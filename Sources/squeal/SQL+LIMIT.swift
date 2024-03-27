@@ -1,0 +1,16 @@
+//
+//  SQL+LIMIT.swift
+//
+//
+//  Created by Sacha Durand Saint Omer on 26/03/2024.
+//
+
+import Foundation
+
+
+extension SQLQuery {
+    
+    func LIMIT(_ value: Int) -> SQLQuery {
+        return BareSQLQuery(raw: raw + " " + "LIMIT \(value)")
+    }
+}
