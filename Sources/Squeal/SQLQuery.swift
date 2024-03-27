@@ -8,10 +8,10 @@
 import Foundation
 
 
-protocol SQLQuery: CustomStringConvertible{
+public protocol SQLQuery: CustomStringConvertible{
     var raw: String { get }
 }
 
-extension SQLQuery {
+public extension SQLQuery {
     var description: String { return raw }
 }

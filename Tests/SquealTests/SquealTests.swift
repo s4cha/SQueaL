@@ -1,5 +1,5 @@
 import XCTest
-@testable import squeal
+@testable import Squeal
 
 // 1 make it more type safe.
 // 2 DRY table names.

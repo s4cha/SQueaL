@@ -4,17 +4,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "squeal",
+    name: "Squeal",
     products: [
         .library(
-            name: "squeal",
-            targets: ["squeal"]),
+            name: "Squeal",
+            targets: ["Squeal"]),
     ],
     targets: [
         .target(
-            name: "squeal"),
+            name: "Squeal"),
         .testTarget(
-            name: "squealTests",
-            dependencies: ["squeal"]),
+            name: "SquealTests",
+            dependencies: ["Squeal"]),
     ]
 )

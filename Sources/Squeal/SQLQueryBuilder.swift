@@ -7,7 +7,7 @@
 
 import Foundation
 
-class SQLQueryBuilder {
+public class SQLQueryBuilder {
     
     func query() -> SQLQuery {
         return BareSQLQuery(raw: "")
