@@ -26,6 +26,25 @@ extension SQLQuery {
     }
 }
 
+extension StartSQLQuery {
+    
+    func SELECT(_ v: SQLSelectValue) -> SelectSQLQuery {
+        return SelectSQLQuery(raw: "SELECT \(v.rawValue)")
+    }
+    
+    func SELECT(_ string: String) -> SelectSQLQuery {
+        return SelectSQLQuery(raw: "SELECT \(string)")
+    }
+    
+    func SELECT<X>(_ field:  Field<X>) -> SelectSQLQuery {
+        return SelectSQLQuery(raw: "SELECT" + " " + field.name)
+    }
+    
+    func SELECT<X,Y>(_ field:  Field<X>, _ field2:  Field<Y>) -> SelectSQLQuery {
+        return SelectSQLQuery(raw: "SELECT" + " " + field.name + ", " + field2.name)
+    }
+}
+
 extension TypedSQLQuery {
     func SELECT(_ string: String) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + "SELECT \(string)")
@@ -71,4 +90,9 @@ extension TypedSQLQuery {
 ////        return SQLQuery(schema: schema, raw: "SELECT" + " "  + keypaths.map { schema[keyPath: $0].name }.joined(separator: ", "))
 //        return self
 //    }
+}
+
+
+struct SelectSQLQuery {
+    let raw: String
 }

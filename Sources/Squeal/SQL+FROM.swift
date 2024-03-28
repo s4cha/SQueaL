@@ -18,6 +18,16 @@ extension SQLQuery {
     }
 }
 
+extension SelectSQLQuery  {
+    func FROM(_ tableName: String) -> FromSQLQuery {
+        return FromSQLQuery(raw: raw + " " + "FROM \(tableName)")
+    }
+    
+    func FROM(_ table: Table) -> FromSQLQuery {
+        return FromSQLQuery(raw: raw + " " + "FROM \(table.tableName)")
+    }
+}
+
 extension TypedSQLQuery {
     
     func FROM(_ tableName: String) -> TypedSQLQuery<T> {
@@ -27,6 +37,10 @@ extension TypedSQLQuery {
     func FROM(_ table: Table) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + " " + "FROM \(table.tableName)")
     }
+}
+
+struct FromSQLQuery {
+    let raw: String
 }
 
 

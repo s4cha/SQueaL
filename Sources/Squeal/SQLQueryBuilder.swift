@@ -17,3 +17,19 @@ public class SQLQueryBuilder {
         return TypedSQLQuery(schema: table)
     }
 }
+
+
+public class Squeal {
+    static func query() -> StartSQLQuery {
+        return StartSQLQuery()
+    }
+    
+}
+
+public struct StartSQLQuery {
+}
+
+
+//struct StartSQLQuery { }
+
+

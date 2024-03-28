@@ -17,20 +17,20 @@ final class squirrelTests: XCTestCase {
     let users = Users()
     
     func testSelectBare() throws {
-        let query = sql.query()
+        let query = Squeal.query()
             .SELECT("*")
         XCTAssertEqual(query.raw, "SELECT *")
         
     }
     
     func testSelectAll() {
-        let query2 = sql.query()
+        let query2 = Squeal.query()
             .SELECT(.all)
         XCTAssertEqual(query2.raw, "SELECT *")
     }
     
     func testSelectOneColums() {
-        let query2 = sql.query()
+        let query2 = Squeal.query()
             .SELECT(users.name)
         XCTAssertEqual(query2.raw, "SELECT name")
     }
@@ -42,23 +42,25 @@ final class squirrelTests: XCTestCase {
     }
     
     func testSelectTwoColums() {
-        let query2 = sql.query()
+        let query2 = Squeal.query()
             .SELECT(users.id, users.name)
         XCTAssertEqual(query2.raw, "SELECT id, name")
     }
     
     func testFrom() throws {
-        let query = sql.query()
+        let query = Squeal.query()
             .SELECT(.all)
             .FROM(users)
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     
     func testWhereClause() throws {
-        let query = sql.query()
+        let query = Squeal.query()
             .SELECT("*")
             .FROM("users")
-            .WHERE("id = 1")
+            .
+            
+//            .WHERE("id = 1")
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
     }
     
@@ -155,6 +157,18 @@ final class squirrelTests: XCTestCase {
     func testFindTable() {
         let query = users.find(\.id, equals: 12)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
+    }
+    
+    func testOrderOfcommands() {
+        let query = Squeal.query()
+            .SELECT("email")
+            .FROM("users")
+            
+        
+        XCTAssertEqual(query.raw, "SELECT email FROM users")
+            
+        
+        
     }
     
 }

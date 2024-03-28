@@ -17,6 +17,17 @@ extension SQLQuery {
     }
 }
 
+extension FromSQLQuery {
+    func WHERE(_ clause: String) -> SQLQuery {
+        return BareSQLQuery(raw: raw + " WHERE \(clause)")
+    }
+    
+//    func WHERE(_ column: String, equals value: Any) -> SQLQuery {
+//        return BareSQLQuery(raw: raw + " WHERE \(column) = \(value)")
+//    }
+}
+
+
 extension TypedSQLQuery {
     func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + " " + "WHERE" + " \(schema[keyPath: kp].name)" + " = " + "\(value)" )

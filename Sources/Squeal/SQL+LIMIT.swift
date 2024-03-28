@@ -14,3 +14,16 @@ extension SQLQuery {
         return BareSQLQuery(raw: raw + " " + "LIMIT \(value)")
     }
 }
+
+
+extension FromSQLQuery {
+    
+    func LIMIT(_ value: Int) -> SQLQuery {
+        return BareSQLQuery(raw: raw + " " + "LIMIT \(value)")
+    }
+}
+
+
+struct LimitSQLQuery {
+    let raw: String
+}
