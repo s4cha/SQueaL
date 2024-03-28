@@ -7,13 +7,13 @@
 
 import Foundation
 
-extension SQLQuery {
+public extension WhereSQLQuery {
     func AND(_ clause: String) -> SQLQuery {
         return BareSQLQuery(raw: raw + " AND \(clause)")
     }
 }
 
-extension TypedSQLQuery {
+public extension TypedSQLQuery {
     func AND<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + " " + "AND" + " \(schema[keyPath: kp].name)" + " = " + "\(value)" )
     }

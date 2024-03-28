@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension SQLQuery {
+public extension SQLQuery {
     func INSERT(INTO tableName: String, columns: String...) -> SQLQuery {
         return BareSQLQuery(raw: raw + "INSERT INTO \(tableName)" + " ("  + columns.joined(separator: ", ") +  ")")
     }

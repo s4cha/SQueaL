@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension SQLQuery {
+public extension SQLQuery {
     
     func FROM(_ tableName: String) -> SQLQuery {
         return BareSQLQuery(raw: raw + " " + "FROM \(tableName)")
@@ -18,7 +18,7 @@ extension SQLQuery {
     }
 }
 
-extension SelectSQLQuery  {
+public extension SelectSQLQuery  {
     func FROM(_ tableName: String) -> FromSQLQuery {
         return FromSQLQuery(raw: raw + " " + "FROM \(tableName)")
     }
@@ -28,7 +28,7 @@ extension SelectSQLQuery  {
     }
 }
 
-extension TypedSQLQuery {
+public extension TypedSQLQuery {
     
     func FROM(_ tableName: String) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + " " + "FROM \(tableName)")
@@ -39,7 +39,8 @@ extension TypedSQLQuery {
     }
 }
 
-struct FromSQLQuery {
+public struct FromSQLQuery: CustomStringConvertible {
+    public var description: String { return raw }    
     let raw: String
 }
 

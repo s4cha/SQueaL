@@ -8,7 +8,7 @@
 import Foundation
 
 
-extension SQLQuery {
+public extension SQLQuery {
     
     func LIMIT(_ value: Int) -> SQLQuery {
         return BareSQLQuery(raw: raw + " " + "LIMIT \(value)")
@@ -16,14 +16,22 @@ extension SQLQuery {
 }
 
 
-extension FromSQLQuery {
+public extension FromSQLQuery {
     
-    func LIMIT(_ value: Int) -> SQLQuery {
-        return BareSQLQuery(raw: raw + " " + "LIMIT \(value)")
+    func LIMIT(_ value: Int) -> LimitSQLQuery {
+        return LimitSQLQuery(raw: raw + " " + "LIMIT \(value)")
+    }
+}
+
+public extension WhereSQLQuery {
+    
+    func LIMIT(_ value: Int) -> LimitSQLQuery {
+        return LimitSQLQuery(raw: raw + " " + "LIMIT \(value)")
     }
 }
 
 
-struct LimitSQLQuery {
+public struct LimitSQLQuery: CustomStringConvertible {
+    public var description: String { return raw }
     let raw: String
 }

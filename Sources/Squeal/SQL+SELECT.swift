@@ -7,8 +7,20 @@
 
 import Foundation
 
+public extension String {
+    func SELECT(_ string: String) -> SelectSQLQuery {
+        return StartSQLQuery().SELECT(string)
+    }
+}
 
-extension SQLQuery {
+public extension Squeal {
+    static func SELECT(_ string: String) -> SelectSQLQuery {
+        return StartSQLQuery().SELECT(string)
+    }
+}
+
+
+public extension SQLQuery {
     func SELECT(_ string: String) -> SQLQuery {
         return BareSQLQuery(raw: raw + "SELECT \(string)")
     }
@@ -26,7 +38,7 @@ extension SQLQuery {
     }
 }
 
-extension StartSQLQuery {
+public extension StartSQLQuery {
     
     func SELECT(_ v: SQLSelectValue) -> SelectSQLQuery {
         return SelectSQLQuery(raw: "SELECT \(v.rawValue)")
@@ -45,7 +57,7 @@ extension StartSQLQuery {
     }
 }
 
-extension TypedSQLQuery {
+public extension TypedSQLQuery {
     func SELECT(_ string: String) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + "SELECT \(string)")
     }
@@ -93,6 +105,8 @@ extension TypedSQLQuery {
 }
 
 
-struct SelectSQLQuery {
+public struct SelectSQLQuery: CustomStringConvertible {
+    public var description: String { return raw }
+    
     let raw: String
 }

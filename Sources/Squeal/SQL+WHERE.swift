@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension SQLQuery {
+public extension SQLQuery {
     func WHERE(_ clause: String) -> SQLQuery {
         return BareSQLQuery(raw: raw + " WHERE \(clause)")
     }
@@ -17,9 +17,9 @@ extension SQLQuery {
     }
 }
 
-extension FromSQLQuery {
-    func WHERE(_ clause: String) -> SQLQuery {
-        return BareSQLQuery(raw: raw + " WHERE \(clause)")
+public extension FromSQLQuery {
+    func WHERE(_ clause: String) -> WhereSQLQuery {
+        return WhereSQLQuery(raw: raw + " WHERE \(clause)")
     }
     
 //    func WHERE(_ column: String, equals value: Any) -> SQLQuery {
@@ -32,6 +32,11 @@ extension TypedSQLQuery {
     func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + " " + "WHERE" + " \(schema[keyPath: kp].name)" + " = " + "\(value)" )
     }
+}
+
+public struct WhereSQLQuery: CustomStringConvertible {
+    public var description: String { return raw }
+    let raw: String
 }
 
 //

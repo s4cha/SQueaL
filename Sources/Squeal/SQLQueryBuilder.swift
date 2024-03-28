@@ -9,11 +9,13 @@ import Foundation
 
 public class SQLQueryBuilder {
     
-    func query() -> SQLQuery {
+    public init() {}
+    
+    public func query() -> SQLQuery {
         return BareSQLQuery(raw: "")
     }
     
-    func query<T: Table>(for table: T) -> TypedSQLQuery<T> {
+    public func query<T: Table>(for table: T) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: table)
     }
 }
@@ -28,6 +30,7 @@ public class Squeal {
 
 public struct StartSQLQuery {
 }
+
 
 
 //struct StartSQLQuery { }

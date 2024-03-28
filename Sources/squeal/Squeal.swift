@@ -1,5 +1,5 @@
 
-enum SQLSelectValue: String {
+public enum SQLSelectValue: String {
     case all = "*"
 }
 

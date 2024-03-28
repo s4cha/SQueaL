@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension TypedSQLQuery {
+public extension TypedSQLQuery {
 
     func all() -> SQLQuery {
         return self.SELECT(.all)
@@ -22,7 +22,7 @@ extension TypedSQLQuery {
     }
 }
 
-extension Table {
+public extension Table {
 //    static func all() -> SQLQuery {
 //        return SQLQueryBuilder()
 //            .query(for: self)
@@ -31,19 +31,19 @@ extension Table {
 //    }
     
 
-    func query() -> TypedSQLQuery<Self> {
+    public func query() -> TypedSQLQuery<Self> {
         return SQLQueryBuilder()
             .query(for: self)
     }
 
-    func all() -> SQLQuery {
+    public func all() -> SQLQuery {
         return SQLQueryBuilder()
             .query(for: self)
             .SELECT(.all)
             .FROM(tableName)
     }
     
-    func find<U>(_ kp: KeyPath<Self, Field<U>>, equals value: U) -> SQLQuery {
+    public func find<U>(_ kp: KeyPath<Self, Field<U>>, equals value: U) -> SQLQuery {
         return SQLQueryBuilder()
            .query(for: self)
            .SELECT(.all)

@@ -7,13 +7,13 @@
 
 import Foundation
 
-extension SQLQuery {
+public extension SQLQuery {
     func DELETE() -> SQLQuery {
         return BareSQLQuery(raw: raw + "DELETE")
     }
 }
 
-extension TypedSQLQuery {
+public extension TypedSQLQuery {
     func DELETE() -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: raw + "DELETE")
     }

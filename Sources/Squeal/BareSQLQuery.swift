@@ -7,6 +7,6 @@
 
 import Foundation
 
-struct BareSQLQuery: SQLQuery {
-    var raw: String
+public struct BareSQLQuery: SQLQuery {
+    public var raw: String
 }
