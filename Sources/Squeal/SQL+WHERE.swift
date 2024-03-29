@@ -47,15 +47,27 @@ public extension FromSQLQuery {
 }
 
 
-extension TypedSQLQuery {
-    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: schema, raw: raw + " " + "WHERE" + " \(schema[keyPath: kp].name)" + " = " + "\(value)" )
+public extension TypedFromSQLQuery {
+    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " = " + "\(value)" )
     }
 }
 
 public struct WhereSQLQuery: CustomStringConvertible {
     public var description: String { return raw }
     let raw: String
+}
+
+public struct TypedWhereSQLQuery<T: Table>: CustomStringConvertible {
+    public var description: String { return raw }
+    let table: T
+    public var raw: String
+    
+
+    init(for table: T, raw: String) {
+        self.table = table
+        self.raw = raw
+    }
 }
 
 //

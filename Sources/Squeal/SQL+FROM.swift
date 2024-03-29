@@ -28,20 +28,36 @@ public extension SelectSQLQuery  {
     }
 }
 
-public extension TypedSQLQuery {
+public extension TypedSelectSQLQuery {
     
-    func FROM(_ tableName: String) -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: schema, raw: raw + " " + "FROM \(tableName)")
+    func FROM(_ tableName: String) -> TypedFromSQLQuery<T> {
+        return TypedFromSQLQuery(for: table, raw: raw + " " + "FROM \(tableName)")
     }
     
-    func FROM(_ table: Table) -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: schema, raw: raw + " " + "FROM \(table.tableName)")
+    func FROM<U: Table>(_ table: U) -> TypedFromSQLQuery<T> where T == U {
+        if raw.contains("FROM") {
+            return TypedFromSQLQuery(for: table, raw: raw)
+        }
+        return TypedFromSQLQuery(for: table, raw: raw + " " + "FROM \(table.tableName)")
     }
 }
 
 public struct FromSQLQuery: CustomStringConvertible {
     public var description: String { return raw }    
     let raw: String
+}
+
+public struct TypedFromSQLQuery<T: Table>: CustomStringConvertible {
+    public var description: String { return raw }    
+    
+    let table: T
+    public var raw: String
+    
+
+    init(for table: T, raw: String) {
+        self.table = table
+        self.raw = raw
+    }
 }
 
 

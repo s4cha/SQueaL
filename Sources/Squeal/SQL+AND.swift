@@ -13,13 +13,13 @@ public extension WhereSQLQuery {
     }
 }
 
-public extension TypedSQLQuery {
-    func AND<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: schema, raw: raw + " " + "AND" + " \(schema[keyPath: kp].name)" + " = " + "\(value)" )
+public extension TypedWhereSQLQuery {
+    func AND<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, raw: raw + " " + "AND" + " \(table[keyPath: kp].name)" + " = " + "\(value)" )
     }
     
-    func AND<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedSQLQuery<T> where U == String {
-        return TypedSQLQuery(schema: schema, raw: raw + " " + "AND" + " \(schema[keyPath: kp].name)" + " = " + "'\(value)'" )
+    func AND<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> where U == String {
+        return TypedWhereSQLQuery(for: table, raw: raw + " " + "AND" + " \(table[keyPath: kp].name)" + " = " + "'\(value)'" )
     }
 }
 

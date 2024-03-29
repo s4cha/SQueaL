@@ -30,8 +30,28 @@ public extension WhereSQLQuery {
     }
 }
 
+public extension TypedWhereSQLQuery {
+    
+    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T> {
+        return TypedLimitSQLQuery(for: table, raw: raw + " " + "LIMIT \(value)")
+    }
+}
+
 
 public struct LimitSQLQuery: CustomStringConvertible {
     public var description: String { return raw }
     let raw: String
+}
+
+public struct TypedLimitSQLQuery<T: Table>: CustomStringConvertible {
+    public var description: String { return raw }
+    
+    let table: T
+    public var raw: String
+    
+
+    init(for table: T, raw: String) {
+        self.table = table
+        self.raw = raw
+    }
 }

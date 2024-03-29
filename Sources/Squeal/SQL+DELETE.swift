@@ -14,7 +14,7 @@ public extension SQLQuery {
 }
 
 public extension TypedSQLQuery {
-    func DELETE() -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: schema, raw: raw + "DELETE")
+    func DELETE() -> TypedSelectSQLQuery<T> {
+        return TypedSelectSQLQuery(for: schema, raw: raw + "DELETE")
     }
 }

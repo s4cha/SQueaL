@@ -14,7 +14,7 @@ public extension TypedSQLQuery {
             .FROM(schema.tableName)
     }
      
-    func find<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> SQLQuery {
+    func find<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedLimitSQLQuery<T> {
         return self.SELECT(.all)
             .FROM(schema.tableName)
             .WHERE(kp, equals: value)
@@ -31,21 +31,20 @@ public extension Table {
 //    }
     
 
-    public func query() -> TypedSQLQuery<Self> {
+    func query() -> TypedSQLQuery<Self> {
         return SQLQueryBuilder()
             .query(for: self)
     }
 
-    public func all() -> SQLQuery {
+    func all() -> SQLQuery {
         return SQLQueryBuilder()
             .query(for: self)
             .SELECT(.all)
             .FROM(tableName)
     }
     
-    public func find<U>(_ kp: KeyPath<Self, Field<U>>, equals value: U) -> SQLQuery {
-        return SQLQueryBuilder()
-           .query(for: self)
+    func find<U>(_ kp: KeyPath<Self, Field<U>>, equals value: U) -> TypedLimitSQLQuery<Self> {
+        return TypedSQLQuery(for: self)
            .SELECT(.all)
            .FROM(tableName)
            .WHERE(kp, equals: value)
