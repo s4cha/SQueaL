@@ -13,7 +13,7 @@ import XCTest
 
 final class squirrelTests: XCTestCase {
     
-//    let sql = SQLQueryBuilder()
+    let users = UsersTable()
     
     func testSelectBare() throws {
         let query = ""
@@ -29,20 +29,20 @@ final class squirrelTests: XCTestCase {
     
     func testSelectOneColums() {
         let query2 = Squeal.query()
-            .SELECT(DB.users.name)
+            .SELECT(users.name)
         XCTAssertEqual(query2.raw, "SELECT name")
     }
     
     func testSelectTwoColums() {
         let query2 = Squeal.query()
-            .SELECT(DB.users.id, DB.users.name)
+            .SELECT(users.id, users.name)
         XCTAssertEqual(query2.raw, "SELECT id, name")
     }
     
     func testFrom() throws {
         let query = Squeal.query()
             .SELECT(.all)
-            .FROM(DB.users)
+            .FROM(users)
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     

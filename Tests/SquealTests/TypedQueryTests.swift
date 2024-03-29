@@ -8,9 +8,6 @@
 import XCTest
 @testable import Squeal
 
-struct DB {
-    static let users = UsersTable()
-}
 
 struct UsersTable: Table {
     let tableName = "users"
@@ -21,58 +18,73 @@ struct UsersTable: Table {
 
 final class TypedQueryTests: XCTestCase {
     
-    var sut: TypedSQLQuery<UsersTable>!
+    let users = UsersTable()
     
-    override func setUp() async throws {
-        self.sut = TypedSQLQuery(for: DB.users)
-    }
-    
-    func testTypesafeFullQuery() {
-        let query = sut
-            .SELECT(\.id)
-            .FROM(DB.users)
+    func testTypesafeFullQuery3() {
+        let query = ""
+            .SELECT(\.id, FROM: users)
             .WHERE(\.id, equals: 1)
             .AND(\.name, equals: "Jack")
         XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
     }
     
+    func testTypesafeFullQuery2() {
+        let query = ""
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id, equals: 1)
+            .AND(\.name, equals: "Jack")
+        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
+    }
+    
+    func testTypesafeFullQuery() {
+            
+        let query = ""
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id, equals: 1)
+            .AND(\.name, equals: "Jack")
+        
+        
+//        let query = ""
+//            .SELECT(\.id, FROM: users)
+////            .WHERE(\.id == 1)
+////            .AND(\.name == "Jack")
+        
+        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
+    }
+    
     func testTypesafeFullQueryOmmittingFrom() {
-        let query = sut
-            .SELECT(\.id)
-            .FROM(DB.users)
+        let query = ""
+            .SELECT(\.id, FROM: users)
             .WHERE(\.id, equals: 1)
             .AND(\.name, equals: "Jack")
         XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
     }
     
     func testSelectTypesShortKeypath() {
-        let query2 = sut
-            .SELECT(\.name)
-        XCTAssertEqual(query2.raw, "SELECT name")
+        let query2 = ""
+            .SELECT(\.name, FROM: users)
+        XCTAssertEqual(query2.raw, "SELECT name FROM users")
     }
     
     func testWhereTypeSafe() throws {
-        let query = sut
-            .SELECT(.all)
-            .FROM(DB.users)
+        let query = ""
+            .SELECT(.all, FROM: users)
             .WHERE(\.id, equals: 1)
         print(query)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
     }
     
     func testAndTypeSafe() throws {
-        let query = sut
-            .SELECT(.all)
-            .FROM(DB.users)
+        let query = ""
+            .SELECT(.all, FROM: users)
             .WHERE(\.id, equals: 1)
             .AND(\.name, equals: "jack")
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
     }
     
     func testAndTypeSafeLimit() throws {
-        let query = sut
-            .SELECT(.all)
-            .FROM(DB.users)
+        let query = ""
+            .SELECT(.all, FROM: users)
             .WHERE(\.id, equals: 1)
             .AND(\.name, equals: "jack")
             .LIMIT(1)
@@ -80,32 +92,26 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testDelete() {
-        let query = sut
-            .DELETE()
-            .FROM(DB.users)
+        let query = ""
+            .DELETE(FROM: users)
             .WHERE(\.id, equals: 243)
         XCTAssertEqual(query.raw, "DELETE FROM users WHERE id = 243")
     }
 
     // - MARK: Helpers
     
-    func testAll() {
-        let query = sut.all()
-        XCTAssertEqual(query.raw, "SELECT * FROM users")
-    }
-    
     func testTableAll() {
-        let query = UsersTable().all()
+        let query = users.all()
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     
     func testFind() {
-        let query = sut.find(\.id, equals: 12)
+        let query = users.find(\.id, equals: 12)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
     }
     
     func testFindTable() {
-        let query = DB.users.find(\.id, equals: 12)
+        let query = users.find(\.id, equals: 12)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
     }
 }
