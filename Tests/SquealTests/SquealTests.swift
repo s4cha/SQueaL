@@ -13,44 +13,57 @@ import XCTest
 
 final class squirrelTests: XCTestCase {
     
-    let sql = SQLQueryBuilder()
-    let users = Users()
+//    let sql = SQLQueryBuilder()
     
     func testSelectBare() throws {
-        let query = Squeal.query()
+        let query = ""
             .SELECT("*")
         XCTAssertEqual(query.raw, "SELECT *")
-        
     }
     
     func testSelectAll() {
-        let query2 = Squeal.query()
+        let query2 = ""
             .SELECT(.all)
         XCTAssertEqual(query2.raw, "SELECT *")
     }
     
+    func testTypesafeFullQuery() {
+        let query = TypedSQLQuery(for: DB.users)
+            .SELECT(\.id)
+//            .FROM(DB.users)
+            .WHERE(\.id, equals: 1)
+            .AND(\.name, equals: "Jack")
+        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
+    }
+    
+    func testSelectTypesShortKeypath() {
+        let query2 = TypedSQLQuery(for: DB.users)
+            .SELECT(\.name)
+        XCTAssertEqual(query2.raw, "SELECT name FROM users")
+    }
+    
     func testSelectOneColums() {
         let query2 = Squeal.query()
-            .SELECT(users.name)
+            .SELECT(DB.users.name)
         XCTAssertEqual(query2.raw, "SELECT name")
     }
     
     func testSelectOneColumnType() {
-        let query2 = sql.query(for: users)
+        let query2 = TypedSQLQuery(for: DB.users)
             .SELECT(\.name)
-        XCTAssertEqual(query2.raw, "SELECT name")
+        XCTAssertEqual(query2.raw, "SELECT name FROM users")
     }
     
     func testSelectTwoColums() {
         let query2 = Squeal.query()
-            .SELECT(users.id, users.name)
+            .SELECT(DB.users.id, DB.users.name)
         XCTAssertEqual(query2.raw, "SELECT id, name")
     }
     
     func testFrom() throws {
         let query = Squeal.query()
             .SELECT(.all)
-            .FROM(users)
+            .FROM(DB.users)
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     
@@ -58,14 +71,25 @@ final class squirrelTests: XCTestCase {
         let query = Squeal.query()
             .SELECT("*")
             .FROM("users")
-            .
-            
+            .WHERE("id = 1")
+        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
+    }
+    
+    func testWhereEquation() throws {
+
+        
+        let query = Squeal.query()
+            .SELECT("*")
+            .FROM("users")
+//            .WHERE(v1: "id", op: =, v2: "1")
+            .WHERE("id" == 1)
 //            .WHERE("id = 1")
+        
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
     }
     
     func testWhereEquals() throws {
-        let query = sql.query()
+        let query = ""
             .SELECT("*")
             .FROM("users")
             .WHERE("id", equals: 43)
@@ -73,16 +97,16 @@ final class squirrelTests: XCTestCase {
     }
     
     func testWhereTypeSafe() throws {
-        let query = sql.query(for: users)
+        let query = TypedSQLQuery(for: DB.users)
             .SELECT(.all)
-            .FROM(users)
+            .FROM(DB.users)
             .WHERE(\.id, equals: 1)
         print(query)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
     }
 
     func testAnd() throws {
-        let query = sql.query()
+        let query = ""
             .SELECT("*")
             .FROM("users")
             .WHERE("id = 1")
@@ -90,10 +114,29 @@ final class squirrelTests: XCTestCase {
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
     }
     
+    func testMultipleAnd() throws {
+        let query = ""
+            .SELECT("*")
+            .FROM("users")
+            .WHERE("id = 1")
+            .AND("name = 'jack'")
+            .AND("name = 'john'")
+        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack' AND name = 'john'")
+    }
+    
+    func testOr() throws {
+        let query = ""
+            .SELECT("*")
+            .FROM("users")
+            .WHERE("id = 1")
+            .OR("id = 3")
+        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 OR id = 3")
+    }
+    
     func testAndTypeSafe() throws {
-        let query = sql.query(for: users)
+        let query = TypedSQLQuery(for: DB.users)
             .SELECT(.all)
-            .FROM(users)
+            .FROM(DB.users)
             .WHERE(\.id, equals: 1)
             .AND(\.name, equals: "jack")
         
@@ -102,7 +145,7 @@ final class squirrelTests: XCTestCase {
 
     
     func testLimit() throws {
-        let query = sql.query()
+        let query = ""
             .SELECT("*")
             .FROM("users")
             .WHERE("id = 1")
@@ -112,9 +155,9 @@ final class squirrelTests: XCTestCase {
     }
     
     func testAndTypeSafeLimit() throws {
-        let query =  sql.query(for: users)
+        let query = TypedSQLQuery(for: DB.users)
             .SELECT(.all)
-            .FROM(users)
+            .FROM(DB.users)
             .WHERE(\.id, equals: 1)
             .AND(\.name, equals: "jack")
             .LIMIT(1)
@@ -122,40 +165,40 @@ final class squirrelTests: XCTestCase {
     }
     
     func testInsert() {
-        let query = sql.query()
+        let query = BareSQLQuery(raw: "")
             .INSERT(INTO:"users", columns: "name", "email")
             .VALUES("john", "john@bar.com")
         XCTAssertEqual(query.raw, "INSERT INTO users (name, email) VALUES ('john', 'john@bar.com')")
     }
     
     func testDelete() {
-        let query = sql.query(for: users)
+        let query = TypedSQLQuery(for: DB.users)
             .DELETE()
-            .FROM(users)
+            .FROM(DB.users)
             .WHERE(\.id, equals: 243)
         XCTAssertEqual(query.raw, "DELETE FROM users WHERE id = 243")
     }
     
     // Helpers
     func testAll() {
-        let query = sql.query(for: users)
+        let query = TypedSQLQuery(for: DB.users)
             .all()
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     
     func testTableAll() {
-        let query = users.all()
+        let query = DB.users.all()
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     
     func testFind() {
-        let query = sql.query(for: users)
+        let query = TypedSQLQuery(for: DB.users)
             .find(\.id, equals: 12)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
     }
     
     func testFindTable() {
-        let query = users.find(\.id, equals: 12)
+        let query = DB.users.find(\.id, equals: 12)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
     }
     
@@ -171,14 +214,6 @@ final class squirrelTests: XCTestCase {
         
     }
     
-}
-
-
-struct Users: Table {
-    let tableName = "users"
-    let id = Field<Int>(name: "id")
-    let name = Field<String>(name: "name")
-    //let status = Field<String>(name: "status")
 }
 
 
@@ -256,3 +291,14 @@ struct Users: Table {
 //    }
 //}
 //
+
+struct DB {
+    static let users = UsersTable()
+}
+
+struct UsersTable: Table {
+    let tableName = "users"
+    let id = Field<Int>(name: "id")
+    let name = Field<String>(name: "name")
+    //let status = Field<String>(name: "status")
+}

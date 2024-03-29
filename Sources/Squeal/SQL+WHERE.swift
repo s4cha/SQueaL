@@ -7,6 +7,17 @@
 
 import Foundation
 
+public func == (left: String, right: Any) -> SQLEquation {
+    return SQLEquation(left: left, sign: "=", right: right)
+}
+
+
+public struct SQLEquation {
+    let left: String
+    let sign: String
+    let right: Any
+}
+
 public extension SQLQuery {
     func WHERE(_ clause: String) -> SQLQuery {
         return BareSQLQuery(raw: raw + " WHERE \(clause)")
@@ -22,8 +33,16 @@ public extension FromSQLQuery {
         return WhereSQLQuery(raw: raw + " WHERE \(clause)")
     }
     
-//    func WHERE(_ column: String, equals value: Any) -> SQLQuery {
-//        return BareSQLQuery(raw: raw + " WHERE \(column) = \(value)")
+    func WHERE(_ column: String, equals value: Any) -> WhereSQLQuery {
+        return WhereSQLQuery(raw: raw + " WHERE \(column) = \(value)")
+    }
+    
+    func WHERE(_ equation: SQLEquation) -> WhereSQLQuery {
+        return WhereSQLQuery(raw: raw + " WHERE \(equation.left) \(equation.sign) \(equation.right)")
+    }
+    
+//    func WHERE(v1: String, op: ((Int, Int) -> Int), v2: String) -> WhereSQLQuery {
+//        return WhereSQLQuery(raw: raw + " WHERE \(v1) = \(v2)")
 //    }
 }
 

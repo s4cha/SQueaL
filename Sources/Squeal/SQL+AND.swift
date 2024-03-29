@@ -8,8 +8,8 @@
 import Foundation
 
 public extension WhereSQLQuery {
-    func AND(_ clause: String) -> SQLQuery {
-        return BareSQLQuery(raw: raw + " AND \(clause)")
+    func AND(_ clause: String) -> WhereSQLQuery {
+        return WhereSQLQuery(raw: raw + " AND \(clause)")
     }
 }
 

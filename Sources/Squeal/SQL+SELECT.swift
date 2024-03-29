@@ -11,6 +11,23 @@ public extension String {
     func SELECT(_ string: String) -> SelectSQLQuery {
         return StartSQLQuery().SELECT(string)
     }
+    
+    func SELECT(_ v: SQLSelectValue) -> SelectSQLQuery {
+        return StartSQLQuery().SELECT(v.rawValue)
+    }
+    
+    // Colorouing seems fucked
+    func SELECT(_ v: ((Int, Int) -> Int)) -> SelectSQLQuery {
+        return StartSQLQuery().SELECT("-")
+    }
+    
+    func SELECTFROM<T: Table>(_ values: String, from table: T) ->  TypedSQLQuery<T> {
+        return TypedSQLQuery(schema: table).SELECT(values)
+    }
+    
+    func table<T: Table>(_ table: T) ->  TypedSQLQuery<T> {
+        return TypedSQLQuery(schema: table)
+    }
 }
 
 public extension Squeal {
@@ -68,6 +85,7 @@ public extension TypedSQLQuery {
     
     func SELECT<X>(_ keypath:  KeyPath<T, Field<X>>) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: schema, raw: "SELECT" + " " + schema[keyPath: keypath].name)
+            .FROM(self.schema)
     }
 }
 

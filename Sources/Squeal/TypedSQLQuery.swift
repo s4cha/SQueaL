@@ -35,4 +35,9 @@ public struct TypedSQLQuery<T: Table>: SQLQuery {
         self.schema = schema
         self.raw = raw
     }
+    
+    init(for table: T) {
+        self.schema = table
+        self.raw = ""
+    }
 }
