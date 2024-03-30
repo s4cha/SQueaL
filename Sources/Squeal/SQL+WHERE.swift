@@ -11,11 +11,25 @@ public func == (left: String, right: Any) -> SQLEquation {
     return SQLEquation(left: left, sign: "=", right: right)
 }
 
+public func == <T>(left: Field<T>, right: Any) -> SQLEquation {
+    return SQLEquation(left: left.name, sign: "=", right: right)
+}
+
+public func == <T,Y>(left: KeyPath<T, Field<Y>>, right: Y) -> KPSQLEquation<T, Y> {
+    return KPSQLEquation(left: left, sign: "=", right: right)
+}
+
 
 public struct SQLEquation {
     let left: String
     let sign: String
     let right: Any
+}
+
+public struct KPSQLEquation<T, Y> {
+    let left: KeyPath<T, Field<Y>>
+    let sign: String
+    let right: Y
 }
 
 public extension SQLQuery {
@@ -51,6 +65,18 @@ public extension TypedFromSQLQuery {
     func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
         return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " = " + "\(value)" )
     }
+    
+    func WHERE(_ equation: SQLEquation) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(equation.left) \(equation.sign) \(equation.right)")
+    }
+    
+    func WHERE<Y>(_ equation: KPSQLEquation<T, Y>) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) \(equation.right)")
+    }
+    
+//    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
+//        return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " = " + "\(value)" )
+//    }
 }
 
 public struct WhereSQLQuery: CustomStringConvertible {

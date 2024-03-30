@@ -225,6 +225,11 @@ public extension String {
         return TypedSQLQuery(for: table).SELECT(keypath).FROM(table)
     }
     
+    func SELECT<X, Y, T>(_ keypath1:  KeyPath<T, Field<X>>, _ keypath2:  KeyPath<T, Field<Y>>, FROM table: T) -> TypedFromSQLQuery<T> {
+        return TypedSelectSQLQuery(for: table, raw: "SELECT" + " " + table[keyPath: keypath1].name + ", " + table[keyPath: keypath1].name)
+            .FROM(table)
+    }
+    
     func DELETE<T>(FROM table: T) -> TypedFromSQLQuery<T> {
         return TypedSQLQuery(for: table).DELETE().FROM(table)
     }

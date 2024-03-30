@@ -20,6 +20,21 @@ final class TypedQueryTests: XCTestCase {
     
     let users = UsersTable()
     
+    func testWHEREqualSign() {
+        let query = ""
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id == 1)
+        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1")
+    }
+    
+    func testWHEREANDEqualSign() {
+        let query = ""
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id == 1)
+            .AND(\.name == "Jack")
+        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
+    }
+    
     func testTypesafeFullQuery3() {
         let query = ""
             .SELECT(\.id, FROM: users)
