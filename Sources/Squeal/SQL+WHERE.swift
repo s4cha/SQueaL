@@ -66,6 +66,10 @@ public extension TypedFromSQLQuery {
         return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " = " + "\(value)" )
     }
     
+    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, in values: [String]) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " in (\(values.joined(separator: ", ")))")
+    }
+    
     func WHERE(_ equation: SQLEquation) -> TypedWhereSQLQuery<T> {
         return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(equation.left) \(equation.sign) \(equation.right)")
     }

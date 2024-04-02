@@ -19,6 +19,7 @@ struct UsersTable: Table {
 final class TypedQueryTests: XCTestCase {
     
     let users = UsersTable()
+    let trades = TradesTable()
     
     func testWHEREqualSign() {
         let query = ""
@@ -112,6 +113,74 @@ final class TypedQueryTests: XCTestCase {
             .WHERE(\.id, equals: 243)
         XCTAssertEqual(query.raw, "DELETE FROM users WHERE id = 243")
     }
+    
+    func testUpdate() {
+        let query = ""
+            .UPDATE(users, SET: "name = 'john'", WHERE: "id = 12")
+        XCTAssertEqual(query.raw, "UPDATE users SET name = 'john' WHERE id = 12")
+    }
+    
+    func testINSERT_INTO() {
+        
+        let userId = UUID(uuidString: "6762B5AA-3FD6-4776-9E30-6A2D84EE8895")!
+        let studyId = UUID(uuidString: "65A92E82-8172-4A96-9E5A-43B52E9CF34F")!
+        print(studyId)
+        //    .columns("user_id", "study_id", "type", "ticker", "price_per_stock")
+        //    .values(SQLBind(userId!), SQLBind(studyId!), SQLBind( type == .buy ? "buy" : "sell"), SQLBind(ticker), SQLBind(pricePerStock))
+        //    .run()
+        let query = ""
+            .INSERT(INTO: trades, "user_id", "study_id",
+                    VALUES: userId, studyId)
+        let query2 = ""
+            .INSERT_INTO(trades, "user_id", "study_id",
+                    VALUES: userId, studyId)
+                
+        
+        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id) VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
+        
+        
+        //let insertBuilder = db.insert(into: "price_action")
+        //    .columns("date", "price", "stock_id")
+        //for price in prices {
+        //    insertBuilder.values(SQLBind(price.date), SQLBind(price.price), SQLBind(stockID))
+        //}
+        //try await insertBuilder.run()
+
+        //try await db.insert(into: DB.stocks.tableName)
+        //    .columns("ticker")
+        //    .values(SQLBind(ticker))
+        //    .run()
+
+
+        //// Attach new stocks
+        //let insert = sqlDB()
+        //    .insert(into: "study+stock")
+        //    .columns("study_id", "stock_id")
+        //for stock in stocks {
+        //    insert.values(SQLBind(studyId), SQLBind(stock.id!))
+        //}
+        //try await insert.run()
+
+        //
+
+
+        //let query = SQLQueryBuilder().query()
+        //    .INSERT(INTO: admin_tokens.tableName, columns: admin_tokens.value.name, admin_tokens.admin_id.name)
+        //    .VALUES(token, adminId.uuidString) //Careful SQL INJECTION
+        //try await sqlDB().execute(query)
+
+
+        //try await sqlDB().insert(into: user_tokens.tableName)
+        //    .columns( "value", "user_id")
+        //    .values(SQLBind(userId), SQLBind(token))
+        //    .run()
+
+        //try await sqlDB().insert(into: DB.users_completed_studies.tableName)
+        //    .columns(DB.users_completed_studies.user_id.name, DB.users_completed_studies.study_id.name)
+        //    .values(SQLBind(user.id!), SQLBind(studyId))
+        //    .run()
+
+    }
 
     // - MARK: Helpers
     
@@ -132,3 +201,54 @@ final class TypedQueryTests: XCTestCase {
 }
 
 
+
+
+//struct StudyStocksTable: Table {
+//    let tableName = "'study+stock'" // TODO check '' added ??
+//    let study_id = Field<UUID?>(name: "study_id")
+//    let stock_id = Field<UUID?>(name: "stock_id")
+//}
+//
+//struct UserTokensTable: Table {
+//    let tableName = "user_tokens"
+//    let user_id = Field<UUID>(name: "user_id")
+//    let value = Field<String>(name: "value")
+//}
+//
+//struct AdminTokensTable: Table {
+//    let tableName = "admin_tokens"
+//    let admin_id = Field<UUID>(name: "admin_id")
+//    let value = Field<String>(name: "value")
+//}
+//
+//struct UsersCompletedStudiesTable: Table {
+//    let tableName = "users_completed_studies"
+//    let user_id = Field<UUID>(name: "user_id")
+//    let study_id = Field<UUID>(name: "study_id")
+//}
+
+struct TradesTable: Table {
+    let tableName = "trades"
+    let user_id = Field<UUID>(name: "user_id")
+    let study_id = Field<UUID>(name: "study_id")
+    let type = Field<String>(name: "type")
+}
+
+//struct AdminsTable: Table {
+//    let tableName = "admins"
+//    let id = Field<UUID>(name: "id")
+//    let email = Field<String>(name: "email")
+//}
+//
+//struct StocksTable: Table {
+//    let tableName = "stocks"
+//    let id = Field<UUID>(name: "id")
+//}
+//
+//struct UsersTable: Table {
+//    let tableName = "users"
+//    let id = Field<UUID>(name: "id")
+//    let prolific_participant_id = Field<String?>(name: "prolific_participant_id")
+//    let available_cash = Field<Double>(name: "available_cash")
+//    let study_id = Field<UUID?>(name: "study_id")
+//}
