@@ -121,22 +121,28 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testINSERT_INTO() {
-        
         let userId = UUID(uuidString: "6762B5AA-3FD6-4776-9E30-6A2D84EE8895")!
         let studyId = UUID(uuidString: "65A92E82-8172-4A96-9E5A-43B52E9CF34F")!
-        print(studyId)
-        //    .columns("user_id", "study_id", "type", "ticker", "price_per_stock")
-        //    .values(SQLBind(userId!), SQLBind(studyId!), SQLBind( type == .buy ? "buy" : "sell"), SQLBind(ticker), SQLBind(pricePerStock))
-        //    .run()
         let query = ""
             .INSERT(INTO: trades, "user_id", "study_id",
                     VALUES: userId, studyId)
-        let query2 = ""
-            .INSERT_INTO(trades, "user_id", "study_id",
-                    VALUES: userId, studyId)
-                
-        
         XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id) VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
+    }
+    
+    func testINSERT_INTO_multiple_values() {
+        let people = [
+            Person(firstname: "John", lastname: "Doe"),
+            Person(firstname: "Ada", lastname: "Lovelace"),
+            Person(firstname: "Alan", lastname: "Turing"),
+        ]
+        
+        var query = ""
+            .INSERT(INTO: trades, columns: "first_name", "last_name",
+            VALUES: people.map { [ $0.firstname, $0.lastname] })
+                    
+    
+        XCTAssertEqual(query.raw, "INSERT INTO trades (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing');")
+    }
         
         
         //let insertBuilder = db.insert(into: "price_action")
@@ -180,8 +186,6 @@ final class TypedQueryTests: XCTestCase {
         //    .values(SQLBind(user.id!), SQLBind(studyId))
         //    .run()
 
-    }
-
     // - MARK: Helpers
     
     func testTableAll() {
@@ -200,6 +204,11 @@ final class TypedQueryTests: XCTestCase {
     }
 }
 
+
+struct Person {
+    let firstname: String
+    let lastname: String
+}
 
 
 

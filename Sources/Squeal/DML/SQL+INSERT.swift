@@ -20,11 +20,33 @@ public extension SQLQuery {
 
 
 public extension String {
+    
+//    func INSERT<T>(INTO table: T, columns: String...) -> TypedInsertSQLQuery<T> {
+//        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
+//                                   + " (\(columns.joined(separator: ", "))) VALUES")
+//    }
+//    
+    
+    func INSERT<T>(INTO table: T, 
+                   columns: String...,
+                   VALUES values: [[CustomStringConvertible?]]) -> TypedInsertSQLQuery<T> {
+        var valuesString = " VALUES"
+        for (i, v) in values.enumerated() {
+            valuesString += " (\(v.map{ $0 == nil ? "NULL" : "'\($0!.description)'" }.joined(separator: ", ")))"
+            if i != values.count - 1 {
+                valuesString += ","
+            }
+
+        }
+        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
+                                   + " (\(columns.joined(separator: ", ")))"
+                                   + valuesString + ";")
+    }
         
     func INSERT<T>(INTO table: T, _ columns: String..., VALUES: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
         return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
                                    + " (\(columns.joined(separator: ", ")))"
-                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))")
+                                   + " VALUES (\(VALUES.map { $0 == nil ? "NULL" : "'\($0!)'"}.joined(separator: ", ")))")
     }
     
     
@@ -43,6 +65,11 @@ public extension String {
 }
 
 public extension TypedInsertSQLQuery {
+    
+    func VALUES(_ values: String...) -> TypedSQLQuery<T> {
+        TypedSQLQuery(schema: table, raw: raw + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))")
+    }
+    
     func RETURNING(_ v: String) -> TypedSQLQuery<T> {
         return TypedSQLQuery(schema: table, raw: raw + " RETURNING \(v)")
     }
