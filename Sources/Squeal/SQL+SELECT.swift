@@ -217,6 +217,10 @@ public func SELECT<T, X>(_ keypath:  KeyPath<T, Field<X>>, FROM table: T) -> Typ
 
 public extension String {
     
+    func SELECT<T>(_ columns: String, FROM table: T) -> TypedFromSQLQuery<T> {
+        return TypedSQLQuery(for: table).SELECT(columns).FROM(table)
+    }
+    
     func SELECT<T>(_ v: SQLSelectValue, FROM table: T) -> TypedFromSQLQuery<T> {
         return TypedSQLQuery(for: table).SELECT(v).FROM(table)
     }

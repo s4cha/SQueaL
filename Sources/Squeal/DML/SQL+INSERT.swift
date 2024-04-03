@@ -43,7 +43,7 @@ public extension String {
                                    + valuesString + ";")
     }
         
-    func INSERT<T>(INTO table: T, _ columns: String..., VALUES: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
+    func INSERT<T>(INTO table: T, columns: String..., VALUES: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
         return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
                                    + " (\(columns.joined(separator: ", ")))"
                                    + " VALUES (\(VALUES.map { $0 == nil ? "NULL" : "'\($0!)'"}.joined(separator: ", ")))")
