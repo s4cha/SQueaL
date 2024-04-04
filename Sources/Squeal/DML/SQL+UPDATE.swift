@@ -15,9 +15,24 @@ import Foundation
 
 public extension String {
     
-    func UPDATE<T>(_ table: T, SET: String, WHERE: String) -> TypedUpdateSQLQuery<T> {
-        return TypedUpdateSQLQuery(for: table, raw: "UPDATE \(table.tableName) SET \(SET) WHERE \(WHERE)")
+    func UPDATE<T, Y>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y?) -> TypedFromSQLQuery<T> {
+        let v = value == nil ? "NULL" : "'\(value!)'"
+        return TypedFromSQLQuery(for: table, raw: "UPDATE \(table.tableName) SET \(table[keyPath: keypath].name) = \(v)")
     }
+    
+//    func UPDATE<T, Y>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y?, 
+//                      WHERE: String) -> TypedFromSQLQuery<T> {
+//        let v = value == nil ? "NULL" : "'\(value)'"
+//        return TypedFromSQLQuery(for: table, raw: "UPDATE \(table.tableName) SET \(table[keyPath: keypath].name) = \(v) WHERE \(WHERE)")
+//    }
+    
+//    func UPDATE<T, Y>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y, WHERE: String) -> TypedUpdateSQLQuery<T> {
+//        return TypedUpdateSQLQuery(for: table, raw: "UPDATE \(table.tableName) SET \(table[keyPath: keypath].name) = '\(value)' WHERE \(WHERE)")
+//    }
+    
+//    func UPDATE<T>(_ table: T, SET: String, WHERE: String) -> TypedUpdateSQLQuery<T> {
+//        return TypedUpdateSQLQuery(for: table, raw: "UPDATE \(table.tableName) SET \(SET) WHERE \(WHERE)")
+//    }
 }
 
 public struct TypedUpdateSQLQuery<T: Table>: CustomStringConvertible {
