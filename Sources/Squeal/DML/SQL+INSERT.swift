@@ -103,8 +103,8 @@ public extension TypedInsertSQLQuery {
         TypedSQLQuery(schema: table, raw: raw + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))")
     }
     
-    func RETURNING(_ v: String) -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: table, raw: raw + " RETURNING \(v)")
+    func RETURNING<U>(_ kp: KeyPath<T, Field<U>>) -> TypedSQLQuery<T> {
+        return TypedSQLQuery(schema: table, raw: raw + " RETURNING \(table[keyPath: kp].name)")
     }
 }
 ////    func SELECT<T>(_ v: SQLSelectValue, FROM table: T) -> TypedFromSQLQuery<T> {
