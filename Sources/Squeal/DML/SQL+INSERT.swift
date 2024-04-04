@@ -21,68 +21,12 @@ public extension SQLQuery {
 
 public extension String {
     
-//    func INSERT<T>(INTO table: T, columns: String...) -> TypedInsertSQLQuery<T> {
-//        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
-//                                   + " (\(columns.joined(separator: ", "))) VALUES")
-//    }
-//    
-    
-    func INSERT<T>(INTO table: T, 
-                   columns: String...,
-                   VALUES values: [[CustomStringConvertible?]]) -> TypedInsertSQLQuery<T> {
-        var valuesString = " VALUES"
-        for (i, v) in values.enumerated() {
-            valuesString += " (\(v.map{ $0 == nil ? "NULL" : "'\($0!.description)'" }.joined(separator: ", ")))"
-            if i != values.count - 1 {
-                valuesString += ","
-            }
-
-        }
+    func INSERT<T>(INTO table: T, columns: String..., VALUES: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
         return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
                                    + " (\(columns.joined(separator: ", ")))"
-                                   + valuesString + ";")
+                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))")
     }
-    
-//    func INSERTX<T: Table, each X>(INTO table: T, columns: repeat each X, VALUES: repeat each X) -> String  {
-//        return ""
-//    }
-    
-    func INSERTX<U, T: Table, each X: KeyPath<T,Field<U>>>(INTO table: T, columns: repeat each X) -> TypedInsertSQLQuery<T> {
-        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
-                                   + "( \(columns.map { $0
-\
-
-
-})")
-//                                   + " (\(fields.map { $0.name }.joined(separator: ", ")))"
-//                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))")
-    }
-//    
-    
-    func variadic<each S>(_: repeat each S) where repeat each S: Sequence { }
-    
-//    func constrain<each S: Sequence>(_: repeat each S) where (repeat (each S).Element) == (Int, String) {}
-    
-//    func foo<each X: AnyField, Y>(columns: repeat each X, V: Y) where repeat each X == Y { // where repeat (each X).Element == T
-//        print("foo")
-//    }
-    
-//    @inlinable
-//    public func decode<each Column: PostgresDecodable>(
-//        _ columnType: (repeat each Column).Type,
-//        file: String = #fileID,
-//        line: Int = #line
-//    ) throws -> (repeat each Column) {
-//        try self.decode(columnType, context: .default, file: file, line: line)
-//    }
-//        
-//    func INSERT<T: Table, each X: KeyPath<T, Field<U>>(INTO table: T, columns: repeat each X, VALUES: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
-//        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
-//                                   + " (\(columns.joined(separator: ", ")))"
-//                                   + " VALUES (\(VALUES.map { $0 == nil ? "NULL" : "'\($0!)'"}.joined(separator: ", ")))")
-//    }
-//    
-    
+        
     func INSERT<T, X>(INTO table: T, _ fields: Field<X>..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
         return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
                                    + " (\(fields.map { $0.name }.joined(separator: ", ")))"
