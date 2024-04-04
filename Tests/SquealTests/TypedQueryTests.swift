@@ -36,46 +36,6 @@ final class TypedQueryTests: XCTestCase {
         XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
     }
     
-    func testTypesafeFullQuery3() {
-        let query = ""
-            .SELECT(\.id, FROM: users)
-            .WHERE(\.id, equals: 1)
-            .AND(\.name, equals: "Jack")
-        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
-    }
-    
-    func testTypesafeFullQuery2() {
-        let query = ""
-            .SELECT(\.id, FROM: users)
-            .WHERE(\.id, equals: 1)
-            .AND(\.name, equals: "Jack")
-        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
-    }
-    
-    func testTypesafeFullQuery() {
-            
-        let query = ""
-            .SELECT(\.id, FROM: users)
-            .WHERE(\.id, equals: 1)
-            .AND(\.name, equals: "Jack")
-        
-        
-//        let query = ""
-//            .SELECT(\.id, FROM: users)
-////            .WHERE(\.id == 1)
-////            .AND(\.name == "Jack")
-        
-        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
-    }
-    
-    func testTypesafeFullQueryOmmittingFrom() {
-        let query = ""
-            .SELECT(\.id, FROM: users)
-            .WHERE(\.id, equals: 1)
-            .AND(\.name, equals: "Jack")
-        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
-    }
-    
     func testSelectTypesShortKeypath() {
         let query2 = ""
             .SELECT(\.name, FROM: users)
@@ -85,7 +45,7 @@ final class TypedQueryTests: XCTestCase {
     func testWhereTypeSafe() throws {
         let query = ""
             .SELECT(.all, FROM: users)
-            .WHERE(\.id, equals: 1)
+            .WHERE(\.id == 1)
         print(query)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
     }
@@ -93,7 +53,7 @@ final class TypedQueryTests: XCTestCase {
     func testAndTypeSafe() throws {
         let query = ""
             .SELECT(.all, FROM: users)
-            .WHERE(\.id, equals: 1)
+            .WHERE(\.id == 1)
             .AND(\.name, equals: "jack")
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
     }
@@ -101,7 +61,7 @@ final class TypedQueryTests: XCTestCase {
     func testAndTypeSafeLimit() throws {
         let query = ""
             .SELECT(.all, FROM: users)
-            .WHERE(\.id, equals: 1)
+            .WHERE(\.id == 1)
             .AND(\.name, equals: "jack")
             .LIMIT(1)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 1")
@@ -110,7 +70,7 @@ final class TypedQueryTests: XCTestCase {
     func testDelete() {
         let query = ""
             .DELETE(FROM: users)
-            .WHERE(\.id, equals: 243)
+            .WHERE(\.id == 243)
         XCTAssertEqual(query.raw, "DELETE FROM users WHERE id = 243")
     }
     
@@ -123,10 +83,19 @@ final class TypedQueryTests: XCTestCase {
     func testINSERT_INTO() {
         let userId = UUID(uuidString: "6762B5AA-3FD6-4776-9E30-6A2D84EE8895")!
         let studyId = UUID(uuidString: "65A92E82-8172-4A96-9E5A-43B52E9CF34F")!
-        let query = ""
-            .INSERT(INTO: trades, "user_id", "study_id",
-                    VALUES: userId, studyId)
-        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id) VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
+        
+        let query = "".INSERTX(INTO: trades, columns: \.user_id, \.study_id)
+        
+        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id)")
+                       
+                       //VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
+        
+//        let query = ""
+//            .INSERT(INTO: trades, column: \.user_id,
+//                    VALUES: <#T##(any CustomStringConvertible)?...##(any CustomStringConvertible)?#>
+//            .INSERT(INTO: trades, columns: "user_id", "study_id",
+//                    VALUES: userId, studyId)
+//        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id) VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
     }
     
     func testINSERT_INTO_multiple_values() {
@@ -136,7 +105,7 @@ final class TypedQueryTests: XCTestCase {
             Person(firstname: "Alan", lastname: "Turing"),
         ]
         
-        var query = ""
+        let query = ""
             .INSERT(INTO: trades, columns: "first_name", "last_name",
             VALUES: people.map { [ $0.firstname, $0.lastname] })
                     
@@ -193,15 +162,15 @@ final class TypedQueryTests: XCTestCase {
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     
-    func testFind() {
-        let query = users.find(\.id, equals: 12)
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
-    }
-    
-    func testFindTable() {
-        let query = users.find(\.id, equals: 12)
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
-    }
+//    func testFind() {
+//        let query = users.find(\.id, equals: 12)
+//        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
+//    }
+//    
+//    func testFindTable() {
+//        let query = users.find(\.id, equals: 12)
+//        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
+//    }
 }
 
 

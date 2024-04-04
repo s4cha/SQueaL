@@ -7,7 +7,13 @@
 
 import Foundation
 
+public protocol AnyField<FieldType> {
+    associatedtype FieldType
+    var name: String { get }
+}
+
 public struct Field<T>: AnyField {
+    public typealias FieldType = T
     
     public init(name: String) {
         self.name = name
@@ -16,9 +22,7 @@ public struct Field<T>: AnyField {
     public let name: String
 }
 
-public protocol AnyField {
-    var name: String { get }
-}
+
 
 public protocol Table {
     var tableName: String { get }

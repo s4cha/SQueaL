@@ -14,12 +14,12 @@ public extension TypedSQLQuery {
             .FROM(schema.tableName)
     }
      
-    func find<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedLimitSQLQuery<T> {
-        return self.SELECT(.all)
-            .FROM(schema.tableName)
-            .WHERE(kp, equals: value)
-            .LIMIT(1)
-    }
+//    func find<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedLimitSQLQuery<T> {
+//        return self.SELECT(.all)
+//            .FROM(schema.tableName)
+//            .WHERE(kp, equals: value)
+//            .LIMIT(1)
+//    }
 }
 
 public extension Table {
@@ -43,11 +43,11 @@ public extension Table {
             .FROM(tableName)
     }
     
-    func find<U>(_ kp: KeyPath<Self, Field<U>>, equals value: U) -> TypedLimitSQLQuery<Self> {
-        return TypedSQLQuery(for: self)
-           .SELECT(.all)
-           .FROM(tableName)
-           .WHERE(kp, equals: value)
-           .LIMIT(1)
-    }
+//    func find<U>(_ kp: KeyPath<Self, Field<U>>, equals value: U) -> TypedLimitSQLQuery<Self> {
+//        return TypedSQLQuery(for: self)
+//           .SELECT(.all)
+//           .FROM(tableName)
+//           .WHERE(kp, equals: value)
+//           .LIMIT(1)
+//    }
 }

@@ -62,10 +62,10 @@ public extension FromSQLQuery {
 
 
 public extension TypedFromSQLQuery {
-    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
-        return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " = " + "\(value)" )
-    }
-    
+//    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
+//        return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " = " + "\(value)" )
+//    }
+//    
     func WHERE<U>(_ kp: KeyPath<T, Field<U>>, in values: [String]) -> TypedWhereSQLQuery<T> {
         return TypedWhereSQLQuery(for: table, raw: raw + " " + "WHERE" + " \(table[keyPath: kp].name)" + " in (\(values.joined(separator: ", ")))")
     }
@@ -75,10 +75,14 @@ public extension TypedFromSQLQuery {
     }
     
     func WHERE<Y>(_ equation: KPSQLEquation<T, Y>) -> TypedWhereSQLQuery<T> {
-        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) '\(equation.right)'")
+        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) \(equation.right)")
     }
     
     func WHERE<Y>(_ equation: KPSQLEquation<T, Y?>) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) \(equation.right!)")
+    }
+    
+    func WHERER<Y>(_ equation: KPSQLEquation<T, Y?>) -> TypedWhereSQLQuery<T> where Y == String {
         return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) '\(equation.right!)'")
     }
     
