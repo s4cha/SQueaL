@@ -13,8 +13,3 @@ public extension SQLQuery {
     }
 }
 
-public extension TypedSQLQuery {
-    func DELETE() -> TypedSelectSQLQuery<T> {
-        return TypedSelectSQLQuery(for: schema, raw: raw + "DELETE")
-    }
-}

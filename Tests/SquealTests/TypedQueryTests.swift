@@ -99,20 +99,27 @@ final class TypedQueryTests: XCTestCase {
 //        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id) VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
     }
     
-    func testINSERT_INTO_multiple_values() {
-        let people = [
-            Person(firstname: "John", lastname: "Doe"),
-            Person(firstname: "Ada", lastname: "Lovelace"),
-            Person(firstname: "Alan", lastname: "Turing"),
-        ]
-        
+    func testLimitAfterSelectFrom() throws {
         let query = ""
-            .INSERT(INTO: trades, columns: "first_name", "last_name",
-            VALUES: people.map { [ $0.firstname, $0.lastname] })
-                    
-    
-        XCTAssertEqual(query.raw, "INSERT INTO trades (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing');")
+            .SELECT(.all, FROM: users)
+            .LIMIT(17)
+        XCTAssertEqual(query.raw, "SELECT * FROM users LIMIT 17")
     }
+    
+//    func testINSERT_INTO_multiple_values() {
+//        let people = [
+//            Person(firstname: "John", lastname: "Doe"),
+//            Person(firstname: "Ada", lastname: "Lovelace"),
+//            Person(firstname: "Alan", lastname: "Turing"),
+//        ]
+//        
+//        let query = ""
+//            .INSERT(INTO: trades, columns: "first_name", "last_name",
+//            VALUES: people.map { [ $0.firstname, $0.lastname] })
+//                    
+//    
+//        XCTAssertEqual(query.raw, "INSERT INTO trades (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing');")
+//    }
         
         
         //let insertBuilder = db.insert(into: "price_action")
@@ -231,3 +238,9 @@ struct TradesTable: Table {
 //    let available_cash = Field<Double>(name: "available_cash")
 //    let study_id = Field<UUID?>(name: "study_id")
 //}
+
+
+// Rename SQLQuery to just SQL
+// Typed -> TSQL
+
+// RM Bare API alltogether ?

@@ -21,15 +21,15 @@ public class SQLQueryBuilder {
 }
 
 
-public class Squeal {
-    static func query() -> StartSQLQuery {
-        return StartSQLQuery()
-    }
-    
-}
+//public class Squeal {
+//    static func query() -> StartSQLQuery {
+//        return StartSQLQuery()
+//    }
+//    
+//}
 
-public struct StartSQLQuery {
-}
+//public struct StartSQLQuery {
+//}
 
 
 

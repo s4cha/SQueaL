@@ -28,26 +28,26 @@ final class squirrelTests: XCTestCase {
     }
     
     func testSelectOneColums() {
-        let query2 = Squeal.query()
-            .SELECT(users.name)
+        let query2 = "".SELECT("name")
+    
         XCTAssertEqual(query2.raw, "SELECT name")
     }
     
     func testSelectTwoColums() {
-        let query2 = Squeal.query()
-            .SELECT(users.id, users.name)
+        let query2 = ""
+            .SELECT("id, name")
         XCTAssertEqual(query2.raw, "SELECT id, name")
     }
     
     func testFrom() throws {
-        let query = Squeal.query()
-            .SELECT(.all)
-            .FROM(users)
+        let query = ""
+            .SELECT("*")
+            .FROM("users")
         XCTAssertEqual(query.raw, "SELECT * FROM users")
     }
     
     func testWhereClause() throws {
-        let query = Squeal.query()
+        let query = ""
             .SELECT("*")
             .FROM("users")
             .WHERE("id = 1")
@@ -55,9 +55,7 @@ final class squirrelTests: XCTestCase {
     }
     
     func testWhereEquation() throws {
-
-        
-        let query = Squeal.query()
+        let query = ""
             .SELECT("*")
             .FROM("users")
 //            .WHERE(v1: "id", op: =, v2: "1")
