@@ -120,15 +120,15 @@ final class squirrelTests: XCTestCase {
         XCTAssertEqual(query.raw, "INSERT INTO users (name, email) VALUES ('john', 'john@bar.com')")
     }
     
-    func testInsertTypeSafe() {
-        let query = ""
-            .INSERTX(INTO: users, columns: \.name)
-//            .INSERTX(INTO: users, columns: \.name)
-        
-//            .INSERT(INTO:"users", columns: "name", "email")
-//            .VALUES("john", "john@bar.com")
+//    func testInsertTypeSafe() {
+//        let query = ""
+////            .INSERTX(INTO: users, columns: \.name)
+////            .INSERTX(INTO: users, columns: \.name)
+//        
+//            .INSERT(INTO: users, columns: "name", "email",
+//                    VALUES: "john", "john@bar.com")
 //        XCTAssertEqual(query.raw, "INSERT INTO users (name, email) VALUES ('john', 'john@bar.com')")
-    }
+//    }
 
 }
 

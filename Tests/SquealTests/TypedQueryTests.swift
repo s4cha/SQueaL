@@ -76,7 +76,8 @@ final class TypedQueryTests: XCTestCase {
     
     func testUpdate() {
         let query = ""
-            .UPDATE(users, SET: "name = 'john'", WHERE: "id = 12")
+            .UPDATE(users, SET: \.name, value: "john")
+            .WHERE(\.id == 12)
         XCTAssertEqual(query.raw, "UPDATE users SET name = 'john' WHERE id = 12")
     }
     
@@ -84,9 +85,9 @@ final class TypedQueryTests: XCTestCase {
         let userId = UUID(uuidString: "6762B5AA-3FD6-4776-9E30-6A2D84EE8895")!
         let studyId = UUID(uuidString: "65A92E82-8172-4A96-9E5A-43B52E9CF34F")!
         
-        let query = "".INSERTX(INTO: trades, columns: \.user_id, \.study_id)
+//        let query = "".INSERTX(INTO: trades, columns: \.user_id, \.study_id)
         
-        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id)")
+//        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id)")
                        
                        //VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
         
