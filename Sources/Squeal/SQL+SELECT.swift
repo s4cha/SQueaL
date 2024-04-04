@@ -98,6 +98,10 @@ public extension StartSQLQuery {
 
 public extension TypedSQLQuery {
     
+    func SELECT(_ columns: [any AnyField]) -> TypedSelectSQLQuery<T> {
+        return TypedSelectSQLQuery(for: schema, raw: "SELECT \(columns.map { $0.name}.joined(separator: ", "))")
+    }
+    
     func SELECT(_ string: String) -> TypedSelectSQLQuery<T> {
         return TypedSelectSQLQuery(for: schema, raw: "SELECT \(string)")
     }
@@ -216,6 +220,10 @@ public func SELECT<T, X>(_ keypath:  KeyPath<T, Field<X>>, FROM table: T) -> Typ
 
 
 public extension String {
+    
+    func SELECT<T>(_ columns: [any AnyField], FROM table: T) -> TypedFromSQLQuery<T> {
+        return TypedSQLQuery(for: table).SELECT(columns).FROM(table)
+    }
     
     func SELECT<T>(_ columns: String, FROM table: T) -> TypedFromSQLQuery<T> {
         return TypedSQLQuery(for: table).SELECT(columns).FROM(table)
