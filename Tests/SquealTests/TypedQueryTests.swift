@@ -71,7 +71,7 @@ final class TypedQueryTests: XCTestCase {
         let query = ""
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
-            .AND(\.name, equals: "jack")
+            .AND(\.name == "jack")
             .LIMIT(1)
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 1")
     }
