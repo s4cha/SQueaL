@@ -42,7 +42,7 @@ final class TypedQueryTests: XCTestCase {
         XCTAssertEqual(query2.raw, "SELECT name FROM users")
     }
     
-    func testWhereTypeSafe() throws {
+    func testWhereTypeSafeInt() throws {
         let query = ""
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
@@ -50,11 +50,19 @@ final class TypedQueryTests: XCTestCase {
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
     }
     
+    func testWhereTypeSafeString() throws {
+        let query = ""
+            .SELECT(.all, FROM: users)
+            .WHERE(\.name == "Alice")
+        print(query)
+        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE name = 'Alice'")
+    }
+    
     func testAndTypeSafe() throws {
         let query = ""
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
-            .AND(\.name, equals: "jack")
+            .AND(\.name == "jack")
         XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
     }
     
@@ -91,12 +99,10 @@ final class TypedQueryTests: XCTestCase {
                        
                        //VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
         
-//        let query = ""
-//            .INSERT(INTO: trades, column: \.user_id,
-//                    VALUES: <#T##(any CustomStringConvertible)?...##(any CustomStringConvertible)?#>
-//            .INSERT(INTO: trades, columns: "user_id", "study_id",
-//                    VALUES: userId, studyId)
-//        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id) VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
+        let query = ""
+            .INSERT(INTO: trades, columns: "user_id", "study_id",
+                    VALUES: userId, studyId)
+        XCTAssertEqual(query.raw, "INSERT INTO trades (user_id, study_id) VALUES ('6762B5AA-3FD6-4776-9E30-6A2D84EE8895', '65A92E82-8172-4A96-9E5A-43B52E9CF34F')")
     }
     
     func testLimitAfterSelectFrom() throws {
