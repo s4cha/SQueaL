@@ -16,6 +16,7 @@ struct UsersTable: Table {
 }
 
 
+@available(macOS 14.0.0, *)
 final class TypedQueryTests: XCTestCase {
     
     let users = UsersTable()
@@ -90,12 +91,11 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testINSERT_INTO() {
-    let query = ""
-        .INSERT(INTO: users, columns: \.id, \.name,
-                VALUES: 12, "Jim")
-
-    XCTAssertEqual(query.raw, "INSERT INTO users (id, name) VALUES (12, 'Jim')")
-}
+        let query = ""
+            .INSERT(INTO: users, columns: \.id, \.name,
+                    VALUES: 12, "Jim")
+        XCTAssertEqual(query.raw, "INSERT INTO users (id, name) VALUES (12, 'Jim')")
+    }
     
     func testLimitAfterSelectFrom() throws {
         let query = ""
@@ -104,21 +104,64 @@ final class TypedQueryTests: XCTestCase {
         XCTAssertEqual(query.raw, "SELECT * FROM users LIMIT 17")
     }
     
-//    func testINSERT_INTO_multiple_values() {
+    @available(macOS 14.0.0, *)
+    func testINSERT_INTO_multiple_values() {
+        let people = [
+            Person(firstname: "John", lastname: "Doe"),
+            Person(firstname: "Ada", lastname: "Lovelace"),
+            Person(firstname: "Alan", lastname: "Turing"),
+        ]
+        var query = ""
+            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
+            .VALUES(people[0].firstname, people[0].lastname)
+            .VALUES(people[1].firstname, people[1].lastname)
+            .VALUES(people[2].firstname, people[2].lastname)
+        XCTAssertEqual(query.raw, "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+    }
+    
+    @available(macOS 14.0.0, *)
+    func testINSERT_INTO_multiple_valuesLoop() {
+        let people = [
+            Person(firstname: "John", lastname: "Doe"),
+            Person(firstname: "Ada", lastname: "Lovelace"),
+            Person(firstname: "Alan", lastname: "Turing"),
+        ]
+        var query = ""
+            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
+        
+        
+        for p in people {
+            query.ADDVALUES(p.firstname, p.lastname)
+        }
+        print(query.raw)
+        XCTAssertEqual(query.raw, "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+    }
+    
+//    func testINSERT_INTO_multiple_valuesLoop() {
 //        let people = [
 //            Person(firstname: "John", lastname: "Doe"),
 //            Person(firstname: "Ada", lastname: "Lovelace"),
 //            Person(firstname: "Alan", lastname: "Turing"),
 //        ]
+////        let people = PersonTable()
 //        
-//        let query = ""
-//            .INSERT(INTO: trades, columns: "first_name", "last_name",
-//            VALUES: people.map { [ $0.firstname, $0.lastname] })
+//        var query = ""
+//            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
+//            .VALUESX(people[0].firstname, people[0].lastname)
+//        
+////        for p in people {
+////            query = query
+////                .VALUESX(p.firstname, p.lastname)
+////        }
+////        
+////
+////                    VALUESARRAY: people.map { [ $0.firstname, $0.lastname] })
+////            .va
 //                    
-//    
+//        print(query)
 //        XCTAssertEqual(query.raw, "INSERT INTO trades (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing');")
 //    }
-        
+//        
         
         //let insertBuilder = db.insert(into: "price_action")
         //    .columns("date", "price", "stock_id")
@@ -183,6 +226,13 @@ final class TypedQueryTests: XCTestCase {
 struct Person {
     let firstname: String
     let lastname: String
+}
+
+
+struct PersonTable: Table {
+    var tableName: String = "people"
+    let firstname = Field<String>(name: "first_name")
+    let lastname = Field<String>(name: "last_name")
 }
 
 
