@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct KPSQLEquation<T, Y> {
+public struct KPSQLEquation<T, Y: Encodable> {
     let left: KeyPath<T, Field<Y>>
     let sign: String
     let right: Y

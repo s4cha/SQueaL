@@ -10,7 +10,7 @@ import Foundation
 
 public struct SelectSQLQuery: SQLQuery {
     public let query: String
-    public var parameters: [Any]
+    public var parameters: [(any Encodable)?]
     
     init(column: String) {
         self.query = "SELECT \(column)"

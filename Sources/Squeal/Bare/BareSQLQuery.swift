@@ -10,5 +10,5 @@ import Foundation
 
 public struct BareSQLQuery: SQLQuery {
     public var query: String
-    public var parameters: [Any]
+    public var parameters: [(any Encodable)?]
 }

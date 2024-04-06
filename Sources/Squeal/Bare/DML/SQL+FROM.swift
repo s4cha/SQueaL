@@ -31,7 +31,7 @@ public extension SelectSQLQuery  {
 
 public struct FromSQLQuery: SQLQuery {
     public let query: String
-    public var parameters: [Any]
+    public var parameters: [(any Encodable)?]
     
     init(query: String) {
         self.query = query

@@ -10,7 +10,7 @@ import Foundation
 
 public struct WhereSQLQuery: SQLQuery {
     public let query: String
-    public var parameters: [Any]
+    public var parameters: [(any Encodable)?]
 }
 
 public extension FromSQLQuery {
@@ -18,12 +18,7 @@ public extension FromSQLQuery {
         return WhereSQLQuery(query: query + " WHERE \(clause)", parameters: parameters)
     }
     
-    func WHERE(_ column: String, equals value: Any) -> WhereSQLQuery {
-        let q = " WHERE \(column) = \(nextDollarSign())"
-        return WhereSQLQuery(query: query + q, parameters: parameters + [value])
-    }
-    
     func WHERE(_ equation: SQLEquation) -> WhereSQLQuery {
-        return WhereSQLQuery(query: query + " WHERE \(equation.left) \(equation.sign) \(nextDollarSign())" ,parameters: parameters + [equation.right])
+        return WhereSQLQuery(query: query + " WHERE \(equation.left) \(equation.sign) \(nextDollarSign())", parameters: parameters + [equation.right])
     }
 }

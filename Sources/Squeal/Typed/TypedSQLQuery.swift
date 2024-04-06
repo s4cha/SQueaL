@@ -12,9 +12,9 @@ public struct TypedSQLQuery<T: Table>: SQLQuery {
     
     let table: T
     public var query: String = ""
-    public var parameters = [Any]()
-        
-    init(for table: T, query: String, parameters: [Any]) {
+    public var parameters: [(any Encodable)?]
+    
+    init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
         self.parameters = parameters

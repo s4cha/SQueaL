@@ -10,8 +10,8 @@ import Foundation
 
 public extension String {
 
-    func UPDATE<T, Y>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y?) -> TypedFromSQLQuery<T> {
+    func UPDATE<T, Y: Encodable>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y?) -> TypedFromSQLQuery<T> {
         let q = "UPDATE \(table.tableName) SET \(table[keyPath: keypath].name) = $1"
-        return TypedFromSQLQuery(for: table, query: q, parameters: [value as Any])
+        return TypedFromSQLQuery(for: table, query: q, parameters: [value])
     }
 }

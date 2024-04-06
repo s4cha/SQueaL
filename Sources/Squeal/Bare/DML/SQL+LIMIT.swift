@@ -10,7 +10,7 @@ import Foundation
 
 public struct LimitSQLQuery: SQLQuery {
     public let query: String
-    public var parameters: [Any]
+    public var parameters: [(any Encodable)?]
     
     init(sqlQuery: SQLQuery, limit: Int) {
         self.query = sqlQuery.query + " LIMIT \(limit)"

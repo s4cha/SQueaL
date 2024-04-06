@@ -10,7 +10,7 @@ import Foundation
 
 public protocol SQLQuery: CustomStringConvertible {
     var query: String { get }
-    var parameters: [Any] { get }
+    var parameters: [(any Encodable)?] { get }
 }
 
 public extension SQLQuery {
@@ -23,10 +23,17 @@ public extension SQLQuery {
     func toString() -> String {
         var q = query
         for (index, value) in parameters.enumerated() {
-            var formattedValue = "\(value)"
-            if let stringValue = value as? String {
+            var formattedValue = ""
+            if value == nil {
+                formattedValue = "NULL"
+            } else if let stringValue = value as? String {
                 formattedValue = "'\(stringValue)'"
-            } else {
+            } else if let uuid = value as? UUID {
+                formattedValue = "'\(uuid.uuidString)'"
+            } else if let int = value as? Int {
+                formattedValue = "\(int)"
+            }
+            else {
                 formattedValue = "\(value)" // TODO quotes for UUIDs etc ?
             }
             q = q.replacingOccurrences(of: "$\(index + 1)", with: "\(formattedValue)")

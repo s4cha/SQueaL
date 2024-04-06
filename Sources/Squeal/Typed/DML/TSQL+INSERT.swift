@@ -10,7 +10,9 @@ import Foundation
 
 public extension String {
     
-    func INSERT<T, each U>(INTO table: T,
+    
+    //Waiting for Swift 6 to cleanly turn parameter pack into nice array of Encodables.
+    func INSERT<T, each U:Encodable>(INTO table: T,
                    columns: repeat KeyPath<T, Field<each U>>,
                    VALUES values: repeat each U) -> TypedInsertSQLQuery<T> {
         
@@ -21,6 +23,16 @@ public extension String {
 //        print(toto)
 //        
         let vals = "\((repeat each values))"
+        
+        
+        let encoder = JSONEncoder()
+//        let jsonData = repeat encoder.encode(each values)
+            
+        // Convert the JSON data to a String
+//        if let jsonString = String(data: jsonData, encoding: .utf8)
+            
+        
+//        let vtypes = "\((repeat each values).dynamicType)"
 //        print(vals)
 //        
 //        let test = vals.substring(from: 1)
@@ -28,11 +40,21 @@ public extension String {
 //        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
         let trimmedString = vals.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
         let components = trimmedString.components(separatedBy: ", ")
-        var parameters = [Any]()
+        var parameters = [(any Encodable)?]()
         components.forEach { component in
-            if let intValue = Int(component) {
-                parameters.append(intValue)
-            } else {
+            if component == "nil" {
+                parameters.append(nil)
+            }
+            else if let int = Int(component) {
+                parameters.append(int)
+            }  else if let double = Double(component) {
+                parameters.append(double)
+            }
+            else if let bool = Bool(component) {
+                parameters.append(bool)
+            }
+//            
+            else {
                 print(component)
                 // Assuming the component is a string, remove the double quotes
                 let trimmedComponent = component.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
@@ -122,7 +144,7 @@ public extension TypedLoneInsertSQLQuery {
         let vals = "\((repeat each values))"
         let trimmedString = vals.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
         let components = trimmedString.components(separatedBy: ", ")
-        var newParameters = [Any]()
+        var newParameters = [(any Encodable)?]()
         components.forEach { component in
             if let intValue = Int(component) {
                 newParameters.append(intValue)
@@ -205,9 +227,9 @@ public extension TypedInsertSQLQuery {
 public struct TypedLoneInsertSQLQuery<T: Table, each V>: SQLQuery {
     let table: T
     public var query: String = ""
-    public var parameters = [Any]()
+    public var parameters: [(any Encodable)?]
         
-    init(for table: T, query: String, parameters: [Any]) {
+    init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
         self.parameters = parameters
@@ -219,9 +241,9 @@ public struct TypedLoneInsertSQLQuery<T: Table, each V>: SQLQuery {
 public struct TypedInsertSQLQuery<T: Table>: SQLQuery {
     let table: T
     public var query: String = ""
-    public var parameters = [Any]()
+    public var parameters: [(any Encodable)?]
         
-    init(for table: T, query: String, parameters: [Any]) {
+    init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
         self.parameters = parameters

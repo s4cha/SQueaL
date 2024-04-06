@@ -58,19 +58,8 @@ final class squirrelTests: XCTestCase {
         let query = ""
             .SELECT("*")
             .FROM("users")
-//            .WHERE(v1: "id", op: =, v2: "1")
             .WHERE("id" == 1)
-//            .WHERE("id = 1")
-        
         XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1")
-    }
-    
-    func testWhereEquals() throws {
-        let query = ""
-            .SELECT("*")
-            .FROM("users")
-            .WHERE("id", equals: 43)
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 43")
     }
     
     func testAnd() throws {
