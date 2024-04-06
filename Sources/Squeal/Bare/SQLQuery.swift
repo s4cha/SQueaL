@@ -8,7 +8,7 @@
 import Foundation
 
 
-public protocol SQLQuery: CustomStringConvertible{
+public protocol SQLQuery: CustomStringConvertible {
     var raw: String { get }
 }
 

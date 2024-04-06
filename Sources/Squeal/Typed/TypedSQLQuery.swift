@@ -7,27 +7,21 @@
 
 import Foundation
 
-struct Field<T>: AnyField {
-    let name: String
-}
 
-protocol AnyField {
-    var name: String { get }
-}
-
-protocol Table {
-    var tableName: String { get }
-    init()
-}
-
-struct TypedSQLQuery<T: Table>: SQLQuery {
+public struct TypedSQLQuery<T: Table>: SQLQuery {
     
     let schema: T
     
-    var raw: String
+    public var raw: String
     
     init(schema: T, raw: String = "") {
         self.schema = schema
         self.raw = raw
     }
+    
+    public init(for table: T) {
+        self.schema = table
+        self.raw = ""
+    }
 }
+
