@@ -9,9 +9,44 @@ import Foundation
 
 
 public protocol SQLQuery: CustomStringConvertible {
-    var raw: String { get }
+    var query: String { get }
+    var parameters: [Any] { get }
 }
 
 public extension SQLQuery {
-    var description: String { return raw }
+    var description: String { return toString() }
+}
+
+
+// Format Queries.
+public extension SQLQuery {
+    func toString() -> String {
+        var q = query
+        for (index, value) in parameters.enumerated() {
+            var formattedValue = "\(value)"
+            if let stringValue = value as? String {
+                formattedValue = "'\(stringValue)'"
+            } else {
+                formattedValue = "\(value)" // TODO quotes for UUIDs etc ?
+            }
+            q = q.replacingOccurrences(of: "$\(index + 1)", with: "\(formattedValue)")
+        }
+        return q
+    }
+}
+
+
+public extension SQLQuery {
+    func nextDollarSign() -> String {
+        if query.contains("$1") {
+            return "$2"
+        } else if query.contains("$2") {
+            return "$3"
+        }
+        return "$1"
+    }
+    
+    func parameterNumber() -> Int {
+        return query.filter { $0 == "$" }.count
+    }
 }

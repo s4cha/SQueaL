@@ -18,32 +18,32 @@ final class squirrelTests: XCTestCase {
     func testSelectBare() throws {
         let query = ""
             .SELECT("*")
-        XCTAssertEqual(query.raw, "SELECT *")
+        XCTAssertEqual("\(query)", "SELECT *")
     }
     
     func testSelectAll() {
-        let query2 = ""
+        let query = ""
             .SELECT(.all)
-        XCTAssertEqual(query2.raw, "SELECT *")
+        XCTAssertEqual("\(query)", "SELECT *")
     }
     
     func testSelectOneColums() {
-        let query2 = "".SELECT("name")
+        let query = "".SELECT("name")
     
-        XCTAssertEqual(query2.raw, "SELECT name")
+        XCTAssertEqual("\(query)", "SELECT name")
     }
     
     func testSelectTwoColums() {
-        let query2 = ""
+        let query = ""
             .SELECT("id, name")
-        XCTAssertEqual(query2.raw, "SELECT id, name")
+        XCTAssertEqual("\(query)", "SELECT id, name")
     }
     
     func testFrom() throws {
         let query = ""
             .SELECT("*")
             .FROM("users")
-        XCTAssertEqual(query.raw, "SELECT * FROM users")
+        XCTAssertEqual("\(query)", "SELECT * FROM users")
     }
     
     func testWhereClause() throws {
@@ -51,7 +51,7 @@ final class squirrelTests: XCTestCase {
             .SELECT("*")
             .FROM("users")
             .WHERE("id = 1")
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1")
     }
     
     func testWhereEquation() throws {
@@ -62,7 +62,7 @@ final class squirrelTests: XCTestCase {
             .WHERE("id" == 1)
 //            .WHERE("id = 1")
         
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1")
     }
     
     func testWhereEquals() throws {
@@ -70,7 +70,7 @@ final class squirrelTests: XCTestCase {
             .SELECT("*")
             .FROM("users")
             .WHERE("id", equals: 43)
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 43")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 43")
     }
     
     func testAnd() throws {
@@ -79,7 +79,7 @@ final class squirrelTests: XCTestCase {
             .FROM("users")
             .WHERE("id = 1")
             .AND("name = 'jack'")
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
     }
     
     func testMultipleAnd() throws {
@@ -89,7 +89,7 @@ final class squirrelTests: XCTestCase {
             .WHERE("id = 1")
             .AND("name = 'jack'")
             .AND("name = 'john'")
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack' AND name = 'john'")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack' AND name = 'john'")
     }
     
     func testOr() throws {
@@ -98,7 +98,7 @@ final class squirrelTests: XCTestCase {
             .FROM("users")
             .WHERE("id = 1")
             .OR("id = 3")
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 OR id = 3")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 OR id = 3")
     }
     
     func testLimit() throws {
@@ -108,14 +108,14 @@ final class squirrelTests: XCTestCase {
             .WHERE("id = 1")
             .AND("name = 'jack'")
             .LIMIT(3)
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 3")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 3")
     }
     
     func testInsert() {
-        let query = BareSQLQuery(raw: "")
+        let query = BareSQLQuery(query: "", parameters: [])
             .INSERT(INTO:"users", columns: "name", "email")
             .VALUES("john", "john@bar.com")
-        XCTAssertEqual(query.raw, "INSERT INTO users (name, email) VALUES ('john', 'john@bar.com')")
+        XCTAssertEqual("\(query)", "INSERT INTO users (name, email) VALUES ('john', 'john@bar.com')")
     }
     
 //    func testInsertTypeSafe() {

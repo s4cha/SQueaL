@@ -9,19 +9,21 @@ import Foundation
 
 
 public struct WhereSQLQuery: SQLQuery {
-    public let raw: String
+    public let query: String
+    public var parameters: [Any]
 }
 
 public extension FromSQLQuery {
     func WHERE(_ clause: String) -> WhereSQLQuery {
-        return WhereSQLQuery(raw: raw + " WHERE \(clause)")
+        return WhereSQLQuery(query: query + " WHERE \(clause)", parameters: parameters)
     }
     
     func WHERE(_ column: String, equals value: Any) -> WhereSQLQuery {
-        return WhereSQLQuery(raw: raw + " WHERE \(column) = \(value)")
+        let q = " WHERE \(column) = \(nextDollarSign())"
+        return WhereSQLQuery(query: query + q, parameters: parameters + [value])
     }
     
     func WHERE(_ equation: SQLEquation) -> WhereSQLQuery {
-        return WhereSQLQuery(raw: raw + " WHERE \(equation.left) \(equation.sign) \(equation.right)")
+        return WhereSQLQuery(query: query + " WHERE \(equation.left) \(equation.sign) \(nextDollarSign())" ,parameters: parameters + [equation.right])
     }
 }

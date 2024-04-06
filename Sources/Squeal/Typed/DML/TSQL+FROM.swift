@@ -9,27 +9,28 @@ import Foundation
 
 
 public struct TypedFromSQLQuery<T: Table>: SQLQuery {
-    
     let table: T
-    public var raw: String
-    
-
-    init(for table: T, raw: String) {
+    public var query: String = ""
+    public var parameters = [Any]()
+        
+    init(for table: T, query: String, parameters: [Any]) {
         self.table = table
-        self.raw = raw
+        self.query = query
+        self.parameters = parameters
     }
 }
 
 public extension TypedSelectSQLQuery {
     
     func FROM(_ tableName: String) -> TypedFromSQLQuery<T> {
-        return TypedFromSQLQuery(for: table, raw: raw + " " + "FROM \(tableName)")
+        let q = query + " FROM \(tableName)"
+        return TypedFromSQLQuery(for: table, query: q, parameters: [])
     }
     
     func FROM(_ table: T) -> TypedFromSQLQuery<T> {
-        if raw.contains("FROM") {
-            return TypedFromSQLQuery(for: table, raw: raw)
+        if query.contains("FROM") {
+            return TypedFromSQLQuery(for: table, query: query, parameters: [])
         }
-        return TypedFromSQLQuery(for: table, raw: raw + " " + "FROM \(table.tableName)")
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(table.tableName)", parameters: [])
     }
 }

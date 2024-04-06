@@ -17,11 +17,45 @@ public extension String {
         let cols = "\((repeat table[keyPath: (each columns)].name))"
         let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
         
+//        let toto = [(repeat each values)]
+//        print(toto)
+//        
         let vals = "\((repeat each values))"
-        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
+//        print(vals)
+//        
+//        let test = vals.substring(from: 1)
+//        print(test)
+//        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
+        let trimmedString = vals.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
+        let components = trimmedString.components(separatedBy: ", ")
+        var parameters = [Any]()
+        components.forEach { component in
+            if let intValue = Int(component) {
+                parameters.append(intValue)
+            } else {
+                print(component)
+                // Assuming the component is a string, remove the double quotes
+                let trimmedComponent = component.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+                parameters.append(trimmedComponent)
+            }
+        }
+        print(parameters)
         
-        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES \(sanitizedVals)"
-        return TypedInsertSQLQuery(for: table, raw: q)
+        
+        let params = components.enumerated().map { i, _ in "$\(i+1)"}.joined(separator: ", ")
+        
+        
+        // This is a nice workaround to turn parameter pack tuple into and array (https://gist.github.com/JensAyton/586f707722bb0b9715eba5bfb4a10c99)
+//        var descriptions: [String] = []
+//        func accumulate(_ string: String) {
+//            descriptions.append(string)
+//        }
+//        (repeat accumulate(String(describing: each values)))
+//        print(descriptions)
+            
+        
+        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES (\(params))"
+        return TypedInsertSQLQuery(for: table, query: q, parameters: parameters)
     }
     
     func INSERT<T, each U, X: Sequence>(INTO table: T,
@@ -39,8 +73,9 @@ public extension String {
 //        let vals = "\((repeat each values))"
 //        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
         
+        
         let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES \(values)"
-        return TypedInsertSQLQuery(for: table, raw: q)
+        return TypedInsertSQLQuery(for: table, query: q, parameters: []) // TODO
     }
     
     
@@ -50,30 +85,26 @@ public extension String {
         
         let cols = "\((repeat table[keyPath: (each columns)].name))"
         let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
-        
-//        let vals = "\((repeat each values))"
-//        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
-        
         let q = "INSERT INTO \(table.tableName) \(sanitizedCols) "
-        return TypedLoneInsertSQLQuery(for: table, raw: q)
+        return TypedLoneInsertSQLQuery(for: table, query: q, parameters: []) // TODO
     }
     
     func INSERT<T>(INTO table: T, columnNames: String..., VALUESARRAY: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
-        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
+        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
                                    + " (\(columnNames.joined(separator: ", ")))"
-                                   + " VALUES (\(VALUESARRAY.map {"'\($0!)'"}.joined(separator: ", ")))")
+                                   + " VALUES (\(VALUESARRAY.map {"'\($0!)'"}.joined(separator: ", ")))", parameters: []) // TODO
     }
         
     func INSERT<T, X>(INTO table: T, _ fields: Field<X>..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
-        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
+        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
                                    + " (\(fields.map { $0.name }.joined(separator: ", ")))"
-                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))")
+                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
     }
     
     func INSERT_INTO<T>(_ table: T, columns: String..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
-        return TypedInsertSQLQuery(for: table, raw: "INSERT INTO \(table.tableName)"
+        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
                                    + " (\(columns.joined(separator: ", ")))"
-                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))")
+                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
     }
         
 }
@@ -82,24 +113,50 @@ public extension String {
 public extension TypedLoneInsertSQLQuery {
     func VALUES(_ values: repeat each V) -> TypedLoneInsertSQLQuery {
         var q = ""
-        if raw.contains("VALUES (") {
+        if query.contains("VALUES (") {
             q += ", "
         } else {
             q += "VALUES "
         }
         
         let vals = "\((repeat each values))"
+        let trimmedString = vals.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
+        let components = trimmedString.components(separatedBy: ", ")
+        var newParameters = [Any]()
+        components.forEach { component in
+            if let intValue = Int(component) {
+                newParameters.append(intValue)
+            } else {
+                print(component)
+                // Assuming the component is a string, remove the double quotes
+                let trimmedComponent = component.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+                newParameters.append(trimmedComponent)
+            }
+        }
+        print(newParameters)
+        
+        var paramNumber = parameterNumber()
+        
+        
+        let params = components.map { _ in
+            paramNumber += 1
+            return "$\(paramNumber)"
+        }.joined(separator: ", ")
+        q += "("
+        q += params
+        q += ")"
+        
         let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
         
 //        q += "("  + values.map {"'\($0)'"} .joined(separator: ", ") +  ")"
-        q += sanitizedVals
-        return TypedLoneInsertSQLQuery(for: table, raw: raw + q)
+//        q += sanitizedVals
+        return TypedLoneInsertSQLQuery(for: table, query: query + q, parameters: parameters + newParameters)
     }
     
     
     mutating func ADDVALUES(_ values: repeat each V) {
         var q = ""
-        if raw.contains("VALUES (") {
+        if query.contains("VALUES (") {
             q += ", "
         } else {
             q += "VALUES "
@@ -110,7 +167,7 @@ public extension TypedLoneInsertSQLQuery {
         
 //        q += "("  + values.map {"'\($0)'"} .joined(separator: ", ") +  ")"
         q += sanitizedVals
-        raw = raw + q
+        query = query + q
 //        return TypedLoneInsertSQLQuery(for: table, raw: raw + q)
     }
 }
@@ -118,11 +175,11 @@ public extension TypedLoneInsertSQLQuery {
 public extension TypedInsertSQLQuery {
     
     func VALUES(_ values: String...) -> TypedSQLQuery<T> {
-        TypedSQLQuery(schema: table, raw: raw + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))")
+        TypedSQLQuery(for: table, query: query + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: parameters)
     }
     
     func RETURNING<U>(_ kp: KeyPath<T, Field<U>>) -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: table, raw: raw + " RETURNING \(table[keyPath: kp].name)")
+        return TypedSQLQuery(for: table, query: query + " RETURNING \(table[keyPath: kp].name)", parameters: parameters)
     }
 }
 ////    func SELECT<T>(_ v: SQLSelectValue, FROM table: T) -> TypedFromSQLQuery<T> {
@@ -146,28 +203,28 @@ public extension TypedInsertSQLQuery {
 
 @available(macOS 14.0.0, *)
 public struct TypedLoneInsertSQLQuery<T: Table, each V>: SQLQuery {
-    
     let table: T
-    public var raw: String
-    
-
-    init(for table: T, raw: String) {
+    public var query: String = ""
+    public var parameters = [Any]()
+        
+    init(for table: T, query: String, parameters: [Any]) {
         self.table = table
-        self.raw = raw
+        self.query = query
+        self.parameters = parameters
     }
 }
 
 
 
 public struct TypedInsertSQLQuery<T: Table>: SQLQuery {
-    
     let table: T
-    public var raw: String
-    
-
-    init(for table: T, raw: String) {
+    public var query: String = ""
+    public var parameters = [Any]()
+        
+    init(for table: T, query: String, parameters: [Any]) {
         self.table = table
-        self.raw = raw
+        self.query = query
+        self.parameters = parameters
     }
 }
 

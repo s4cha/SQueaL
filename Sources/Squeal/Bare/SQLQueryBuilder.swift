@@ -7,18 +7,19 @@
 
 import Foundation
 
-public class SQLQueryBuilder {
-    
-    public init() {}
-    
-    public func query() -> SQLQuery {
-        return BareSQLQuery(raw: "")
-    }
-    
-    public func query<T: Table>(for table: T) -> TypedSQLQuery<T> {
-        return TypedSQLQuery(schema: table)
-    }
-}
+
+//public class SQLQueryBuilder {
+//    
+//    public init() {}
+//    
+//    public func query() -> SQLQuery {
+//        return BareSQLQuery(raw: "")
+//    }
+//    
+//    public func query<T: Table>(for table: T) -> TypedSQLQuery<T> {
+//        return TypedSQLQuery(schema: table)
+//    }
+//}
 
 
 //public class Squeal {

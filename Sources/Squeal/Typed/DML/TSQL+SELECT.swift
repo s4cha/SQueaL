@@ -10,11 +10,13 @@ import Foundation
 public struct TypedSelectSQLQuery<T: Table>: SQLQuery {
     
     let table: T
-    public var raw: String
-    
-    init(for table: T, raw: String) {
+    public var query: String = ""
+    public var parameters = [Any]()
+        
+    init(for table: T, query: String, parameters: [Any]) {
         self.table = table
-        self.raw = raw
+        self.query = query
+        self.parameters = parameters
     }
 }
 
@@ -38,7 +40,7 @@ public extension String {
     }
     
     func SELECT<X, Y, T>(_ keypath1:  KeyPath<T, Field<X>>, _ keypath2:  KeyPath<T, Field<Y>>, FROM table: T) -> TypedFromSQLQuery<T> {
-        return TypedSelectSQLQuery(for: table, raw: "SELECT" + " " + table[keyPath: keypath1].name + ", " + table[keyPath: keypath1].name)
+        return TypedSelectSQLQuery(for: table, query: "SELECT" + " " + table[keyPath: keypath1].name + ", " + table[keyPath: keypath1].name, parameters: [])
             .FROM(table)
     }
     
@@ -51,25 +53,23 @@ public extension String {
 public extension TypedSQLQuery {
     
     func SELECT(_ columns: [any AnyField]) -> TypedSelectSQLQuery<T> {
-        return TypedSelectSQLQuery(for: schema, raw: "SELECT \(columns.map { $0.name}.joined(separator: ", "))")
+        return TypedSelectSQLQuery(for: table, query: "SELECT \(columns.map { $0.name}.joined(separator: ", "))", parameters: parameters)
     }
     
     func SELECT(_ string: String) -> TypedSelectSQLQuery<T> {
-        return TypedSelectSQLQuery(for: schema, raw: "SELECT \(string)")
+        return TypedSelectSQLQuery(for: table, query: "SELECT \(string)", parameters: parameters)
     }
     
     func SELECT(_ v: SQLSelectValue) -> TypedSelectSQLQuery<T> {
-        return TypedSelectSQLQuery(for: schema, raw: "SELECT \(v.rawValue)")
+        return TypedSelectSQLQuery(for: table, query: "SELECT \(v.rawValue)", parameters: parameters)
     }
     
     func SELECT<X>(_ keypath:  KeyPath<T, Field<X>>) -> TypedSelectSQLQuery<T> {
-        return TypedSelectSQLQuery(for: schema, raw: "SELECT" + " " + schema[keyPath: keypath].name)
-           // .FROM(self.schema)
+        return TypedSelectSQLQuery(for: table, query: "SELECT" + " " + table[keyPath: keypath].name, parameters: parameters)
     }
     
     func SELECT<X, Y>(_ keypath1:  KeyPath<T, Field<X>>, _ keypath2:  KeyPath<T, Field<Y>>) -> TypedSelectSQLQuery<T> {
-        return TypedSelectSQLQuery(for: schema, raw: "SELECT" + " " + schema[keyPath: keypath1].name + ", " + schema[keyPath: keypath1].name)
-           // .FROM(self.schema)
+        return TypedSelectSQLQuery(for: table, query: "SELECT" + " " + table[keyPath: keypath1].name + ", " + table[keyPath: keypath1].name, parameters: parameters)
     }
 }
 

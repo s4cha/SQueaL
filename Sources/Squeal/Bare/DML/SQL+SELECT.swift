@@ -9,10 +9,12 @@ import Foundation
 
 
 public struct SelectSQLQuery: SQLQuery {
-    public let raw: String
+    public let query: String
+    public var parameters: [Any]
     
     init(column: String) {
-        raw = "SELECT \(column)"
+        self.query = "SELECT \(column)"
+        self.parameters = []
     }
 }
 

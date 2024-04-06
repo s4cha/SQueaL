@@ -9,13 +9,6 @@ import XCTest
 @testable import Squeal
 
 
-struct UsersTable: Table {
-    let tableName = "users"
-    let id = Field<Int>(name: "id")
-    let name = Field<String>(name: "name")
-}
-
-
 @available(macOS 14.0.0, *)
 final class TypedQueryTests: XCTestCase {
     
@@ -26,7 +19,10 @@ final class TypedQueryTests: XCTestCase {
         let query = ""
             .SELECT(\.id, FROM: users)
             .WHERE(\.id == 1)
-        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1")
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1")
     }
     
     func testWHEREANDEqualSign() {
@@ -34,29 +30,39 @@ final class TypedQueryTests: XCTestCase {
             .SELECT(\.id, FROM: users)
             .WHERE(\.id == 1)
             .AND(\.name == "Jack")
-        XCTAssertEqual(query.raw, "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
+        XCTAssertEqual(query.parameters.count, 2)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssert(query.parameters[1] as? String == "Jack")
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1 AND name = $2")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
     }
     
     func testSelectTypesShortKeypath() {
-        let query2 = ""
+        let query = ""
             .SELECT(\.name, FROM: users)
-        XCTAssertEqual(query2.raw, "SELECT name FROM users")
+        XCTAssert(query.parameters.isEmpty)
+        XCTAssertEqual(query.query, "SELECT name FROM users")
+        XCTAssertEqual("\(query)", "SELECT name FROM users")
     }
     
     func testWhereTypeSafeInt() throws {
         let query = ""
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
-        print(query)
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1")
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1")
     }
     
     func testWhereTypeSafeString() throws {
         let query = ""
             .SELECT(.all, FROM: users)
             .WHERE(\.name == "Alice")
-        print(query)
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE name = 'Alice'")
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? String == "Alice")
+        XCTAssertEqual(query.query, "SELECT * FROM users WHERE name = $1")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE name = 'Alice'")
     }
     
     func testAndTypeSafe() throws {
@@ -64,7 +70,11 @@ final class TypedQueryTests: XCTestCase {
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
+        XCTAssertEqual(query.parameters.count, 2)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssert(query.parameters[1] as? String == "jack")
+        XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1 AND name = $2")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
     }
     
     func testAndTypeSafeLimit() throws {
@@ -73,35 +83,52 @@ final class TypedQueryTests: XCTestCase {
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
             .LIMIT(1)
-        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 1")
+        XCTAssertEqual(query.parameters.count, 2)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssert(query.parameters[1] as? String == "jack")
+        XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1 AND name = $2 LIMIT 1")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 1")
     }
     
     func testDelete() {
         let query = ""
             .DELETE(FROM: users)
             .WHERE(\.id == 243)
-        XCTAssertEqual(query.raw, "DELETE FROM users WHERE id = 243")
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 243)
+        XCTAssertEqual(query.query, "DELETE FROM users WHERE id = $1")
+        XCTAssertEqual("\(query)", "DELETE FROM users WHERE id = 243")
     }
     
     func testUpdate() {
         let query = ""
             .UPDATE(users, SET: \.name, value: "john")
             .WHERE(\.id == 12)
-        XCTAssertEqual(query.raw, "UPDATE users SET name = 'john' WHERE id = 12")
+        XCTAssertEqual(query.parameters.count, 2)
+        XCTAssert(query.parameters[0] as? String == "john")
+        XCTAssert(query.parameters[1] as? Int == 12)
+        XCTAssertEqual(query.query, "UPDATE users SET name = $1 WHERE id = $2")
+        XCTAssertEqual("\(query)", "UPDATE users SET name = 'john' WHERE id = 12")
     }
     
     func testINSERT_INTO() {
         let query = ""
             .INSERT(INTO: users, columns: \.id, \.name,
                     VALUES: 12, "Jim")
-        XCTAssertEqual(query.raw, "INSERT INTO users (id, name) VALUES (12, 'Jim')")
+//        XCTAssertEqual(query.parameters.count, 2)
+//        XCTAssert(query.parameters[0] as? Int == 12)
+//        XCTAssert(query.parameters[1] as? String == "Jim")
+        XCTAssertEqual(query.query, "INSERT INTO users (id, name) VALUES ($1, $2)")
+        XCTAssertEqual("\(query)", "INSERT INTO users (id, name) VALUES (12, 'Jim')")
     }
     
     func testLimitAfterSelectFrom() throws {
         let query = ""
             .SELECT(.all, FROM: users)
             .LIMIT(17)
-        XCTAssertEqual(query.raw, "SELECT * FROM users LIMIT 17")
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT * FROM users LIMIT 17")
+        XCTAssertEqual("\(query)", "SELECT * FROM users LIMIT 17")
     }
     
     @available(macOS 14.0.0, *)
@@ -111,12 +138,21 @@ final class TypedQueryTests: XCTestCase {
             Person(firstname: "Ada", lastname: "Lovelace"),
             Person(firstname: "Alan", lastname: "Turing"),
         ]
-        var query = ""
+        let query = ""
             .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
             .VALUES(people[0].firstname, people[0].lastname)
             .VALUES(people[1].firstname, people[1].lastname)
             .VALUES(people[2].firstname, people[2].lastname)
-        XCTAssertEqual(query.raw, "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+        
+        XCTAssertEqual(query.parameters.count, 6)
+        XCTAssert(query.parameters[0] as? String == "John")
+        XCTAssert(query.parameters[1] as? String == "Doe")
+        XCTAssert(query.parameters[2] as? String == "Ada")
+        XCTAssert(query.parameters[3] as? String == "Lovelace")
+        XCTAssert(query.parameters[4] as? String == "Alan")
+        XCTAssert(query.parameters[5] as? String == "Turing")
+        XCTAssertEqual(query.query, "INSERT INTO people (first_name, last_name) VALUES ($1, $2), ($3, $4), ($5, $6)")
+        XCTAssertEqual("\(query)", "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
     
     @available(macOS 14.0.0, *)
@@ -133,8 +169,7 @@ final class TypedQueryTests: XCTestCase {
         for p in people {
             query.ADDVALUES(p.firstname, p.lastname)
         }
-        print(query.raw)
-        XCTAssertEqual(query.raw, "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+        XCTAssertEqual("\(query)", "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
     
 //    func testINSERT_INTO_multiple_valuesLoop() {
@@ -203,23 +238,6 @@ final class TypedQueryTests: XCTestCase {
         //    .columns(DB.users_completed_studies.user_id.name, DB.users_completed_studies.study_id.name)
         //    .values(SQLBind(user.id!), SQLBind(studyId))
         //    .run()
-
-    // - MARK: Helpers
-    
-    func testTableAll() {
-        let query = users.all()
-        XCTAssertEqual(query.raw, "SELECT * FROM users")
-    }
-    
-//    func testFind() {
-//        let query = users.find(\.id, equals: 12)
-//        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
-//    }
-//    
-//    func testFindTable() {
-//        let query = users.find(\.id, equals: 12)
-//        XCTAssertEqual(query.raw, "SELECT * FROM users WHERE id = 12 LIMIT 1")
-//    }
 }
 
 
@@ -228,38 +246,17 @@ struct Person {
     let lastname: String
 }
 
+struct UsersTable: Table {
+    let tableName = "users"
+    let id = Field<Int>(name: "id")
+    let name = Field<String>(name: "name")
+}
 
 struct PersonTable: Table {
     var tableName: String = "people"
     let firstname = Field<String>(name: "first_name")
     let lastname = Field<String>(name: "last_name")
 }
-
-
-
-//struct StudyStocksTable: Table {
-//    let tableName = "'study+stock'" // TODO check '' added ??
-//    let study_id = Field<UUID?>(name: "study_id")
-//    let stock_id = Field<UUID?>(name: "stock_id")
-//}
-//
-//struct UserTokensTable: Table {
-//    let tableName = "user_tokens"
-//    let user_id = Field<UUID>(name: "user_id")
-//    let value = Field<String>(name: "value")
-//}
-//
-//struct AdminTokensTable: Table {
-//    let tableName = "admin_tokens"
-//    let admin_id = Field<UUID>(name: "admin_id")
-//    let value = Field<String>(name: "value")
-//}
-//
-//struct UsersCompletedStudiesTable: Table {
-//    let tableName = "users_completed_studies"
-//    let user_id = Field<UUID>(name: "user_id")
-//    let study_id = Field<UUID>(name: "study_id")
-//}
 
 struct TradesTable: Table {
     let tableName = "trades"
@@ -268,27 +265,7 @@ struct TradesTable: Table {
     let type = Field<String>(name: "type")
 }
 
-//struct AdminsTable: Table {
-//    let tableName = "admins"
-//    let id = Field<UUID>(name: "id")
-//    let email = Field<String>(name: "email")
-//}
-//
-//struct StocksTable: Table {
-//    let tableName = "stocks"
-//    let id = Field<UUID>(name: "id")
-//}
-//
-//struct UsersTable: Table {
-//    let tableName = "users"
-//    let id = Field<UUID>(name: "id")
-//    let prolific_participant_id = Field<String?>(name: "prolific_participant_id")
-//    let available_cash = Field<Double>(name: "available_cash")
-//    let study_id = Field<UUID?>(name: "study_id")
-//}
-
 
 // Rename SQLQuery to just SQL
 // Typed -> TSQL
-
 // RM Bare API alltogether ?

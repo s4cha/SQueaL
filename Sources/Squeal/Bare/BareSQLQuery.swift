@@ -7,6 +7,8 @@
 
 import Foundation
 
+
 public struct BareSQLQuery: SQLQuery {
-    public var raw: String
+    public var query: String
+    public var parameters: [Any]
 }

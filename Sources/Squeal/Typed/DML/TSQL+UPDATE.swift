@@ -11,7 +11,7 @@ import Foundation
 public extension String {
 
     func UPDATE<T, Y>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y?) -> TypedFromSQLQuery<T> {
-        let v = value == nil ? "NULL" : "'\(value!)'"
-        return TypedFromSQLQuery(for: table, raw: "UPDATE \(table.tableName) SET \(table[keyPath: keypath].name) = \(v)")
+        let q = "UPDATE \(table.tableName) SET \(table[keyPath: keypath].name) = $1"
+        return TypedFromSQLQuery(for: table, query: q, parameters: [value as Any])
     }
 }

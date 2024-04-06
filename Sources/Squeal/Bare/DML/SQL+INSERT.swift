@@ -10,10 +10,10 @@ import Foundation
 
 public extension SQLQuery {
     func INSERT(INTO tableName: String, columns: String...) -> SQLQuery {
-        return BareSQLQuery(raw: raw + "INSERT INTO \(tableName)" + " ("  + columns.joined(separator: ", ") +  ")")
+        return BareSQLQuery(query: query + "INSERT INTO \(tableName)" + " ("  + columns.joined(separator: ", ") +  ")", parameters: []) // TODO
     }
     
     func VALUES(_ values: String...) -> SQLQuery {
-        return BareSQLQuery(raw: raw + " VALUES ("  + values.map {"'\($0)'"} .joined(separator: ", ") +  ")")
+        return BareSQLQuery(query: query + " VALUES ("  + values.map {"'\($0)'"} .joined(separator: ", ") +  ")", parameters: []) // TODO
     }
 }

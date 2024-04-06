@@ -10,18 +10,20 @@ import Foundation
 
 public struct TypedSQLQuery<T: Table>: SQLQuery {
     
-    let schema: T
-    
-    public var raw: String
-    
-    init(schema: T, raw: String = "") {
-        self.schema = schema
-        self.raw = raw
+    let table: T
+    public var query: String = ""
+    public var parameters = [Any]()
+        
+    init(for table: T, query: String, parameters: [Any]) {
+        self.table = table
+        self.query = query
+        self.parameters = parameters
     }
     
-    public init(for table: T) {
-        self.schema = table
-        self.raw = ""
+    init(for table: T) {
+        self.table = table
+        self.query = ""
+        self.parameters = []
     }
 }
 

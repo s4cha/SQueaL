@@ -10,6 +10,6 @@ import Foundation
 
 public extension WhereSQLQuery {
     func OR(_ clause: String) -> WhereSQLQuery {
-        return WhereSQLQuery(raw: raw + " OR \(clause)")
+        return WhereSQLQuery(query: query + " OR \(clause)", parameters: [])
     }
 }

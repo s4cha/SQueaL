@@ -7,9 +7,10 @@
 
 import Foundation
 
+
 public extension SQLQuery {
     func DELETE() -> SQLQuery {
-        return BareSQLQuery(raw: raw + "DELETE")
+        return BareSQLQuery(query: query + "DELETE", parameters: [])
     }
 }
 

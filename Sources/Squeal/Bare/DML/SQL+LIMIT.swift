@@ -7,26 +7,28 @@
 
 import Foundation
 
+
 public struct LimitSQLQuery: SQLQuery {
-    public let raw: String
+    public let query: String
+    public var parameters: [Any]
     
-    init(query: SQLQuery, limit: Int) {
-        raw = query.raw + " LIMIT \(limit)"
+    init(sqlQuery: SQLQuery, limit: Int) {
+        self.query = sqlQuery.query + " LIMIT \(limit)"
+        self.parameters = sqlQuery.parameters
     }
 }
-
 
 public extension FromSQLQuery {
     
     func LIMIT(_ value: Int) -> LimitSQLQuery {
-        return LimitSQLQuery(query: self, limit: value)
+        return LimitSQLQuery(sqlQuery: self, limit: value)
     }
 }
 
 public extension WhereSQLQuery {
     
     func LIMIT(_ value: Int) -> LimitSQLQuery {
-        return LimitSQLQuery(query: self, limit: value)
+        return LimitSQLQuery(sqlQuery: self, limit: value)
     }
 }
 
