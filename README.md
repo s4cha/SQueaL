@@ -58,6 +58,7 @@ Only supports Postgres syntax at the moment
 - By using Swift's `CustomStringConvertible` protocol to generate raw SQL strings
 
 ## ORM issues great reads
+[Don't use an ORM - Prime reacts](https://youtu.be/bpGvVI7NM_k?feature=shared)
 [The Vietnam of Computer Science](https://web.archive.org/web/20220823105749/http://blogs.tedneward.com/post/the-vietnam-of-computer-science/)  
 [Object-Relational Mapping is the Vietnam of Computer Science](https://blog.codinghorror.com/object-relational-mapping-is-the-vietnam-of-computer-science/)  
 [ORM is an anti-pattern](https://seldo.com/posts/orm_is_an_antipattern)  
