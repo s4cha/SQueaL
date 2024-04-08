@@ -218,31 +218,20 @@ final class TypedQueryTests: XCTestCase {
 //        XCTAssertEqual("\(query)", "INSERT INTO studies (name, starting_cash, partitioning, prolific_study_id, completion_link, shows_results, allows_fractional_investing) VALUES ('April', 2500, 100.0, NULL, NULL, false, true) RETURNING id")
     }
     
-//    func testINSERT_INTO_multiple_valuesLoop() {
-//        let people = [
-//            Person(firstname: "John", lastname: "Doe"),
-//            Person(firstname: "Ada", lastname: "Lovelace"),
-//            Person(firstname: "Alan", lastname: "Turing"),
-//        ]
-////        let people = PersonTable()
-//        
-//        var query = ""
-//            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
-//            .VALUESX(people[0].firstname, people[0].lastname)
-//        
-////        for p in people {
-////            query = query
-////                .VALUESX(p.firstname, p.lastname)
-////        }
-////        
-////
-////                    VALUESARRAY: people.map { [ $0.firstname, $0.lastname] })
-////            .va
-//                    
-//        print(query)
-//        XCTAssertEqual(query.raw, "INSERT INTO trades (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing');")
-//    }
-//        
+    func testINSERT_INTO_Map() {
+        let people = [
+            Person(firstname: "John", lastname: "Doe"),
+            Person(firstname: "Ada", lastname: "Lovelace"),
+            Person(firstname: "Alan", lastname: "Turing"),
+        ]
+        
+        var query = ""
+            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname, addValuesFrom: people) { p in
+                (p.firstname, p.lastname)
+            }
+        XCTAssertEqual("\(query)", "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+    }
+        
         
         //let insertBuilder = db.insert(into: "price_action")
         //    .columns("date", "price", "stock_id")
