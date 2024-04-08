@@ -32,9 +32,8 @@ public extension SQLQuery {
                 formattedValue = "'\(uuid.uuidString)'"
             } else if let int = value as? Int {
                 formattedValue = "\(int)"
-            }
-            else {
-                formattedValue = "\(value)" // TODO quotes for UUIDs etc ?
+            } else {
+                formattedValue = "\(value!)" // TODO quotes for UUIDs etc ?
             }
             q = q.replacingOccurrences(of: "$\(index + 1)", with: "\(formattedValue)")
         }
