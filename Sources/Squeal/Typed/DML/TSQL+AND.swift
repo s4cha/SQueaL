@@ -14,16 +14,8 @@ public extension TypedWhereSQLQuery {
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [value])
     }
     
-//    func AND<U>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> where U == String {
-//        return TypedWhereSQLQuery(for: table, query: query + " " + "AND" + " \(table[keyPath: kp].name)" + " = " + "'\(value)'" )
-//    }
-    
-    func AND<Y>(_ equation: KPSQLEquation<T, Y>) -> TypedWhereSQLQuery<T> {
-        let q = query + " AND \(table[keyPath: equation.left].name) \(equation.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [equation.right])
+    func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T> {
+        let q = query + " AND \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
+        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
     }
-    
-//    func AND<Y>(_ equation: KPSQLEquation<T, Y>) -> TypedWhereSQLQuery<T> where Y == String {
-//        return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: equation.left].name) \(equation.sign) '\(equation.right)'")
-//    }
 }

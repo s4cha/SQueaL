@@ -18,7 +18,7 @@ public extension FromSQLQuery {
         return WhereSQLQuery(query: query + " WHERE \(clause)", parameters: parameters)
     }
     
-    func WHERE(_ equation: SQLEquation) -> WhereSQLQuery {
-        return WhereSQLQuery(query: query + " WHERE \(equation.left) \(equation.sign) \(nextDollarSign())", parameters: parameters + [equation.right])
+    func WHERE(_ predicate: BareSQLPredicate) -> WhereSQLQuery {
+        return WhereSQLQuery(query: query + " WHERE \(predicate.left) \(predicate.sign) \(nextDollarSign())", parameters: parameters + [predicate.right])
     }
 }

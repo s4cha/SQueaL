@@ -26,29 +26,20 @@ public extension TypedFromSQLQuery {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " in (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: []) //TODO fix
     }
     
-    func WHERE(_ equation: SQLEquation) -> TypedWhereSQLQuery<T> {
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(equation.left) \(equation.sign) \(nextDollarSign())", parameters: parameters + [equation.right])
+    func WHERE(_ predicate: BareSQLPredicate) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(predicate.left) \(predicate.sign) \(nextDollarSign())", parameters: parameters + [predicate.right])
     }
     
-    func WHERE<Y>(_ equation: KPSQLEquation<T, Y>) -> TypedWhereSQLQuery<T> {
-        let q = query + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) \(nextDollarSign())"
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T> {
+        let q = query + " WHERE \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table,
                                   query: q,
-                                  parameters: parameters + [equation.right])
+                                  parameters: parameters + [predicate.right])
     }
     
-//    func WHERE<Y>(_ equation: KPSQLEquation<T, Y>) -> TypedWhereSQLQuery<T> where Y == String {
-//        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) '\(equation.right)'")
-//    }
-    
-    func WHERE<Y>(_ equation: KPSQLEquation<T, Y?>) -> TypedWhereSQLQuery<T> {
-//        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) \(equation.right!)")
-        let q = query + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters:  parameters + [equation.right!])
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T> {
+        let q = query + " WHERE \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
+        return TypedWhereSQLQuery(for: table, query: q, parameters:  parameters + [predicate.right!])
     }
-    
-//    func WHERE<Y>(_ equation: KPSQLEquation<T, Y?>) -> TypedWhereSQLQuery<T> where Y == String {
-//        return TypedWhereSQLQuery(for: table, raw: raw + " WHERE \(table[keyPath: equation.left].name) \(equation.sign) '\(equation.right!)'")
-//    }
 }
 
