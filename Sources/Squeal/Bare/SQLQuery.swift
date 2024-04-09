@@ -43,13 +43,9 @@ public extension SQLQuery {
 
 
 public extension SQLQuery {
+    
     func nextDollarSign() -> String {
-        if query.contains("$1") {
-            return "$2"
-        } else if query.contains("$2") {
-            return "$3"
-        }
-        return "$1"
+        return "$\(parameterNumber() + 1)"
     }
     
     func parameterNumber() -> Int {

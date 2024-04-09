@@ -8,7 +8,7 @@
 import Foundation
 
 
-func parse(string: String) -> (String, [(any Encodable)?]) {
+func parse(string: String) -> [(any Encodable)?] {
     let trimmedString = string.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
     let components = trimmedString.components(separatedBy: ", ")
     var parameters = [(any Encodable)?]()
@@ -31,9 +31,7 @@ func parse(string: String) -> (String, [(any Encodable)?]) {
             parameters.append(trimmedComponent)
         }
     }
-    let values = components.enumerated().map { i, _ in "$\(i+1)"}.joined(separator: ", ") // TODO remove from here and use next param
-    
-    return (values, parameters)
+    return parameters
 }
 
 public extension String {
@@ -47,9 +45,10 @@ public extension String {
         let cols = "\((repeat table[keyPath: (each columns)].name))"
         let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
         let vals = "\((repeat each values))"
-        let (values, parameters) = parse(string: vals)
-        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES (\(values))"
-        return TypedInsertSQLQuery(for: table, query: q, parameters: parameters)
+        let queryParams = parse(string: vals)
+        let queryValues = queryParams.enumerated().map { i, _ in "$\(i+1)"}.joined(separator: ", ")
+        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES (\(queryValues))"
+        return TypedInsertSQLQuery(for: table, query: q, parameters: queryParams)
     }
     
     func INSERT<T, each U, X: Sequence>(INTO table: T,
@@ -59,18 +58,24 @@ public extension String {
         
         let cols = "\((repeat table[keyPath: (each columns)].name))"
         let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
-        let vals = array.map { p in
-            return mapValues(p)
-        }.map {
-            "\($0)".replacingOccurrences(of: "\"", with: "'")
-        }.joined(separator: ", ")
+        var newParams = [(any Encodable)?]()
+        var valueRows = [String]()
+        var nextPIndex = 1
+        for x in array {
+            let tuple = mapValues(x)
+            let tupleString = "\(tuple)"
+            let queryParams = parse(string: tupleString)
+            newParams += queryParams
+            let queryValues = queryParams.enumerated().map { i, _ in "$\(nextPIndex + i)"}.joined(separator: ", ")
+            print(queryValues)
+            nextPIndex += queryParams.count
+            valueRows.append("(" + queryValues + ")")
+        }
         
-        let (values, parameters) = parse(string: vals)
-        
-        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES \(values)"
-        return TypedInsertSQLQuery(for: table, query: q, parameters: parameters) // TODO
+        let valuesString = valueRows.joined(separator: ", ")
+        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES \(valuesString)"
+        return TypedInsertSQLQuery(for: table, query: q, parameters: newParams) // TODO
     }
-    
     
     @available(macOS 14.0.0, *)
     func INSERT<T, each U>(INTO table: T,
@@ -111,30 +116,13 @@ public extension TypedLoneInsertSQLQuery {
             q += "VALUES "
         }
         let vals = "\((repeat each values))"
-        let trimmedString = vals.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
-        let components = trimmedString.components(separatedBy: ", ")
-        var newParameters = [(any Encodable)?]()
-        components.forEach { component in
-            if let intValue = Int(component) {
-                newParameters.append(intValue)
-            } else {
-                print(component)
-                // Assuming the component is a string, remove the double quotes
-                let trimmedComponent = component.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-                newParameters.append(trimmedComponent)
-            }
-        }
-        var paramNumber = parameterNumber()
-        let params = components.map { _ in
-            paramNumber += 1
-            return "$\(paramNumber)"
-        }.joined(separator: ", ")
-        q += "("
-        q += params
-        q += ")"
-        return TypedLoneInsertSQLQuery(for: table, query: query + q, parameters: parameters + newParameters)
+        let queryParams = parse(string: vals)
+        let nextPIndex = parameterNumber() + 1
+        let queryValues = queryParams.enumerated().map { i, _ in "$\(nextPIndex+i)"}.joined(separator: ", ")
+        let valuesRow = "(" + queryValues + ")"
+        q += valuesRow
+        return TypedLoneInsertSQLQuery(for: table, query: query + q, parameters: parameters + queryParams)
     }
-    
     
     mutating func ADDVALUES(_ values: repeat each V) {
         var q = ""
@@ -143,18 +131,14 @@ public extension TypedLoneInsertSQLQuery {
         } else {
             q += "VALUES "
         }
-        
         let vals = "\((repeat each values))"
-        let (values, params) = parse(string: vals)
-        print("values", values)
-        print("params", params)
-//        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
-        let valuesRow = "(" + values + ")"
+        let queryParams = parse(string: vals)
+        let nextPIndex = parameterNumber() + 1
+        let queryValues = queryParams.enumerated().map { i, _ in "$\(nextPIndex+i)"}.joined(separator: ", ")
+        let valuesRow = "(" + queryValues + ")"
         q += valuesRow
         query = query + q
-        parameters += params
-        print("query", query)
-        print("parameters", parameters)
+        parameters += queryParams
     }
 }
 

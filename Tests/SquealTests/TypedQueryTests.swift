@@ -204,18 +204,12 @@ final class TypedQueryTests: XCTestCase {
         } else {
             XCTFail("Couldn't parse double")
         }
-        
-        
-        
-        
         XCTAssert(query.parameters[3] == nil)
         XCTAssert(query.parameters[4] == nil)
         XCTAssert(query.parameters[5] as? Bool == false)
-      XCTAssert(query.parameters[6] as? Bool == true)
+        XCTAssert(query.parameters[6] as? Bool == true)
         
-//        XCTAssertEqual(query.query, "INSERT INTO people (first_name, last_name) VALUES ($1, $2), ($3, $4), ($5, $6)")
         XCTAssertEqual(query.query,"INSERT INTO studies (name, starting_cash, partitioning, prolific_study_id, completion_link, shows_results, allows_fractional_investing) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id")
-//        XCTAssertEqual("\(query)", "INSERT INTO studies (name, starting_cash, partitioning, prolific_study_id, completion_link, shows_results, allows_fractional_investing) VALUES ('April', 2500, 100.0, NULL, NULL, false, true) RETURNING id")
     }
     
     func testINSERT_INTO_Map() {
@@ -226,53 +220,13 @@ final class TypedQueryTests: XCTestCase {
         ]
         
         var query = ""
-            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname, addValuesFrom: people) { p in
+            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname, 
+                    addValuesFrom: people) { p in
                 (p.firstname, p.lastname)
             }
         XCTAssertEqual("\(query)", "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
         
-        
-        //let insertBuilder = db.insert(into: "price_action")
-        //    .columns("date", "price", "stock_id")
-        //for price in prices {
-        //    insertBuilder.values(SQLBind(price.date), SQLBind(price.price), SQLBind(stockID))
-        //}
-        //try await insertBuilder.run()
-
-        //try await db.insert(into: DB.stocks.tableName)
-        //    .columns("ticker")
-        //    .values(SQLBind(ticker))
-        //    .run()
-
-
-        //// Attach new stocks
-        //let insert = sqlDB()
-        //    .insert(into: "study+stock")
-        //    .columns("study_id", "stock_id")
-        //for stock in stocks {
-        //    insert.values(SQLBind(studyId), SQLBind(stock.id!))
-        //}
-        //try await insert.run()
-
-        //
-
-
-        //let query = SQLQueryBuilder().query()
-        //    .INSERT(INTO: admin_tokens.tableName, columns: admin_tokens.value.name, admin_tokens.admin_id.name)
-        //    .VALUES(token, adminId.uuidString) //Careful SQL INJECTION
-        //try await sqlDB().execute(query)
-
-
-        //try await sqlDB().insert(into: user_tokens.tableName)
-        //    .columns( "value", "user_id")
-        //    .values(SQLBind(userId), SQLBind(token))
-        //    .run()
-
-        //try await sqlDB().insert(into: DB.users_completed_studies.tableName)
-        //    .columns(DB.users_completed_studies.user_id.name, DB.users_completed_studies.study_id.name)
-        //    .values(SQLBind(user.id!), SQLBind(studyId))
-        //    .run()
 }
 
 
