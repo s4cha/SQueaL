@@ -8,6 +8,34 @@
 import Foundation
 
 
+func parse(string: String) -> (String, [(any Encodable)?]) {
+    let trimmedString = string.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
+    let components = trimmedString.components(separatedBy: ", ")
+    var parameters = [(any Encodable)?]()
+    components.forEach { component in
+        if component == "nil" {
+            parameters.append(nil)
+        }
+        else if let int = Int(component) {
+            parameters.append(int)
+        }  else if let double = Double(component) {
+            parameters.append(double)
+        }
+        else if let bool = Bool(component) {
+            parameters.append(bool)
+        } else if let uuid = UUID(uuidString: component) {
+            parameters.append(uuid)
+        }  else {
+            // Assuming the component is a string, remove the double quotes
+            let trimmedComponent = component.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+            parameters.append(trimmedComponent)
+        }
+    }
+    let values = components.enumerated().map { i, _ in "$\(i+1)"}.joined(separator: ", ") // TODO remove from here and use next param
+    
+    return (values, parameters)
+}
+
 public extension String {
     
     
@@ -19,40 +47,8 @@ public extension String {
         let cols = "\((repeat table[keyPath: (each columns)].name))"
         let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
         let vals = "\((repeat each values))"
-        let trimmedString = vals.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
-        let components = trimmedString.components(separatedBy: ", ")
-        var parameters = [(any Encodable)?]()
-        components.forEach { component in
-            if component == "nil" {
-                parameters.append(nil)
-            }
-            else if let int = Int(component) {
-                parameters.append(int)
-            }  else if let double = Double(component) {
-                parameters.append(double)
-            }
-            else if let bool = Bool(component) {
-                parameters.append(bool)
-            } else {
-                // Assuming the component is a string, remove the double quotes
-                let trimmedComponent = component.trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-                parameters.append(trimmedComponent)
-            }
-        }
-        
-        let params = components.enumerated().map { i, _ in "$\(i+1)"}.joined(separator: ", ")
-        
-        
-        // This is a nice workaround to turn parameter pack tuple into and array (https://gist.github.com/JensAyton/586f707722bb0b9715eba5bfb4a10c99)
-//        var descriptions: [String] = []
-//        func accumulate(_ string: String) {
-//            descriptions.append(string)
-//        }
-//        (repeat accumulate(String(describing: each values)))
-//        print(descriptions)
-            
-        
-        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES (\(params))"
+        let (values, parameters) = parse(string: vals)
+        let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES (\(values))"
         return TypedInsertSQLQuery(for: table, query: q, parameters: parameters)
     }
     
@@ -63,13 +59,16 @@ public extension String {
         
         let cols = "\((repeat table[keyPath: (each columns)].name))"
         let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
-        let values = array.map { p in
+        let vals = array.map { p in
             return mapValues(p)
         }.map {
             "\($0)".replacingOccurrences(of: "\"", with: "'")
         }.joined(separator: ", ")
+        
+        let (values, parameters) = parse(string: vals)
+        
         let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES \(values)"
-        return TypedInsertSQLQuery(for: table, query: q, parameters: []) // TODO
+        return TypedInsertSQLQuery(for: table, query: q, parameters: parameters) // TODO
     }
     
     
@@ -146,9 +145,16 @@ public extension TypedLoneInsertSQLQuery {
         }
         
         let vals = "\((repeat each values))"
-        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
-        q += sanitizedVals
+        let (values, params) = parse(string: vals)
+        print("values", values)
+        print("params", params)
+//        let sanitizedVals = vals.replacingOccurrences(of: "\"", with: "'")
+        let valuesRow = "(" + values + ")"
+        q += valuesRow
         query = query + q
+        parameters += params
+        print("query", query)
+        print("parameters", parameters)
     }
 }
 
