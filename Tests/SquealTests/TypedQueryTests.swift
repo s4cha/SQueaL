@@ -15,6 +15,14 @@ final class TypedQueryTests: XCTestCase {
     let users = UsersTable()
     let trades = TradesTable()
     
+    func testSelectcVariadicColumns() {
+        let query = ""
+            .SELECT(\.id, \.name, FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id, name FROM users")
+        XCTAssertEqual("\(query)", "SELECT id, name FROM users")
+    }
+    
     func testWHEREqualSign() {
         let query = ""
             .SELECT(\.id, FROM: users)

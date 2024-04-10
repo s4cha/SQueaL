@@ -38,9 +38,9 @@ public extension String {
     func SELECT<T, X>(_ keypath:  KeyPath<T, Field<X>>, FROM table: T) -> TypedFromSQLQuery<T> {
         return TypedSQLQuery(for: table).SELECT(keypath).FROM(table)
     }
-    
+
     func SELECT<X, Y, T>(_ keypath1:  KeyPath<T, Field<X>>, _ keypath2:  KeyPath<T, Field<Y>>, FROM table: T) -> TypedFromSQLQuery<T> {
-        return TypedSelectSQLQuery(for: table, query: "SELECT" + " " + table[keyPath: keypath1].name + ", " + table[keyPath: keypath1].name, parameters: [])
+        return TypedSelectSQLQuery(for: table, query: "SELECT" + " " + table[keyPath: keypath1].name + ", " + table[keyPath: keypath2].name, parameters: [])
             .FROM(table)
     }
     
