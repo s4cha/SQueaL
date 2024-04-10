@@ -130,6 +130,16 @@ final class TypedQueryTests: XCTestCase {
         XCTAssertEqual("\(query)", "UPDATE users SET name = 'john' WHERE id = 12")
     }
     
+    func testINSERT_INTO_singleValue() {
+        let query = ""
+            .INSERT(INTO: users, columns: \.name,
+                    VALUES: "John")
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? String == "John")
+        XCTAssertEqual(query.query, "INSERT INTO users (name) VALUES ($1)")
+        XCTAssertEqual("\(query)", "INSERT INTO users (name) VALUES ('John')")
+    }
+    
     func testINSERT_INTO() {
         let query = ""
             .INSERT(INTO: users, columns: \.id, \.name,

@@ -43,10 +43,16 @@ public extension String {
                    VALUES values: repeat each U) -> TypedInsertSQLQuery<T> {
         
         let cols = "\((repeat table[keyPath: (each columns)].name))"
-        let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
+        var sanitizedCols = cols.replacingOccurrences(of: "\"", with: "")
+        if sanitizedCols.first != "(" {
+            sanitizedCols = "(\(sanitizedCols))"
+        }
+            
         let vals = "\((repeat each values))"
         let queryParams = parse(string: vals)
         let queryValues = queryParams.enumerated().map { i, _ in "$\(i+1)"}.joined(separator: ", ")
+        print(queryParams)
+        print(queryValues)
         let q = "INSERT INTO \(table.tableName) \(sanitizedCols) VALUES (\(queryValues))"
         return TypedInsertSQLQuery(for: table, query: q, parameters: queryParams)
     }
