@@ -10,24 +10,26 @@ import Foundation
 public struct TypedLimitSQLQuery<T: Table>: SQLQuery {
     
     let table: T
-    public var raw: String
+    public var query: String
+    public var parameters: [(any Encodable)?]
     
-    init(for table: T, raw: String) {
+    init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
-        self.raw = raw
+        self.query = query
+        self.parameters = parameters
     }
 }
 
 public extension TypedFromSQLQuery {
     
     func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T> {
-        return TypedLimitSQLQuery(for: table, raw: raw + " " + "LIMIT \(value)")
+        return TypedLimitSQLQuery(for: table, query: query + " " + "LIMIT \(value)", parameters: parameters)
     }
 }
 
 public extension TypedWhereSQLQuery {
     
     func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T> {
-        return TypedLimitSQLQuery(for: table, raw: raw + " " + "LIMIT \(value)")
+        return TypedLimitSQLQuery(for: table, query: query + " " + "LIMIT \(value)", parameters: parameters)
     }
 }

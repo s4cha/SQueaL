@@ -9,9 +9,6 @@ import Foundation
 
 
 public protocol SQLQuery: CustomStringConvertible {
-    var raw: String { get }
-}
-
-public extension SQLQuery {
-    var description: String { return raw }
+    var query: String { get }
+    var parameters: [(any Encodable)?] { get }
 }
