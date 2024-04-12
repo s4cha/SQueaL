@@ -14,7 +14,7 @@ public struct TypedSQLQuery<T: Table>: SQLQuery {
     public var query: String = ""
     public var parameters: [(any Encodable)?]
     
-    init(for table: T, query: String, parameters: [(any Encodable)?]) {
+    public init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
         self.parameters = parameters
