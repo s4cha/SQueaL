@@ -15,7 +15,7 @@ let query = """
 ```
 Using Squeal
 ```swift
-let query = ""
+let query = SQL
     .SELECT(\.email, FROM: users)
     .WHERE(\.id == 1)
     .AND(\.name == "jack")
