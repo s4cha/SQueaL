@@ -15,16 +15,71 @@ final class TypedQueryTests: XCTestCase {
     let users = UsersTable()
     let trades = TradesTable()
     
-    func testSelectcVariadicColumns() {
-        let query = ""
+    func testSelect1Column() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id FROM users")
+        XCTAssertEqual("\(query)", "SELECT id FROM users")
+    }
+    
+    func testSelect2Columns() {
+        let query = SQL
             .SELECT(\.id, \.name, FROM: users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users")
         XCTAssertEqual("\(query)", "SELECT id, name FROM users")
     }
     
+    func testSelect3Columns() {
+        let query = SQL
+            .SELECT([users.uuid, users.id, users.name], FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
+        XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
+    }
+    
+    func testSelectStringColumns() {
+        let query = SQL
+            .SELECT("uuid, id, name", FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
+        XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
+    }
+    
+    func testSelectVariadicColumns() {
+        let columns: [KeyPath<UsersTable, any AnyField>] = [\.uuid, \.id, \.name] as [KeyPath<UsersTable, any AnyField>] 
+        let query = SQL
+            .SELECT(\.uuid, \.id, \.name, FROM: users)
+            
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
+        XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
+    }
+    
+    func testWhereInt() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id == 1)
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1")
+    }
+    
+    func testWhereString() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.name == "Ada")
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? String == "Ada")
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name = $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name = 'Ada'")
+    }
+    
+    
     func testWHEREqualSign() {
-        let query = ""
+        let query = SQL
             .SELECT(\.id, FROM: users)
             .WHERE(\.id == 1)
         XCTAssertEqual(query.parameters.count, 1)
@@ -34,7 +89,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testWHEREANDEqualSign() {
-        let query = ""
+        let query = SQL
             .SELECT(\.id, FROM: users)
             .WHERE(\.id == 1)
             .AND(\.name == "Jack")
@@ -46,7 +101,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testSelectTypesShortKeypath() {
-        let query = ""
+        let query = SQL
             .SELECT(\.name, FROM: users)
         XCTAssert(query.parameters.isEmpty)
         XCTAssertEqual(query.query, "SELECT name FROM users")
@@ -54,7 +109,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testWhereTypeSafeInt() throws {
-        let query = ""
+        let query = SQL
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
         XCTAssertEqual(query.parameters.count, 1)
@@ -64,7 +119,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testWhereTypeSafeString() throws {
-        let query = ""
+        let query = SQL
             .SELECT(.all, FROM: users)
             .WHERE(\.name == "Alice")
         XCTAssertEqual(query.parameters.count, 1)
@@ -75,7 +130,7 @@ final class TypedQueryTests: XCTestCase {
     
     func testWhereTypeSafeUUID() throws {
         let uuid = UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!
-        let query = ""
+        let query = SQL
             .SELECT(.all, FROM: users)
             .WHERE(\.uuid == uuid)
         XCTAssertEqual(query.parameters.count, 1)
@@ -85,7 +140,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testAndTypeSafe() throws {
-        let query = ""
+        let query = SQL
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
@@ -97,7 +152,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testAndTypeSafeLimit() throws {
-        let query = ""
+        let query = SQL
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
@@ -110,7 +165,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testDelete() {
-        let query = ""
+        let query = SQL
             .DELETE(FROM: users)
             .WHERE(\.id == 243)
         XCTAssertEqual(query.parameters.count, 1)
@@ -120,7 +175,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testUpdate() {
-        let query = ""
+        let query = SQL
             .UPDATE(users, SET: \.name, value: "john")
             .WHERE(\.id == 12)
         XCTAssertEqual(query.parameters.count, 2)
@@ -131,7 +186,7 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testINSERT_INTO_singleValue() {
-        let query = ""
+        let query = SQL
             .INSERT(INTO: users, columns: \.name,
                     VALUES: "John")
         XCTAssertEqual(query.parameters.count, 1)
@@ -141,18 +196,18 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testINSERT_INTO() {
-        let query = ""
+        let query = SQL
             .INSERT(INTO: users, columns: \.id, \.name,
                     VALUES: 12, "Jim")
-//        XCTAssertEqual(query.parameters.count, 2)
-//        XCTAssert(query.parameters[0] as? Int == 12)
-//        XCTAssert(query.parameters[1] as? String == "Jim")
+        XCTAssertEqual(query.parameters.count, 2)
+        XCTAssert(query.parameters[0] as? Int == 12)
+        XCTAssert(query.parameters[1] as? String == "Jim")
         XCTAssertEqual(query.query, "INSERT INTO users (id, name) VALUES ($1, $2)")
         XCTAssertEqual("\(query)", "INSERT INTO users (id, name) VALUES (12, 'Jim')")
     }
     
     func testLimitAfterSelectFrom() throws {
-        let query = ""
+        let query = SQL
             .SELECT(.all, FROM: users)
             .LIMIT(17)
         XCTAssertEqual(query.parameters.count, 0)
@@ -167,7 +222,7 @@ final class TypedQueryTests: XCTestCase {
             Person(firstname: "Ada", lastname: "Lovelace"),
             Person(firstname: "Alan", lastname: "Turing"),
         ]
-        let query = ""
+        let query = SQL
             .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
             .VALUES(people[0].firstname, people[0].lastname)
             .VALUES(people[1].firstname, people[1].lastname)
@@ -191,7 +246,7 @@ final class TypedQueryTests: XCTestCase {
             Person(firstname: "Ada", lastname: "Lovelace"),
             Person(firstname: "Alan", lastname: "Turing"),
         ]
-        var query = ""
+        var query = SQL
             .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
         
         
@@ -204,7 +259,7 @@ final class TypedQueryTests: XCTestCase {
     func testFailingInsertInto() {
         let study = Study(id: nil, name: "April", startingCash: 2500.12, partitioning: 100, prolificStudyId: nil, completionLink: nil, showsResults: false, allowsFractionalInvesting: true)
         let studies = StudiesTable()
-        let query = "".INSERT(INTO: studies,
+        let query = SQL.INSERT(INTO: studies,
                 columns: \.name, \.starting_cash, \.partitioning, \.prolific_study_id, \.completion_link, \.shows_results, \.allows_fractional_investing,
                 VALUES: study.name, study.startingCash, study.partitioning, study.prolificStudyId, study.completionLink, study.showsResults, study.allowsFractionalInvesting)
         .RETURNING(\.id)
@@ -237,8 +292,8 @@ final class TypedQueryTests: XCTestCase {
             Person(firstname: "Alan", lastname: "Turing"),
         ]
         
-        var query = ""
-            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname, 
+        let query = SQL
+            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname,
                     addValuesFrom: people) { p in
                 (p.firstname, p.lastname)
             }
@@ -302,3 +357,12 @@ struct Study {
     let allowsFractionalInvesting: Bool
 //    var stocks: [Stock]?
 }
+
+
+// TODO
+// Where =  like NULL NOT NULL
+// OR
+// Group by
+// Order By / ASC DESC NULL NOT NULL
+// Having
+// UPDATE SET

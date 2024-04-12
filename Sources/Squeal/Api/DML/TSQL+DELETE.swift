@@ -12,3 +12,9 @@ public extension TypedSQLQuery {
         return TypedSelectSQLQuery(for: table, query: query + "DELETE", parameters: [])
     }
 }
+
+public extension SQL {
+    static func DELETE<T>(FROM table: T) -> TypedFromSQLQuery<T> {
+        return TypedSQLQuery(for: table).DELETE().FROM(table)
+    }
+}

@@ -1,22 +1,11 @@
 //
-//  SQLQuery.swift
+//  File.swift
+//  
 //
-//
-//  Created by Sacha Durand Saint Omer on 26/03/2024.
+//  Created by DURAND SAINT OMER Sacha on 11/04/2024.
 //
 
 import Foundation
-
-
-public protocol SQLQuery: CustomStringConvertible {
-    var query: String { get }
-    var parameters: [(any Encodable)?] { get }
-}
-
-public extension SQLQuery {
-    var description: String { return toString() }
-}
-
 
 // Format Queries.
 public extension SQLQuery {
@@ -41,14 +30,6 @@ public extension SQLQuery {
     }
 }
 
-
 public extension SQLQuery {
-    
-    func nextDollarSign() -> String {
-        return "$\(parameterNumber() + 1)"
-    }
-    
-    func parameterNumber() -> Int {
-        return query.filter { $0 == "$" }.count
-    }
+    var description: String { return toString() }
 }

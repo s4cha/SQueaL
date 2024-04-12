@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 public protocol AnyField<FieldType> {
     associatedtype FieldType
     var name: String { get }

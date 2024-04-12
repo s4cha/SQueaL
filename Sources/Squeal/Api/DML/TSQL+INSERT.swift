@@ -34,11 +34,11 @@ func parse(string: String) -> [(any Encodable)?] {
     return parameters
 }
 
-public extension String {
+public extension SQL {
     
     
     //Waiting for Swift 6 to cleanly turn parameter pack into nice array of Encodables.
-    func INSERT<T, each U:Encodable>(INTO table: T,
+    static func INSERT<T, each U:Encodable>(INTO table: T,
                    columns: repeat KeyPath<T, Field<each U>>,
                    VALUES values: repeat each U) -> TypedInsertSQLQuery<T> {
         
@@ -57,7 +57,7 @@ public extension String {
         return TypedInsertSQLQuery(for: table, query: q, parameters: queryParams)
     }
     
-    func INSERT<T, each U, X: Sequence>(INTO table: T,
+    static func INSERT<T, each U, X: Sequence>(INTO table: T,
                    columns: repeat KeyPath<T, Field<each U>>,
                            addValuesFrom array: X,
                                            mapValues: (X.Element) -> (repeat each U)) -> TypedInsertSQLQuery<T> {
@@ -84,7 +84,7 @@ public extension String {
     }
     
     @available(macOS 14.0.0, *)
-    func INSERT<T, each U>(INTO table: T,
+    static func INSERT<T, each U>(INTO table: T,
                    columns: repeat KeyPath<T, Field<each U>>) -> TypedLoneInsertSQLQuery<T, repeat each U> {
         
         let cols = "\((repeat table[keyPath: (each columns)].name))"
@@ -93,23 +93,23 @@ public extension String {
         return TypedLoneInsertSQLQuery(for: table, query: q, parameters: []) // TODO
     }
     
-    func INSERT<T>(INTO table: T, columnNames: String..., VALUESARRAY: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
-        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
-                                   + " (\(columnNames.joined(separator: ", ")))"
-                                   + " VALUES (\(VALUESARRAY.map {"'\($0!)'"}.joined(separator: ", ")))", parameters: []) // TODO
-    }
+//    static func INSERT<T>(INTO table: T, columnNames: String..., VALUESARRAY: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
+//        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
+//                                   + " (\(columnNames.joined(separator: ", ")))"
+//                                   + " VALUES (\(VALUESARRAY.map {"'\($0!)'"}.joined(separator: ", ")))", parameters: []) // TODO
+//    }
         
-    func INSERT<T, X>(INTO table: T, _ fields: Field<X>..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
-        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
-                                   + " (\(fields.map { $0.name }.joined(separator: ", ")))"
-                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
-    }
+//    static func INSERT<T, X>(INTO table: T, _ fields: Field<X>..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
+//        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
+//                                   + " (\(fields.map { $0.name }.joined(separator: ", ")))"
+//                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
+//    }
     
-    func INSERT_INTO<T>(_ table: T, columns: String..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
-        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
-                                   + " (\(columns.joined(separator: ", ")))"
-                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
-    }
+//    static func INSERT_INTO<T>(_ table: T, columns: String..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
+//        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
+//                                   + " (\(columns.joined(separator: ", ")))"
+//                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
+//    }
 }
 
 @available(macOS 14.0.0, *)

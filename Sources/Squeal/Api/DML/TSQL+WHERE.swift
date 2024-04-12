@@ -25,11 +25,7 @@ public extension TypedFromSQLQuery {
     func WHERE<U>(_ kp: KeyPath<T, Field<U>>, in values: [String]) -> TypedWhereSQLQuery<T> {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " in (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: []) //TODO fix
     }
-    
-    func WHERE(_ predicate: BareSQLPredicate) -> TypedWhereSQLQuery<T> {
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(predicate.left) \(predicate.sign) \(nextDollarSign())", parameters: parameters + [predicate.right])
-    }
-    
+
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T> {
         let q = query + " WHERE \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table,
