@@ -112,24 +112,6 @@ public extension SQL {
         let q = "INSERT INTO \(table.tableName) \(sanitizedCols) "
         return TypedLoneInsertSQLQuery(for: table, query: q, parameters: []) // TODO
     }
-    
-//    static func INSERT<T>(INTO table: T, columnNames: String..., VALUESARRAY: CustomStringConvertible?...) -> TypedInsertSQLQuery<T> {
-//        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
-//                                   + " (\(columnNames.joined(separator: ", ")))"
-//                                   + " VALUES (\(VALUESARRAY.map {"'\($0!)'"}.joined(separator: ", ")))", parameters: []) // TODO
-//    }
-        
-//    static func INSERT<T, X>(INTO table: T, _ fields: Field<X>..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
-//        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
-//                                   + " (\(fields.map { $0.name }.joined(separator: ", ")))"
-//                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
-//    }
-    
-//    static func INSERT_INTO<T>(_ table: T, columns: String..., VALUES: CustomStringConvertible...) -> TypedInsertSQLQuery<T> {
-//        return TypedInsertSQLQuery(for: table, query: "INSERT INTO \(table.tableName)"
-//                                   + " (\(columns.joined(separator: ", ")))"
-//                                   + " VALUES (\(VALUES.map {"'\($0)'"}.joined(separator: ", ")))", parameters: []) // TODO
-//    }
 }
 
 @available(macOS 14.0.0, *)
