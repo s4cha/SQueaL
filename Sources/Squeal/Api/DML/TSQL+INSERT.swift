@@ -12,11 +12,29 @@ func parse(string: String) -> [(any Encodable)?] {
     let trimmedString = string.trimmingCharacters(in: CharacterSet(charactersIn: "()"))
     let components = trimmedString.components(separatedBy: ", ")
     var parameters = [(any Encodable)?]()
-    components.forEach { component in
+    components.forEach { c in
+        var component = c
         if component == "nil" {
             parameters.append(nil)
+            return
         }
-        else if let int = Int(component) {
+    
+        if component.hasPrefix("Optional(") {
+            // Remove the leading "Optional("
+                let startIndex = component.index(component.startIndex, offsetBy: "Optional(".count)
+                var endIndex = component.endIndex
+    
+                // Assuming the string ends with ")", adjust if necessary based on your use case
+                if component.hasSuffix(")") {
+                    endIndex = component.index(component.endIndex, offsetBy: -1)
+                }
+    
+                // Extract the string between "Optional(" and the corresponding ")"
+                let strippedString = String(component[startIndex..<endIndex])
+            component = strippedString
+        }
+    
+        if let int = Int(component) {
             parameters.append(int)
         }  else if let double = Double(component) {
             parameters.append(double)
@@ -37,7 +55,9 @@ func parse(string: String) -> [(any Encodable)?] {
 public extension SQL {
     
     
-    //Waiting for Swift 6 to cleanly turn parameter pack into nice array of Encodables.
+    // Waiting for Swift 6 to cleanly turn parameter pack into nice array of Encodables.
+    // This is subpar at the moment because types are erased inside a String
+    @available(*, deprecated, message: "Use at your own risk")
     static func INSERT<T, each U:Encodable>(INTO table: T,
                    columns: repeat KeyPath<T, Field<each U>>,
                    VALUES values: repeat each U) -> TypedInsertSQLQuery<T> {
@@ -114,6 +134,8 @@ public extension SQL {
 
 @available(macOS 14.0.0, *)
 public extension TypedLoneInsertSQLQuery {
+    
+    @available(*, deprecated, message: "Use at your own risk")
     func VALUES(_ values: repeat each V) -> TypedLoneInsertSQLQuery {
         var q = ""
         if query.contains("VALUES (") {
@@ -130,6 +152,7 @@ public extension TypedLoneInsertSQLQuery {
         return TypedLoneInsertSQLQuery(for: table, query: query + q, parameters: parameters + queryParams)
     }
     
+    @available(*, deprecated, message: "Use at your own risk")
     mutating func ADDVALUES(_ values: repeat each V) {
         var q = ""
         if query.contains("VALUES (") {
