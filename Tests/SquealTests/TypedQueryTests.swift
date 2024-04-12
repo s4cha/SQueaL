@@ -48,10 +48,8 @@ final class TypedQueryTests: XCTestCase {
     }
     
     func testSelectVariadicColumns() {
-        let columns: [KeyPath<UsersTable, any AnyField>] = [\.uuid, \.id, \.name] as [KeyPath<UsersTable, any AnyField>] 
         let query = SQL
             .SELECT(\.uuid, \.id, \.name, FROM: users)
-            
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
         XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
