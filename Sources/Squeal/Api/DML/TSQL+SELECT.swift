@@ -49,9 +49,12 @@ public extension SQL {
     }
 
     static func SELECT<T, each U>(_ columns: repeat KeyPath<T, Field<each U>>, FROM table: T) -> TypedFromSQLQuery<T> {
-        let cols = "\((repeat table[keyPath: (each columns)].name))"
-        let sanitizedCols = cols.replacingOccurrences(of: "\"", with: "").dropFirst().dropLast()
-        return TypedSelectSQLQuery(for: table, query: "SELECT \(sanitizedCols)", parameters: [])
+        var columnNames = [String]()
+        for column in repeat each columns {
+            columnNames.append(table[keyPath: column].name)
+        }
+        
+        return TypedSelectSQLQuery(for: table, query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
             .FROM(table)
     }
 }
