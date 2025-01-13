@@ -7,7 +7,8 @@
 
 import Foundation
 
-public struct TypedLimitSQLQuery<T: Table>: TableSQLQuery {
+
+public struct TypedGroupBySQLQuery<T: Table>: TableSQLQuery, LimitableQuery {
     
     public let table: T
     public var query: String
@@ -20,17 +21,15 @@ public struct TypedLimitSQLQuery<T: Table>: TableSQLQuery {
     }
 }
 
+public protocol GroupByableQuery: TableSQLQuery {
 
-public protocol LimitableQuery: TableSQLQuery {
-
-    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T>
+    func GROUP_BY(_ value: String) -> TypedGroupBySQLQuery<T>
 }
 
-public extension LimitableQuery {
+public extension GroupByableQuery {
     
-    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T> {
-        return TypedLimitSQLQuery(for: table, query: query + " " + "LIMIT \(value)", parameters: parameters)
+    func GROUP_BY(_ value: String) -> TypedGroupBySQLQuery<T> {
+        return TypedGroupBySQLQuery(for: table, query: query + " " + "GROUP BY \(value)", parameters: parameters)
     }
 }
-
 

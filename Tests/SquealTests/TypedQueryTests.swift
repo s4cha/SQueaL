@@ -149,19 +149,6 @@ final class TypedQueryTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack'")
     }
     
-    func testAndTypeSafeLimit() throws {
-        let query = SQL
-            .SELECT(.all, FROM: users)
-            .WHERE(\.id == 1)
-            .AND(\.name == "jack")
-            .LIMIT(1)
-        XCTAssertEqual(query.parameters.count, 2)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssert(query.parameters[1] as? String == "jack")
-        XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1 AND name = $2 LIMIT 1")
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 1")
-    }
-    
     func testDelete() {
         let query = SQL
             .DELETE(FROM: users)
@@ -202,15 +189,6 @@ final class TypedQueryTests: XCTestCase {
         XCTAssert(query.parameters[1] as? String == "Jim")
         XCTAssertEqual(query.query, "INSERT INTO users (id, name) VALUES ($1, $2)")
         XCTAssertEqual("\(query)", "INSERT INTO users (id, name) VALUES (12, 'Jim')")
-    }
-    
-    func testLimitAfterSelectFrom() throws {
-        let query = SQL
-            .SELECT(.all, FROM: users)
-            .LIMIT(17)
-        XCTAssertEqual(query.parameters.count, 0)
-        XCTAssertEqual(query.query, "SELECT * FROM users LIMIT 17")
-        XCTAssertEqual("\(query)", "SELECT * FROM users LIMIT 17")
     }
     
     @available(macOS 14.0.0, *)

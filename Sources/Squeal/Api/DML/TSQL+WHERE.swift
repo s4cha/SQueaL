@@ -7,8 +7,9 @@
 
 import Foundation
 
-public struct TypedWhereSQLQuery<T: Table>: SQLQuery {
-    let table: T
+public struct TypedWhereSQLQuery<T: Table>: SQLQuery, LimitableQuery, GroupByableQuery {
+    
+    public let table: T
     public var query: String = ""
     public var parameters: [(any Encodable)?]
         
