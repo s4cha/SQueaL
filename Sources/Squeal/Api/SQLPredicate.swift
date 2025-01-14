@@ -25,3 +25,12 @@ public func > <T,Y>(left: KeyPath<T, Field<Y>>, right: Y) -> SQLPredicate<T, Y> 
 public func < <T,Y>(left: KeyPath<T, Field<Y>>, right: Y) -> SQLPredicate<T, Y> {
     return SQLPredicate(left: left, sign: "<", right: right)
 }
+
+public func >= <T,Y>(left: KeyPath<T, Field<Y>>, right: Y) -> SQLPredicate<T, Y> {
+    return SQLPredicate(left: left, sign: ">=", right: right)
+}
+
+public func <= <T,Y>(left: KeyPath<T, Field<Y>>, right: Y) -> SQLPredicate<T, Y> {
+    return SQLPredicate(left: left, sign: "<=", right: right)
+}
+

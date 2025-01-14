@@ -35,7 +35,7 @@ final class WHERETests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name = 'Ada'")
     }
     
-    func testWHEREqualSign() {
+    func testWHEREEqual() {
         let query = SQL
             .SELECT(\.id, FROM: users)
             .WHERE(\.id == 1)
@@ -45,14 +45,57 @@ final class WHERETests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1")
     }
     
-    func testWhereTypeSafeInt() throws {
+    func testWHERESuperior() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id > 42)
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 42)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id > $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id > 42")
+    }
+    
+    func testWHERESuperiorOrEqual() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id >= 42)
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 42)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id >= $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id >= 42")
+    }
+    
+    func testWHEREInferior() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id < 65)
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 65)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id < $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id < 65")
+    }
+    
+    func testWHEREInferiorOrEqual() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id <= 99)
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? Int == 99)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id <= $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id <= 99")
+    }
+    
+    func testWhereInList() {
         let query = SQL
             .SELECT(.all, FROM: users)
-            .WHERE(\.id == 1)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1")
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1")
+            .WHERE(\.name, IN: ["Alice", "Bob", "Charlie"])
+        
+        XCTAssertEqual(query.parameters.count, 3)
+        XCTAssert(query.parameters[0] as? String == "Alice")
+        XCTAssert(query.parameters[1] as? String == "Bob")
+        XCTAssert(query.parameters[2] as? String == "Charlie")
+        XCTAssertEqual(query.query, "SELECT * FROM users WHERE name IN ($1, $2, $3)")
+        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE name IN ('Alice', 'Bob', 'Charlie')")
     }
     
     func testWhereTypeSafeString() throws {
@@ -75,4 +118,37 @@ final class WHERETests: XCTestCase {
         XCTAssertEqual(query.query, "SELECT * FROM users WHERE uuid = $1")
         XCTAssertEqual("\(query)", "SELECT * FROM users WHERE uuid = '5DC4AC7B-37C1-4472-B1F6-974B79624FE5'")
     }
+    
+    // AND
+    
+    func testWHEREANDEqualSign() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id == 1)
+            .AND(\.name == "Jack")
+        XCTAssertEqual(query.parameters.count, 2)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssert(query.parameters[1] as? String == "Jack")
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1 AND name = $2")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
+    }
+    
+    // OR
+    
+    func testWHEREOREqualSign() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.id == 1)
+            .OR(\.name == "john")
+        XCTAssertEqual(query.parameters.count, 2)
+        XCTAssert(query.parameters[0] as? Int == 1)
+        XCTAssert(query.parameters[1] as? String == "john")
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1 OR name = $2")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1 OR name = 'john'")
+    }
 }
+
+// TOOD
+// - LIKE
+// - IS NULL
+// - IS NOT NULL
