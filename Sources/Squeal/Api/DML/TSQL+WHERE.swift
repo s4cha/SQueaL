@@ -7,7 +7,12 @@
 
 import Foundation
 
-public struct TypedWhereSQLQuery<T: Table>: SQLQuery, LimitableQuery, GroupByableQuery {
+// TODO try return WHereClause?
+public protocol WHEREClause: TableSQLQuery, ANDableQuery, LimitableQuery, GroupByableQuery {
+    
+}
+
+public struct TypedWhereSQLQuery<T: Table>: WHEREClause {
     
     public let table: T
     public var query: String = ""
@@ -20,8 +25,14 @@ public struct TypedWhereSQLQuery<T: Table>: SQLQuery, LimitableQuery, GroupByabl
     }
 }
 
+public protocol WHEREableQuery: TableSQLQuery {
+    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, in values: [String]) -> TypedWhereSQLQuery<T>
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T>
+}
 
-public extension TypedFromSQLQuery {
+
+public extension WHEREableQuery {
 
     func WHERE<U>(_ kp: KeyPath<T, Field<U>>, in values: [String]) -> TypedWhereSQLQuery<T> {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " in (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: []) //TODO fix

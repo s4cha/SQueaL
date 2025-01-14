@@ -8,7 +8,8 @@
 import Foundation
 
 
-public struct TypedFromSQLQuery<T: Table>: SQLQuery, LimitableQuery {
+public struct TypedFromSQLQuery<T: Table>: SQLQuery, WHEREableQuery, LimitableQuery {
+    
     public let table: T
     public var query: String
     public var parameters: [(any Encodable)?]

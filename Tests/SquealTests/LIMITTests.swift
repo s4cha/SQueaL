@@ -28,6 +28,8 @@ final class LimitTests: XCTestCase {
         let query = SQL
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 34)
+        
+        
             .LIMIT(17)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1 LIMIT 17")
@@ -38,7 +40,7 @@ final class LimitTests: XCTestCase {
         let query = SQL
             .SELECT(.all, FROM: users)
             .WHERE(\.id == 1)
-            .AND(\.name == "jack")
+            .AND(\UsersTable.name == "jack")
             .LIMIT(1)
         XCTAssertEqual(query.parameters.count, 2)
         XCTAssert(query.parameters[0] as? Int == 1)
@@ -61,7 +63,6 @@ final class LimitTests: XCTestCase {
         XCTAssertEqual(query.query, "SELECT name FROM users WHERE id = $1 AND name = $2 GROUP BY name LIMIT 3")
         XCTAssertEqual("\(query)", "SELECT name FROM users WHERE id = 1 AND name = 'jack' GROUP BY name LIMIT 3")
     }
-
 }
 
 
