@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct TypedFromSQLQuery<T: Table>: SQLQuery, WHEREableQuery, LimitableQuery {
+public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, WHEREableQuery, LimitableQuery {
     
     public let table: T
     public var query: String
@@ -21,8 +21,13 @@ public struct TypedFromSQLQuery<T: Table>: SQLQuery, WHEREableQuery, LimitableQu
     }
 }
 
-public extension TypedSelectSQLQuery {
-    
+public protocol FROMableQuery: TableSQLQuery {
+    func FROM(_ tableName: String) -> TypedFromSQLQuery<T>
+    func FROM(_ table: T) -> TypedFromSQLQuery<T>
+}
+
+public extension FROMableQuery {
+
     func FROM(_ tableName: String) -> TypedFromSQLQuery<T> {
         let q = query + " FROM \(tableName)"
         return TypedFromSQLQuery(for: table, query: q, parameters: [])

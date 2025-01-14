@@ -7,9 +7,9 @@
 
 import Foundation
 
-public struct TypedSelectSQLQuery<T: Table>: SQLQuery {
+public struct TypedSelectSQLQuery<T: Table>: TableSQLQuery, FROMableQuery  {
     
-    let table: T
+    public let table: T
     public var query: String
     public var parameters: [(any Encodable)?]
         
