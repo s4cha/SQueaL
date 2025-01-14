@@ -54,7 +54,7 @@ final class LimitTests: XCTestCase {
             .SELECT(\.name, FROM: users)
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
-            .GROUP_BY("name")
+            .GROUP_BY(\.name)
             .LIMIT(3)
         
         XCTAssertEqual(query.parameters.count, 2)

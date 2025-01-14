@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, WHEREableQuery, LimitableQuery {
+public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, WHEREableQuery, GroupByableQuery, LimitableQuery {    
     
     public let table: T
     public var query: String
