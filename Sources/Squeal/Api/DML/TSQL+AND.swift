@@ -19,7 +19,6 @@ public protocol ANDableQuery: TableSQLQuery {
 
 public extension ANDableQuery {
 
-//public extension TypedWhereSQLQuery {
     func AND<U: Encodable>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
         let q = query + " " + "AND" + " \(table[keyPath: kp].name)" + " = " + "\(nextDollarSign())"
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [value])

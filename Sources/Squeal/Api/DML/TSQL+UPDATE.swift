@@ -8,7 +8,6 @@
 import Foundation
 
 
-
 public extension SQL {
 
     static func UPDATE<T, Y: Encodable>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y?) -> TypedFromSQLQuery<T> {
