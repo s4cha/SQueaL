@@ -108,6 +108,16 @@ final class WHERETests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT * FROM users WHERE name = 'Alice'")
     }
     
+    func testWHERELike() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.name, LIKE: "%ob")
+        XCTAssertEqual(query.parameters.count, 1)
+        XCTAssert(query.parameters[0] as? String == "%ob")
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name like $1")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name like '%ob'")
+    }
+    
     func testWhereTypeSafeUUID() throws {
         let uuid = UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!
         let query = SQL
@@ -149,6 +159,5 @@ final class WHERETests: XCTestCase {
 }
 
 // TOOD
-// - LIKE
 // - IS NULL
 // - IS NOT NULL

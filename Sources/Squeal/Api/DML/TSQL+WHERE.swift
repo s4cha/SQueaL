@@ -27,6 +27,7 @@ public struct TypedWhereSQLQuery<T: Table>: WHEREClause {
 
 public protocol WHEREableQuery: TableSQLQuery {
     func WHERE<U>(_ kp: KeyPath<T, Field<U>>, IN values: [String]) -> TypedWhereSQLQuery<T>
+    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, LIKE value: String) -> TypedWhereSQLQuery<T>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T>
 }
@@ -43,6 +44,10 @@ public extension WHEREableQuery {
         }
         
         return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " IN (\(values.map{_ in "\(nextParamSign())"}.joined(separator: ", ")))", parameters: parameters + values) //TODO fix
+    }
+    
+    func WHERE<U>(_ kp: KeyPath<T, Field<U>>, LIKE value: String) -> TypedWhereSQLQuery<T> {
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(table[keyPath: kp].name) like \(nextDollarSign())", parameters: parameters + [value])
     }
 
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T> {
