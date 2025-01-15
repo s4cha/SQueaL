@@ -31,22 +31,6 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT id, name FROM users")
     }
     
-    func testSelect3Columns() {
-        let query = SQL
-            .SELECT([users.uuid, users.id, users.name], FROM: users)
-        XCTAssertEqual(query.parameters.count, 0)
-        XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
-        XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
-    }
-    
-    func testSelectStringColumns() {
-        let query = SQL
-            .SELECT("uuid, id, name", FROM: users)
-        XCTAssertEqual(query.parameters.count, 0)
-        XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
-        XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
-    }
-    
     func testSelectVariadicColumns() {
         let query = SQL
             .SELECT(\.uuid, \.id, \.name, FROM: users)
@@ -62,4 +46,27 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual(query.query, "SELECT name FROM users")
         XCTAssertEqual("\(query)", "SELECT name FROM users")
     }
+    
+    // AS
+    func testSelectAS() {
+        let query = SQL
+            .SELECT((\.id, AS: "user_id"), FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id AS user_id FROM users")
+        XCTAssertEqual("\(query)", "SELECT id AS user_id FROM users")
+    }
+
+    func testSelectMultipleAS() {
+        let query = SQL
+            .SELECT(
+                (\.uuid, AS: "unique_id"),
+                (\.id, AS: "user_id"),
+                (\.name, AS: "username"),
+                FROM: users)
+        
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT uuid AS unique_id, id AS user_id, name AS username FROM users")
+        XCTAssertEqual("\(query)", "SELECT uuid AS unique_id, id AS user_id, name AS username FROM users")
+    }
 }
+    
