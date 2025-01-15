@@ -118,6 +118,28 @@ final class WHERETests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name like '%ob'")
     }
     
+    func testWHERE_IS_NULL() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.name)
+            .IS_NULL
+        
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name IS NULL")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name IS NULL")
+    }
+    
+    func testWHERE_IS_NOT_NULL() {
+        let query = SQL
+            .SELECT(\.id, FROM: users)
+            .WHERE(\.name)
+            .IS_NOT_NULL
+        
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name IS NOT NULL")
+        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name IS NOT NULL")
+    }
+    
     func testWhereTypeSafeUUID() throws {
         let uuid = UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!
         let query = SQL
@@ -157,7 +179,3 @@ final class WHERETests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1 OR name = 'john'")
     }
 }
-
-// TOOD
-// - IS NULL
-// - IS NOT NULL
