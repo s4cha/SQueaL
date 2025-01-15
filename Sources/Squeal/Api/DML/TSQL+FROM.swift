@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, WHEREableQuery, GroupByableQuery, OrderByableQuery, LimitableQuery {    
+public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, JoinableQuery, WHEREableQuery, GroupByableQuery, OrderByableQuery, LimitableQuery {    
     
     public let table: T
     public var query: String
@@ -37,6 +37,6 @@ public extension FROMableQuery {
         if query.contains("FROM") {
             return TypedFromSQLQuery(for: table, query: query, parameters: [])
         }
-        return TypedFromSQLQuery(for: table, query: query + " FROM \(table.tableName)", parameters: [])
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
     }
 }

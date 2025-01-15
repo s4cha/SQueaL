@@ -9,6 +9,5 @@ import Foundation
 
 
 public protocol Table {
-    var tableName: String { get }
-    init()
+    static var schema: String { get }
 }

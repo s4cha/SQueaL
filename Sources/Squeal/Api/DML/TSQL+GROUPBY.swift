@@ -22,12 +22,12 @@ public struct TypedGroupBySQLQuery<T: Table>: TableSQLQuery, LimitableQuery {
 }
 
 public protocol GroupByableQuery: TableSQLQuery {
-    func GROUP_BY<X>(_ keypath:  KeyPath<T, Field<X>>) -> TypedGroupBySQLQuery<T>
+    func GROUP_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedGroupBySQLQuery<T>
 }
 
 public extension GroupByableQuery {
     
-    func GROUP_BY<X>(_ keypath:  KeyPath<T, Field<X>>) -> TypedGroupBySQLQuery<T> {
+    func GROUP_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedGroupBySQLQuery<T> {
         return TypedGroupBySQLQuery(for: table, query: query + " GROUP BY " + table[keyPath: keypath].name, parameters: parameters)
     }
 }

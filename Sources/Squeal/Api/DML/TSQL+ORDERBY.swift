@@ -33,17 +33,17 @@ public struct TypedOrderBySQLQuery<T: Table>: OrderByClause {
 }
 
 public protocol OrderByableQuery: TableSQLQuery {
-    func ORDER_BY<X>(_ keypath:  KeyPath<T, Field<X>>) -> TypedOrderBySQLQuery<T>
-    func ORDER_BY<X>(_ keypath:  KeyPath<T, Field<X>>, _ order: OrderByOrder) -> TypedOrderBySQLQuery<T>
+    func ORDER_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedOrderBySQLQuery<T>
+    func ORDER_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>, _ order: OrderByOrder) -> TypedOrderBySQLQuery<T>
 }
 
 public extension OrderByableQuery {
     
-    func ORDER_BY<X>(_ keypath:  KeyPath<T, Field<X>>) -> TypedOrderBySQLQuery<T> {
+    func ORDER_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedOrderBySQLQuery<T> {
         return TypedOrderBySQLQuery(for: table, query: query + " ORDER BY " + table[keyPath: keypath].name, parameters: parameters)
     }
     
-    func ORDER_BY<X>(_ keypath:  KeyPath<T, Field<X>>, _ order: OrderByOrder) -> TypedOrderBySQLQuery<T> {
+    func ORDER_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>, _ order: OrderByOrder) -> TypedOrderBySQLQuery<T> {
         return TypedOrderBySQLQuery(for: table, query: query + " ORDER BY " + table[keyPath: keypath].name + " " + order.rawValue, parameters: parameters)
     }
 }

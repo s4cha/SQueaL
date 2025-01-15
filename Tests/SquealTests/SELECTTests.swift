@@ -22,7 +22,7 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual(query.query, "SELECT id FROM users")
         XCTAssertEqual("\(query)", "SELECT id FROM users")
     }
-    
+
     func testSelect2Columns() {
         let query = SQL
             .SELECT(\.id, \.name, FROM: users)

@@ -29,7 +29,7 @@ public extension SQL {
     }
     
 
-    static func SELECT<T, each U>(_ columns: repeat KeyPath<T, Field<each U>>, FROM table: T) -> TypedFromSQLQuery<T> {
+    static func SELECT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>, FROM table: T) -> TypedFromSQLQuery<T> {
         var columnNames = [String]()
         for column in repeat each columns {
             columnNames.append(table[keyPath: column].name)
@@ -39,7 +39,7 @@ public extension SQL {
             .FROM(table)
     }
     
-    static func SELECT<T, each U>(_ aliases: repeat (KeyPath<T, Field<each U>>, AS: String), FROM table: T) -> TypedFromSQLQuery<T> {
+    static func SELECT<T, each U>(_ aliases: repeat (KeyPath<T, TableColumn<T, each U>>, AS: String), FROM table: T) -> TypedFromSQLQuery<T> {
         var columnNames = [String]()
         for alias in repeat each aliases {
             columnNames.append(table[keyPath: alias.0].name + " AS \(alias.AS)")
