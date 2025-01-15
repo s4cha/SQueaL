@@ -35,6 +35,7 @@ public struct TypedOrderBySQLQuery<T: Table>: OrderByClause {
 public protocol OrderByableQuery: TableSQLQuery {
     func ORDER_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedOrderBySQLQuery<T>
     func ORDER_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>, _ order: OrderByOrder) -> TypedOrderBySQLQuery<T>
+    func ORDER_BY<each U>(_ tuple: repeat (KeyPath<T, TableColumn<T, each U>>, OrderByOrder)) -> TypedOrderBySQLQuery<T>
 }
 
 public extension OrderByableQuery {
@@ -45,6 +46,14 @@ public extension OrderByableQuery {
     
     func ORDER_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>, _ order: OrderByOrder) -> TypedOrderBySQLQuery<T> {
         return TypedOrderBySQLQuery(for: table, query: query + " ORDER BY " + table[keyPath: keypath].name + " " + order.rawValue, parameters: parameters)
+    }
+    
+    func ORDER_BY<each U>(_ orders: repeat (KeyPath<T, TableColumn<T, each U>>, OrderByOrder)) -> TypedOrderBySQLQuery<T> {
+        var columnNames = [String]()
+        for order in repeat each orders {
+            columnNames.append(table[keyPath: order.0].name + " \(order.1 == .ASC ? "ASC" : "DESC")")
+        }
+        return TypedOrderBySQLQuery(for: table, query: query + " ORDER BY \(columnNames.joined(separator: ", "))", parameters: parameters)
     }
 }
 

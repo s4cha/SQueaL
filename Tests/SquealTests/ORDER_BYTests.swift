@@ -32,6 +32,15 @@ final class ORDER_BYTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT id, name FROM users ORDER BY name ASC")
     }
     
+    func testMultipleORDER_BY_afterSELECT() throws {
+        let query = SQL
+            .SELECT(\.id, \.name, FROM: users)
+            .ORDER_BY((\.id, .ASC), (\.name, .DESC))
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id, name FROM users ORDER BY id ASC, name DESC")
+        XCTAssertEqual("\(query)", "SELECT id, name FROM users ORDER BY id ASC, name DESC")
+    }
+    
     func testORDER_BY_ASC2_afterSELECT() throws {
         let query = SQL
             .SELECT(\.id, \.name, FROM: users)
