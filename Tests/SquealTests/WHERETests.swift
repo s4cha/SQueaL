@@ -87,7 +87,7 @@ final class WHERETests: XCTestCase {
     
     func testWhereInList() {
         let query = SQL
-            .SELECT(.all, FROM: users)
+            .SELECT(*, FROM: users)
             .WHERE(\.name, IN: ["Alice", "Bob", "Charlie"])
         
         XCTAssertEqual(query.parameters.count, 3)
@@ -100,7 +100,7 @@ final class WHERETests: XCTestCase {
     
     func testWhereTypeSafeString() throws {
         let query = SQL
-            .SELECT(.all, FROM: users)
+            .SELECT(*, FROM: users)
             .WHERE(\.name == "Alice")
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? String == "Alice")
@@ -143,7 +143,7 @@ final class WHERETests: XCTestCase {
     func testWhereTypeSafeUUID() throws {
         let uuid = UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!
         let query = SQL
-            .SELECT(.all, FROM: users)
+            .SELECT(*, FROM: users)
             .WHERE(\.uuid == uuid)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? UUID == UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!)

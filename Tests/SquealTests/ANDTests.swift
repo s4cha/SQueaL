@@ -30,7 +30,7 @@ final class ANDTests: XCTestCase {
     
     func testAndTypeSafe() throws {
         let query = SQL
-            .SELECT(.all, FROM: users)
+            .SELECT(*, FROM: users)
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
         XCTAssertEqual(query.parameters.count, 2)

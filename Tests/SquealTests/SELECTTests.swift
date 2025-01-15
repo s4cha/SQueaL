@@ -15,6 +15,30 @@ final class SELECTTests: XCTestCase {
     let users = UsersTable()
     let trades = TradesTable()
     
+    func testSelectAll2() {
+        let query = SQL
+            .SELECT(*, FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT * FROM users")
+        XCTAssertEqual("\(query)", "SELECT * FROM users")
+    }
+    
+    func testSelectCount() {
+        let query = SQL
+            .SELECT(COUNT(*), FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT COUNT(*) FROM users")
+        XCTAssertEqual("\(query)", "SELECT COUNT(*) FROM users")
+    }
+    
+    func testSelectCountNameShortKeyPath() {
+        let query = SQL
+            .SELECT(COUNT(\.name), FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT COUNT(name) FROM users")
+        XCTAssertEqual("\(query)", "SELECT COUNT(name) FROM users")
+    }
+    
     func testSelect1Column() {
         let query = SQL
             .SELECT(\.id, FROM: users)
@@ -22,6 +46,15 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual(query.query, "SELECT id FROM users")
         XCTAssertEqual("\(query)", "SELECT id FROM users")
     }
+    
+//    func testSelect1Column() {
+//        let query = SQL
+//            .SELECT(\.id)
+//            .FROM(users)
+//        XCTAssertEqual(query.parameters.count, 0)
+//        XCTAssertEqual(query.query, "SELECT id FROM users")
+//        XCTAssertEqual("\(query)", "SELECT id FROM users")
+//    }
 
     func testSelect2Columns() {
         let query = SQL
@@ -95,4 +128,5 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT DISTINCT name AS username FROM users")
     }
 }
+    
     
