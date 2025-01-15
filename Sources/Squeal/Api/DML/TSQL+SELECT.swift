@@ -34,8 +34,16 @@ public extension SQL {
         for column in repeat each columns {
             columnNames.append(table[keyPath: column].name)
         }
-        
         return TypedSelectSQLQuery(for: table, query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
+            .FROM(table)
+    }
+    
+    static func SELECT_DISTINCT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>, FROM table: T) -> TypedFromSQLQuery<T> {
+        var columnNames = [String]()
+        for column in repeat each columns {
+            columnNames.append(table[keyPath: column].name)
+        }
+        return TypedSelectSQLQuery(for: table, query: "SELECT DISTINCT \(columnNames.joined(separator: ", "))", parameters: [])
             .FROM(table)
     }
     
@@ -45,6 +53,15 @@ public extension SQL {
             columnNames.append(table[keyPath: alias.0].name + " AS \(alias.AS)")
         }
         return TypedSelectSQLQuery(for: table, query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
+            .FROM(table)
+    }
+    
+    static func SELECT_DISTINCT<T, each U>(_ aliases: repeat (KeyPath<T, TableColumn<T, each U>>, AS: String), FROM table: T) -> TypedFromSQLQuery<T> {
+        var columnNames = [String]()
+        for alias in repeat each aliases {
+            columnNames.append(table[keyPath: alias.0].name + " AS \(alias.AS)")
+        }
+        return TypedSelectSQLQuery(for: table, query: "SELECT DISTINCT \(columnNames.joined(separator: ", "))", parameters: [])
             .FROM(table)
     }
 }

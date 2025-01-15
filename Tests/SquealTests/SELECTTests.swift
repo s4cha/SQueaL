@@ -68,5 +68,31 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual(query.query, "SELECT uuid AS unique_id, id AS user_id, name AS username FROM users")
         XCTAssertEqual("\(query)", "SELECT uuid AS unique_id, id AS user_id, name AS username FROM users")
     }
+    
+    // DISTINCT
+    
+    func testSELECT_DISTINCT() {
+        let query = SQL
+            .SELECT_DISTINCT(\.name, FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT DISTINCT name FROM users")
+        XCTAssertEqual("\(query)", "SELECT DISTINCT name FROM users")
+    }
+    
+    func testMultipleSELECT_DISTINCT() {
+        let query = SQL
+            .SELECT_DISTINCT(\.id, \.name, FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT DISTINCT id, name FROM users")
+        XCTAssertEqual("\(query)", "SELECT DISTINCT id, name FROM users")
+    }
+    
+    func testSELECT_DISTINCTwithAliase() {
+        let query = SQL
+            .SELECT_DISTINCT((\.name, AS: "username"), FROM: users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT DISTINCT name AS username FROM users")
+        XCTAssertEqual("\(query)", "SELECT DISTINCT name AS username FROM users")
+    }
 }
     
