@@ -60,7 +60,7 @@ public struct TableColumnProperty<T, Value> where T: Table {
     var name: String
     public var wrappedValue: TableColumn<T, Value>
     
-    init(name: String) {
+    public init(name: String) {
         self.wrappedValue = TableColumn<T, Value>(name: name)
         self.name = name
     }

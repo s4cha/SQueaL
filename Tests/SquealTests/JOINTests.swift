@@ -70,7 +70,33 @@ final class JOINTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT name AS username FROM users FULL OUTER JOIN orders ON users.uuid = orders.user_id")
     }
     
+    
+    // Common
+    
+    func testCommon1() {
+        
+        let employees = Employees()
+        let departments = Departments()
+        
+        let query = SQL
+            .SELECT(employees.name, departments.name) // TODO (AS department)
+            .FROM(employees)
+            .INNER_JOIN(departments, ON: employees.department_id == departments.id)
+        XCTAssertEqual("\(query)", "SELECT employees.name, departments.name FROM employees INNER JOIN departments ON employees.department_id = departments.id")
+    }
+}
 
+struct Employees: Table {
+    static let schema = "employees"
+    @Column<String>(name: "name") var name
+    @Column<UUID>(name: "department_id") var department_id
+}
+
+struct Departments: Table {
+    static let schema = "departments"
+    
+    @Column<UUID>(name: "id") var id
+    @Column<String>(name: "name") var name
 }
 
 //

@@ -31,9 +31,46 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT COUNT(*) FROM users")
     }
     
+    func testSelectHeterogeneousList1() {
+        let query = SQL
+            .SELECT(users.name)
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT users.name FROM users")
+        XCTAssertEqual("\(query)", "SELECT users.name FROM users")
+    }
+    
+    func testSelectHeterogeneousList2() {
+        let query = SQL
+            .SELECT(users.id, users.name)
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT users.id, users.name FROM users")
+        XCTAssertEqual("\(query)", "SELECT users.id, users.name FROM users")
+    }
+    
+    func testSelectHeterogeneousList3() {
+        let query = SQL
+            .SELECT(users.id, COUNT(users.name))
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT users.id, COUNT(users.name) FROM users")
+        XCTAssertEqual("\(query)", "SELECT users.id, COUNT(users.name) FROM users")
+    }
+    
+    func testSelectHeterogeneousList4() {
+        let query = SQL
+            .SELECT(COUNT(*), COUNT(users.name))
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT COUNT(*), COUNT(users.name) FROM users")
+        XCTAssertEqual("\(query)", "SELECT COUNT(*), COUNT(users.name) FROM users")
+    }
+    
+    
     func testSelectCountNameShortKeyPath() {
         let query = SQL
-            .SELECT(COUNT(\.name), FROM: users)
+            .SELECT(COUNT(\UsersTable.name), FROM: users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT COUNT(name) FROM users")
         XCTAssertEqual("\(query)", "SELECT COUNT(name) FROM users")
@@ -47,13 +84,40 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT id FROM users")
     }
     
-//    func testSelect1Column() {
+    func testSelectWithSingleField() {
+        let query = SQL
+            .SELECT(\UsersTable.id)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id")
+        XCTAssertEqual("\(query)", "SELECT id")
+    }
+    
+    func testSelectWithSingleFieldAndFROM() {
+        let query = SQL
+            .SELECT(\.id)
+            
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id FROM users")
+        XCTAssertEqual("\(query)", "SELECT id FROM users")
+    }
+    
+    func testSelectCountWithSingleField() {
+        let query = SQL
+            .SELECT(COUNT(\UsersTable.id))
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT COUNT(id)")
+        XCTAssertEqual("\(query)", "SELECT COUNT(id)")
+    }
+    
+    // TODO
+//    func testSelectCountWithSingleFieldAndFROM() {
 //        let query = SQL
-//            .SELECT(\.id)
+//            .SELECT(COUNT(\.id))
 //            .FROM(users)
 //        XCTAssertEqual(query.parameters.count, 0)
-//        XCTAssertEqual(query.query, "SELECT id FROM users")
-//        XCTAssertEqual("\(query)", "SELECT id FROM users")
+//        XCTAssertEqual(query.query, "SELECT COUNT(id) FROM users")
+//        XCTAssertEqual("\(query)", "SELECT COUNT(id) FROM users")
 //    }
 
     func testSelect2Columns() {

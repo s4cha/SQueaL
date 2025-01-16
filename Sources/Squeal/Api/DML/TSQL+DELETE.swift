@@ -7,14 +7,14 @@
 
 import Foundation
 
-public extension TypedSQLQuery {
-    func DELETE() -> TypedSelectSQLQuery<T> {
-        return TypedSelectSQLQuery(for: table, query: query + "DELETE", parameters: [])
-    }
-}
+//public extension TypedSQLQuery {
+//    func DELETE() -> TypedSelectSQLQuery<T> {
+//        return TypedSelectSQLQuery(for: table, query: query + "DELETE", parameters: [])
+//    }
+//}
 
 public extension SQL {
-    static func DELETE<T>(FROM table: T) -> TypedFromSQLQuery<T> {
-        return TypedSQLQuery(for: table).DELETE().FROM(table)
+    static func DELETE_FROM<T>(_ table: T) -> TypedFromSQLQuery<T> {
+        return TypedSelectSQLQuery(for: table, query: "DELETE", parameters: []).FROM(table)
     }
 }

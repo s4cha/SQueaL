@@ -22,18 +22,28 @@ public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, JoinableQuery, WHEREab
 }
 
 public protocol FROMableQuery: TableSQLQuery {
-    func FROM(_ tableName: String) -> TypedFromSQLQuery<T>
     func FROM(_ table: T) -> TypedFromSQLQuery<T>
 }
 
 public extension FROMableQuery {
-
-    func FROM(_ tableName: String) -> TypedFromSQLQuery<T> {
-        let q = query + " FROM \(tableName)"
-        return TypedFromSQLQuery(for: table, query: q, parameters: [])
-    }
     
     func FROM(_ table: T) -> TypedFromSQLQuery<T> {
+        if query.contains("FROM") {
+            return TypedFromSQLQuery(for: table, query: query, parameters: [])
+        }
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
+    }
+}
+
+
+public protocol FROMableSQLQuery: SQLQuery {
+    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T>
+}
+
+
+public extension FROMableSQLQuery {
+    
+    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T> {
         if query.contains("FROM") {
             return TypedFromSQLQuery(for: table, query: query, parameters: [])
         }

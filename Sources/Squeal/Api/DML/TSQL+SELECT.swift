@@ -9,6 +9,7 @@ import Foundation
 
 public struct TypedSelectSQLQuery<T: Table>: TableSQLQuery, FROMableQuery {
     
+    
     public let table: T
     public var query: String
     public var parameters: [(any Encodable)?]
@@ -20,16 +21,65 @@ public struct TypedSelectSQLQuery<T: Table>: TableSQLQuery, FROMableQuery {
     }
 }
 
+public struct SelectSQLQuery: SQLQuery, FROMableSQLQuery {
+    
+    public var query: String
+    public var parameters: [(any Encodable)?]
+        
+    init(query: String, parameters: [(any Encodable)?]) {
+        self.query = query
+        self.parameters = parameters
+    }
+}
+
+
 
 public extension SQL {
+    
+    static func SELECT(_ function: (Int, Int) -> Int) -> SelectSQLQuery {
+        return SelectSQLQuery(query: "SELECT *", parameters: [])
+    }
+       
+    static func SELECT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T> {
+        let table = T()
+        var columnNames = [String]()
+        for column in repeat each columns {
+            columnNames.append(table[keyPath: column].name)
+        }
+        return TypedSelectSQLQuery(for: table, query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
+    }
+    
+    
+//    static func SELECT<each X, each U>(_ columns: repeat TableColumn<each X, each U>) -> SelectSQLQuery {
+//        var columnNames = [String]()
+//        for column in repeat each columns {
+//            columnNames.append("\(column.tableName).\(column.name)")
+//        }
+//        return SelectSQLQuery(query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
+//    }
+    
+    static func SELECT<each Z: SelectField>(_ fields: repeat each Z) -> SelectSQLQuery {
+        var fieldNames = [String]()
+        for field in repeat each fields {
+            fieldNames.append(field.toString())
+        }
+        return SelectSQLQuery(query: "SELECT \(fieldNames.joined(separator: ", "))", parameters: [])
+    }
+
+    
+    
+    
+
+    
     
     static func SELECT<T>(_ function: (Int, Int) -> Int, FROM table: T) -> TypedFromSQLQuery<T> {
         return TypedSelectSQLQuery(for: table, query: "SELECT *", parameters: [])
             .FROM(table)
     }
+
     
-    static func SELECT<T>(_ value: any SelectValue<T>, FROM table: T) -> TypedFromSQLQuery<T> {
-        return TypedSelectSQLQuery(for: table, query: "SELECT \(value.string)", parameters: [])
+    static func SELECT<T>(_ field: SelectField, FROM table: T) -> TypedFromSQLQuery<T> {
+        return TypedSelectSQLQuery(for: table, query: "SELECT \(field.toString())", parameters: [])
             .FROM(table)
     }
 
@@ -71,33 +121,39 @@ public extension SQL {
 }
 
 
-public protocol SelectValue<T> {
-    associatedtype T
-    var string: String { get }
+
+public protocol SelectField {
+    func toString() -> String
 }
 
 
-public struct COUNTSelectValue<T>: SelectValue {
-    public let string: String = "COUNT(*)"
-}
-
-public struct COUNTColumnSelectValue<T>: SelectValue {
-    public let string: String
-}
-
-public struct COUNT<T>: SelectValue {
+public struct COUNT {
     public let string: String
     
     public init(_ function: (Int, Int) -> Int) {
         self.string =  "COUNT(*)"
     }
     
-    public init<Y>(_ column: TableColumn<T, Y>) {
-        self.string = "COUNT(\(column.name))"
+    public init<T, Y>(_ column: TableColumn<T, Y>) {
+        self.string = "COUNT(\(column.tableName).\(column.name))"
     }
     
-    public init<Y>(_ column: KeyPath<T, TableColumn<T, Y>>) where T: Table {
+    public init<T, Y>(_ column: KeyPath<T, TableColumn<T, Y>>) where T: Table {
         let table = T()
         self.string = "COUNT(\(table[keyPath: column].name))"
     }
 }
+
+extension TableColumn: SelectField {
+    public func toString() -> String {
+        return "\(tableName).\(name)"
+    }
+}
+
+
+extension COUNT: SelectField {
+    public func toString() -> String {
+        return string
+    }
+}
+
