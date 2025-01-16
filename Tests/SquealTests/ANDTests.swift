@@ -18,7 +18,8 @@ final class ANDTests: XCTestCase {
     
     func testWHEREANDEqualSign() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id == 1)
             .AND(\.name == "Jack")
         XCTAssertEqual(query.parameters.count, 2)
@@ -30,7 +31,8 @@ final class ANDTests: XCTestCase {
     
     func testAndTypeSafe() throws {
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
         XCTAssertEqual(query.parameters.count, 2)

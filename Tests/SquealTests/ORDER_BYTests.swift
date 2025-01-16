@@ -16,7 +16,8 @@ final class ORDER_BYTests: XCTestCase {
     
     func testORDER_BYafterSELECT() throws {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
             .ORDER_BY(\.name)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users ORDER BY name")
@@ -25,7 +26,8 @@ final class ORDER_BYTests: XCTestCase {
     
     func testORDER_BY_ASC_afterSELECT() throws {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
             .ORDER_BY(\.name, .ASC)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users ORDER BY name ASC")
@@ -34,7 +36,8 @@ final class ORDER_BYTests: XCTestCase {
     
     func testMultipleORDER_BY_afterSELECT() throws {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
             .ORDER_BY((\.id, .ASC), (\.name, .DESC))
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users ORDER BY id ASC, name DESC")
@@ -43,7 +46,8 @@ final class ORDER_BYTests: XCTestCase {
     
     func testORDER_BY_ASC2_afterSELECT() throws {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
             .ORDER_BY(\.name).ASC
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users ORDER BY name ASC")
@@ -52,7 +56,8 @@ final class ORDER_BYTests: XCTestCase {
     
     func testORDER_BY_DESC_afterSELECT() throws {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
             .ORDER_BY(\.name, .DESC)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users ORDER BY name DESC")
@@ -61,7 +66,8 @@ final class ORDER_BYTests: XCTestCase {
     
     func testORDER_BY_DESC2_afterSELECT() throws {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
             .ORDER_BY(\.name).DESC
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users ORDER BY name DESC")
@@ -70,7 +76,8 @@ final class ORDER_BYTests: XCTestCase {
     
     func testORDER_BYafterWHERE() throws {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
             .WHERE(\.id > 12)
             .ORDER_BY(\.name)
         XCTAssertEqual(query.parameters.count, 1)

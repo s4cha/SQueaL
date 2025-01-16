@@ -28,9 +28,6 @@ public protocol FROMableQuery: TableSQLQuery {
 public extension FROMableQuery {
     
     func FROM(_ table: T) -> TypedFromSQLQuery<T> {
-        if query.contains("FROM") {
-            return TypedFromSQLQuery(for: table, query: query, parameters: [])
-        }
         return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
     }
 }
@@ -44,9 +41,6 @@ public protocol FROMableSQLQuery: SQLQuery {
 public extension FROMableSQLQuery {
     
     func FROM<T>(_ table: T) -> TypedFromSQLQuery<T> {
-        if query.contains("FROM") {
-            return TypedFromSQLQuery(for: table, query: query, parameters: [])
-        }
         return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
     }
 }

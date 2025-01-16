@@ -17,7 +17,8 @@ final class SELECTTests: XCTestCase {
     
     func testSelectAll2() {
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT * FROM users")
         XCTAssertEqual("\(query)", "SELECT * FROM users")
@@ -25,7 +26,8 @@ final class SELECTTests: XCTestCase {
     
     func testSelectCount() {
         let query = SQL
-            .SELECT(COUNT(*), FROM: users)
+            .SELECT(COUNT(*))
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT COUNT(*) FROM users")
         XCTAssertEqual("\(query)", "SELECT COUNT(*) FROM users")
@@ -67,10 +69,10 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT COUNT(*), COUNT(users.name) FROM users")
     }
     
-    
     func testSelectCountNameShortKeyPath() {
         let query = SQL
-            .SELECT(COUNT(\UsersTable.name), FROM: users)
+            .SELECT(COUNT(\UsersTable.name))
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT COUNT(name) FROM users")
         XCTAssertEqual("\(query)", "SELECT COUNT(name) FROM users")
@@ -78,7 +80,8 @@ final class SELECTTests: XCTestCase {
     
     func testSelect1Column() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id FROM users")
         XCTAssertEqual("\(query)", "SELECT id FROM users")
@@ -110,19 +113,19 @@ final class SELECTTests: XCTestCase {
         XCTAssertEqual("\(query)", "SELECT COUNT(id)")
     }
     
-    // TODO
-//    func testSelectCountWithSingleFieldAndFROM() {
-//        let query = SQL
-//            .SELECT(COUNT(\.id))
-//            .FROM(users)
-//        XCTAssertEqual(query.parameters.count, 0)
-//        XCTAssertEqual(query.query, "SELECT COUNT(id) FROM users")
-//        XCTAssertEqual("\(query)", "SELECT COUNT(id) FROM users")
-//    }
+    func testSelectCountWithSingleFieldAndFROM() {
+        let query = TSQL<UsersTable>
+            .SELECT(COUNT(\UsersTable.id))
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT COUNT(id) FROM users")
+        XCTAssertEqual("\(query)", "SELECT COUNT(id) FROM users")
+    }
 
     func testSelect2Columns() {
         let query = SQL
-            .SELECT(\.id, \.name, FROM: users)
+            .SELECT(\.id, \.name)
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id, name FROM users")
         XCTAssertEqual("\(query)", "SELECT id, name FROM users")
@@ -130,7 +133,17 @@ final class SELECTTests: XCTestCase {
     
     func testSelectVariadicColumns() {
         let query = SQL
-            .SELECT(\.uuid, \.id, \.name, FROM: users)
+            .SELECT(\.uuid, \.id, \.name)
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
+        XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
+    }
+    
+    func testSelectVariadicColumnsTyped() {
+        let query = TSQL
+            .SELECT(\.uuid, \.id, \.name)
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT uuid, id, name FROM users")
         XCTAssertEqual("\(query)", "SELECT uuid, id, name FROM users")
@@ -138,29 +151,43 @@ final class SELECTTests: XCTestCase {
 
     func testSelectTypesShortKeypath() {
         let query = SQL
-            .SELECT(\.name, FROM: users)
+            .SELECT(\.name)
+            .FROM(users)
         XCTAssert(query.parameters.isEmpty)
         XCTAssertEqual(query.query, "SELECT name FROM users")
         XCTAssertEqual("\(query)", "SELECT name FROM users")
     }
     
-    // AS
+    // Aliases
+    
+    // Cannot convert value of type 'any WritableKeyPath<UsersTable, TableColumn<UsersTable, Int>> & Sendable' to expected argument type '(KeyPath<String, TableColumn<String, _>>, AS: String)'
+
+    
     func testSelectAS() {
         let query = SQL
-            .SELECT((\.id, AS: "user_id"), FROM: users)
+            .SELECT((\UsersTable.id, AS: "user_id"))
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT id AS user_id FROM users")
+        XCTAssertEqual("\(query)", "SELECT id AS user_id FROM users")
+    }
+    
+    func testSelectASTyped() {
+        let query = TSQL
+            .SELECT((\.id, AS: "user_id"))
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT id AS user_id FROM users")
         XCTAssertEqual("\(query)", "SELECT id AS user_id FROM users")
     }
 
     func testSelectMultipleAS() {
-        let query = SQL
+        let query = TSQL
             .SELECT(
                 (\.uuid, AS: "unique_id"),
                 (\.id, AS: "user_id"),
-                (\.name, AS: "username"),
-                FROM: users)
-        
+                (\.name, AS: "username"))
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT uuid AS unique_id, id AS user_id, name AS username FROM users")
         XCTAssertEqual("\(query)", "SELECT uuid AS unique_id, id AS user_id, name AS username FROM users")
@@ -170,7 +197,8 @@ final class SELECTTests: XCTestCase {
     
     func testSELECT_DISTINCT() {
         let query = SQL
-            .SELECT_DISTINCT(\.name, FROM: users)
+            .SELECT_DISTINCT(\.name)
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT DISTINCT name FROM users")
         XCTAssertEqual("\(query)", "SELECT DISTINCT name FROM users")
@@ -178,15 +206,35 @@ final class SELECTTests: XCTestCase {
     
     func testMultipleSELECT_DISTINCT() {
         let query = SQL
-            .SELECT_DISTINCT(\.id, \.name, FROM: users)
+            .SELECT_DISTINCT(\.id, \.name)
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT DISTINCT id, name FROM users")
         XCTAssertEqual("\(query)", "SELECT DISTINCT id, name FROM users")
     }
     
+    func testMultipleSELECT_DISTINCTTyped() {
+        let query = TSQL
+            .SELECT_DISTINCT(\.id, \.name)
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT DISTINCT id, name FROM users")
+        XCTAssertEqual("\(query)", "SELECT DISTINCT id, name FROM users")
+    }
+   
     func testSELECT_DISTINCTwithAliase() {
         let query = SQL
-            .SELECT_DISTINCT((\.name, AS: "username"), FROM: users)
+            .SELECT_DISTINCT((\UsersTable.name, AS: "username"))
+            .FROM(users)
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT DISTINCT name AS username FROM users")
+        XCTAssertEqual("\(query)", "SELECT DISTINCT name AS username FROM users")
+    }
+    
+    func testSELECT_DISTINCTwithAliaseTyped() {
+        let query = TSQL
+            .SELECT_DISTINCT((\.name, AS: "username"))
+            .FROM(users)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT DISTINCT name AS username FROM users")
         XCTAssertEqual("\(query)", "SELECT DISTINCT name AS username FROM users")

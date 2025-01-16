@@ -16,8 +16,9 @@ final class JOINTests: XCTestCase {
     let orders = OrdersTable()
     
     func testJOIN() {
-        let query = SQL
-            .SELECT((\.name, AS: "username"), FROM: users)
+        let query = TSQL
+            .SELECT((\.name, AS: "username"))
+            .FROM(users)
             .JOIN(orders, ON: users.uuid == orders.user_id)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT name AS username FROM users JOIN orders ON users.uuid = orders.user_id")
@@ -25,8 +26,9 @@ final class JOINTests: XCTestCase {
     }
     
     func testJOINReverseON() {
-        let query = SQL
-            .SELECT((\.name, AS: "username"), FROM: users)
+        let query = TSQL
+            .SELECT((\.name, AS: "username"))
+            .FROM(users)
             .JOIN(orders, ON: orders.user_id == users.uuid)
             
         XCTAssertEqual(query.parameters.count, 0)
@@ -35,8 +37,9 @@ final class JOINTests: XCTestCase {
     }
     
     func testINNER_JOIN() {
-        let query = SQL
-            .SELECT((\.name, AS: "username"), FROM: users)
+        let query = TSQL
+            .SELECT((\.name, AS: "username"))
+            .FROM(users)
             .INNER_JOIN(orders, ON: users.uuid == orders.user_id)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT name AS username FROM users INNER JOIN orders ON users.uuid = orders.user_id")
@@ -44,8 +47,9 @@ final class JOINTests: XCTestCase {
     }
     
     func testLEFT_JOIN() {
-        let query = SQL
-            .SELECT((\.name, AS: "username"), FROM: users)
+        let query = TSQL
+            .SELECT((\.name, AS: "username"))
+            .FROM(users)
             .LEFT_JOIN(orders, ON: users.uuid == orders.user_id)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT name AS username FROM users LEFT JOIN orders ON users.uuid = orders.user_id")
@@ -53,8 +57,9 @@ final class JOINTests: XCTestCase {
     }
     
     func testRIGHT_JOIN() {
-        let query = SQL
-            .SELECT((\.name, AS: "username"), FROM: users)
+        let query = TSQL
+            .SELECT((\.name, AS: "username"))
+            .FROM(users)
             .RIGHT_JOIN(orders, ON: users.uuid == orders.user_id)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT name AS username FROM users RIGHT JOIN orders ON users.uuid = orders.user_id")
@@ -62,8 +67,9 @@ final class JOINTests: XCTestCase {
     }
     
     func testFULL_OUTER_JOIN() {
-        let query = SQL
-            .SELECT((\.name, AS: "username"), FROM: users)
+        let query = TSQL
+            .SELECT((\.name, AS: "username"))
+            .FROM(users)
             .FULL_OUTER_JOIN(orders, ON: users.uuid == orders.user_id)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT name AS username FROM users FULL OUTER JOIN orders ON users.uuid = orders.user_id")

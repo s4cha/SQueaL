@@ -24,10 +24,4 @@ public struct TypedSQLQuery<T: Table>: TableSQLQuery {
         self.query = query
         self.parameters = parameters
     }
-    
-    init(for table: T) {
-        self.table = table
-        self.query = ""
-        self.parameters = []
-    }
 }

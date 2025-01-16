@@ -60,7 +60,6 @@ public protocol WHEREableQuery: TableSQLQuery {
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T>
-    
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U>
 }
 

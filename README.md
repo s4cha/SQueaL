@@ -16,7 +16,8 @@ let query = """
 Using Squeal
 ```swift
 let query = SQL
-    .SELECT(\.email, FROM: users)
+    .SELECT(\.email)
+    .FROM(users)
     .WHERE(\.id == 1)
     .AND(\.name == "jack")
     .LIMIT(1)

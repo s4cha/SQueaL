@@ -17,7 +17,8 @@ final class LimitTests: XCTestCase {
         
     func testLimitAfterFROM() throws {
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
             .LIMIT(17)
         XCTAssertEqual(query.parameters.count, 0)
         XCTAssertEqual(query.query, "SELECT * FROM users LIMIT 17")
@@ -26,7 +27,8 @@ final class LimitTests: XCTestCase {
     
     func testLimitAfterWHERE() throws {
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
             .WHERE(\.id == 34)
             .LIMIT(17)
         XCTAssertEqual(query.parameters.count, 1)
@@ -36,7 +38,8 @@ final class LimitTests: XCTestCase {
     
     func testLimitAfterAND() throws {
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
             .WHERE(\.id == 1)
             .AND(\UsersTable.name == "jack")
             .LIMIT(1)
@@ -49,7 +52,8 @@ final class LimitTests: XCTestCase {
     
     func testLimitAfterGROUP_BY() throws {
         let query = SQL
-            .SELECT(\.name, FROM: users)
+            .SELECT(\.name)
+            .FROM(users)
             .WHERE(\.id == 1)
             .AND(\.name == "jack")
             .GROUP_BY(\.name)

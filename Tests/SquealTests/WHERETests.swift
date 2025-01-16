@@ -17,7 +17,8 @@ final class WHERETests: XCTestCase {
     
     func testWhereInt() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id == 1)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? Int == 1)
@@ -27,7 +28,8 @@ final class WHERETests: XCTestCase {
     
     func testWhereString() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.name == "Ada")
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? String == "Ada")
@@ -37,7 +39,8 @@ final class WHERETests: XCTestCase {
     
     func testWHEREEqual() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id == 1)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? Int == 1)
@@ -47,7 +50,8 @@ final class WHERETests: XCTestCase {
     
     func testWHERESuperior() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id > 42)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? Int == 42)
@@ -57,7 +61,8 @@ final class WHERETests: XCTestCase {
     
     func testWHERESuperiorOrEqual() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id >= 42)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? Int == 42)
@@ -67,7 +72,8 @@ final class WHERETests: XCTestCase {
     
     func testWHEREInferior() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id < 65)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? Int == 65)
@@ -77,7 +83,8 @@ final class WHERETests: XCTestCase {
     
     func testWHEREInferiorOrEqual() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id <= 99)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? Int == 99)
@@ -87,7 +94,8 @@ final class WHERETests: XCTestCase {
     
     func testWhereInList() {
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
             .WHERE(\.name, IN: ["Alice", "Bob", "Charlie"])
         
         XCTAssertEqual(query.parameters.count, 3)
@@ -100,7 +108,8 @@ final class WHERETests: XCTestCase {
     
     func testWhereTypeSafeString() throws {
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
             .WHERE(\.name == "Alice")
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? String == "Alice")
@@ -110,7 +119,8 @@ final class WHERETests: XCTestCase {
     
     func testWHERELike() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.name, LIKE: "%ob")
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? String == "%ob")
@@ -120,7 +130,8 @@ final class WHERETests: XCTestCase {
     
     func testWHERE_IS_NULL() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.name)
             .IS_NULL
         
@@ -131,7 +142,8 @@ final class WHERETests: XCTestCase {
     
     func testWHERE_IS_NOT_NULL() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.name)
             .IS_NOT_NULL
         
@@ -143,7 +155,8 @@ final class WHERETests: XCTestCase {
     func testWhereTypeSafeUUID() throws {
         let uuid = UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!
         let query = SQL
-            .SELECT(*, FROM: users)
+            .SELECT(*)
+            .FROM(users)
             .WHERE(\.uuid == uuid)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? UUID == UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!)
@@ -155,7 +168,8 @@ final class WHERETests: XCTestCase {
     
     func testWHEREANDEqualSign() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id == 1)
             .AND(\.name == "Jack")
         XCTAssertEqual(query.parameters.count, 2)
@@ -169,7 +183,8 @@ final class WHERETests: XCTestCase {
     
     func testWHEREOREqualSign() {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id == 1)
             .OR(\.name == "john")
         XCTAssertEqual(query.parameters.count, 2)

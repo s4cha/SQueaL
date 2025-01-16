@@ -16,7 +16,7 @@ final class DELETETests: XCTestCase {
     
     func testDelete() {
         let query = SQL
-            .DELETE(FROM: users)
+            .DELETE_FROM(users)
             .WHERE(\.id == 243)
         XCTAssertEqual(query.parameters.count, 1)
         XCTAssert(query.parameters[0] as? Int == 243)

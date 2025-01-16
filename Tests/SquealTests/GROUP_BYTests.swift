@@ -16,7 +16,8 @@ final class GROUP_BYTests: XCTestCase {
     
     func testGROUP_BYafterSELECT() throws {
         let query = SQL
-            .SELECT(\.name, FROM: users)
+            .SELECT(\.name)
+            .FROM(users)
             .GROUP_BY(\.name)
         
         XCTAssertEqual(query.parameters.count, 0)
@@ -26,7 +27,8 @@ final class GROUP_BYTests: XCTestCase {
     
     func testGROUP_BYafterWHERE() throws {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id == 12)
             .GROUP_BY(\.id)
 
@@ -38,7 +40,8 @@ final class GROUP_BYTests: XCTestCase {
     
     func testGROUP_BYafterAND() throws {
         let query = SQL
-            .SELECT(\.id, FROM: users)
+            .SELECT(\.id)
+            .FROM(users)
             .WHERE(\.id == 12)
             .AND(\.name == "jack")
             .GROUP_BY(\.id)

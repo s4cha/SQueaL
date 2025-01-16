@@ -14,61 +14,16 @@ final class HAVINGTests: XCTestCase {
     
     let users = UsersTable()
     
-//    func testGROUP_BYafterSELECT() throws {
-//        let query = SQL
-//            .SELECT(\.name, FROM: users)
-//            .GROUP_BY(\.name)
-//            .HAVING("COUNT(*) > 500")
-//            
-//    
-//        XCTAssertEqual(query.parameters.count, 0)
-//        XCTAssertEqual(query.query, "SELECT name FROM users GROUP BY name")
-//        XCTAssertEqual("\(query)", "SELECT name FROM users GROUP BY name")
-//    }
-//    
-    func testGROUP_BYafterWHERE() throws {
+    func testHavingafterSELECT() throws {
         let query = SQL
-            .SELECT(\.id, FROM: users)
-            .WHERE(\.id == 12)
-            .GROUP_BY(\.id)
-
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 12)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1 GROUP BY id")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 12 GROUP BY id")
-    }
-    
-    func testGROUP_BYafterAND() throws {
-        let query = SQL
-            .SELECT(\.id, FROM: users)
-            .WHERE(\.id == 12)
-            .AND(\.name == "jack")
-            .GROUP_BY(\.id)
-    
-        XCTAssertEqual(query.parameters.count, 2)
-        XCTAssert(query.parameters[0] as? Int == 12)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1 AND name = $2 GROUP BY id")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 12 AND name = 'jack' GROUP BY id")
+            .SELECT(\.name)
+            .FROM(users)
+            .GROUP_BY(\.name)
+            .HAVING("COUNT(*) > 500")
+            
+        XCTAssertEqual(query.parameters.count, 0)
+        XCTAssertEqual(query.query, "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 500")
+        XCTAssertEqual("\(query)", "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 500")
     }
 }
 
-struct Foo {
-    
-    func bar() {
-        let test = [1, 2 ,3]
-        
-//        let sum1 = test.reduce(0) { partialResult, v in
-//
-//        }
-//        let sum = COUNT(*)
-        
-        
-    }
-    
-
-}
-
-
-
-
-    // TODO select all
