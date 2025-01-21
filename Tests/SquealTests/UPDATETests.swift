@@ -16,12 +16,27 @@ final class UPDATETests: XCTestCase {
     
     func testUpdate() {
         let query = SQL
-            .UPDATE(users, SET: \.name, value: "john")
+            .UPDATE(users, SET: (\.name, "john"))
             .WHERE(\.id == 12)
         XCTAssertEqual(query.parameters.count, 2)
         XCTAssert(query.parameters[0] as? String == "john")
         XCTAssert(query.parameters[1] as? Int == 12)
         XCTAssertEqual(query.query, "UPDATE users SET name = $1 WHERE id = $2")
         XCTAssertEqual("\(query)", "UPDATE users SET name = 'john' WHERE id = 12")
+    }
+    
+    func testMultipleUpdatesTyped() {
+        let query = SQL
+            .UPDATE(users,
+                    SET:
+                        (\.name, "john"),
+                        (\.age, 42)
+            )
+            .WHERE(\.id == 12)
+        XCTAssertEqual(query.parameters.count, 3)
+        XCTAssert(query.parameters[0] as? String == "john")
+        XCTAssert(query.parameters[1] as? Int == 42)
+        XCTAssertEqual(query.query, "UPDATE users SET name = $1, age = $2 WHERE id = $3")
+        XCTAssertEqual("\(query)", "UPDATE users SET name = 'john', age = 42 WHERE id = 12")
     }
 }

@@ -95,6 +95,7 @@ struct UsersTable: Table {
     @Column<UUID>(name: "uuid") var uuid
     @Column<Int>(name: "id") var id
     @Column<String>(name: "name") var name
+    @Column<Int>(name: "age") var age
 }
 
 struct TradesTable: Table {
