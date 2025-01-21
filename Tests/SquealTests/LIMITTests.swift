@@ -1,56 +1,56 @@
 //
-//  TypedQueryTests.swift
-//  
+//  LimitTests.swift
+//
 //
 //  Created by Sacha Durand Saint Omer on 28/03/2024.
 //
 
-import XCTest
-@testable import Squeal
+import Testing
+import Squeal
 
 
-@available(macOS 14.0.0, *)
-final class LimitTests: XCTestCase {
-    
-    let users = UsersTable()
-    let trades = TradesTable()
+struct LimitTests {
         
-    func testLimitAfterFROM() throws {
+    @Test
+    func LIMITAfterFROM() {
         let query = SQL
             .SELECT(*)
             .FROM(users)
             .LIMIT(17)
-        XCTAssertEqual(query.parameters.count, 0)
-        XCTAssertEqual(query.query, "SELECT * FROM users LIMIT 17")
-        XCTAssertEqual("\(query)", "SELECT * FROM users LIMIT 17")
+        #expect(query.parameters.count == 0)
+        #expect(query.query == "SELECT * FROM users LIMIT 17")
+        #expect("\(query)" == "SELECT * FROM users LIMIT 17")
     }
     
-    func testLimitAfterWHERE() throws {
+    @Test
+    func LIMITAfterWHERE() {
         let query = SQL
             .SELECT(*)
             .FROM(users)
             .WHERE(\.id == 34)
             .LIMIT(17)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1 LIMIT 17")
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 34 LIMIT 17")
+        #expect(query.parameters.count == 1)
+        #expect(query.query == "SELECT * FROM users WHERE id = $1 LIMIT 17")
+        #expect("\(query)" == "SELECT * FROM users WHERE id = 34 LIMIT 17")
     }
     
-    func testLimitAfterAND() throws {
+    @Test
+    func LIMITAfterAND() {
         let query = SQL
             .SELECT(*)
             .FROM(users)
             .WHERE(\.id == 1)
             .AND(\UsersTable.name == "jack")
             .LIMIT(1)
-        XCTAssertEqual(query.parameters.count, 2)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssert(query.parameters[1] as? String == "jack")
-        XCTAssertEqual(query.query, "SELECT * FROM users WHERE id = $1 AND name = $2 LIMIT 1")
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 1")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[0] as? Int == 1)
+        #expect(query.parameters[1] as? String == "jack")
+        #expect(query.query == "SELECT * FROM users WHERE id = $1 AND name = $2 LIMIT 1")
+        #expect("\(query)" == "SELECT * FROM users WHERE id = 1 AND name = 'jack' LIMIT 1")
     }
     
-    func testLimitAfterGROUP_BY() throws {
+    @Test
+    func LIMITAfterGROUP_BY() {
         let query = SQL
             .SELECT(\.name)
             .FROM(users)
@@ -58,12 +58,11 @@ final class LimitTests: XCTestCase {
             .AND(\.name == "jack")
             .GROUP_BY(\.name)
             .LIMIT(3)
-        
-        XCTAssertEqual(query.parameters.count, 2)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssert(query.parameters[1] as? String == "jack")
-        XCTAssertEqual(query.query, "SELECT name FROM users WHERE id = $1 AND name = $2 GROUP BY name LIMIT 3")
-        XCTAssertEqual("\(query)", "SELECT name FROM users WHERE id = 1 AND name = 'jack' GROUP BY name LIMIT 3")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[0] as? Int == 1)
+        #expect(query.parameters[1] as? String == "jack")
+        #expect(query.query == "SELECT name FROM users WHERE id = $1 AND name = $2 GROUP BY name LIMIT 3")
+        #expect("\(query)" == "SELECT name FROM users WHERE id = 1 AND name = 'jack' GROUP BY name LIMIT 3")
     }
 }
 

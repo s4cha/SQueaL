@@ -1,196 +1,205 @@
 //
-//  TypedQueryTests.swift
-//  
+//  WHERETests.swift
+//
 //
 //  Created by Sacha Durand Saint Omer on 28/03/2024.
 //
 
-import XCTest
+import Testing
 @testable import Squeal
+import Foundation
 
 
-@available(macOS 14.0.0, *)
-final class WHERETests: XCTestCase {
+struct WHERETests {
     
-    let users = UsersTable()
-    let trades = TradesTable()
-    
-    func testWhereInt() {
+    @Test
+    func WHEREInt() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id == 1)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 1)
+        #expect(query.query == "SELECT id FROM users WHERE id = $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE id = 1")
     }
     
-    func testWhereString() {
+    @Test
+    func WHEREString() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.name == "Ada")
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? String == "Ada")
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name = $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name = 'Ada'")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? String == "Ada")
+        #expect(query.query == "SELECT id FROM users WHERE name = $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE name = 'Ada'")
     }
     
-    func testWHEREEqual() {
+    @Test
+    func WHEREEqual() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id == 1)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 1)
+        #expect(query.query == "SELECT id FROM users WHERE id = $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE id = 1")
     }
     
-    func testWHERESuperior() {
+    @Test
+    func WHERESuperior() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id > 42)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 42)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id > $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id > 42")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 42)
+        #expect(query.query == "SELECT id FROM users WHERE id > $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE id > 42")
     }
     
-    func testWHERESuperiorOrEqual() {
+    @Test
+    func WHERESuperiorOrEqual() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id >= 42)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 42)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id >= $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id >= 42")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 42)
+        #expect(query.query == "SELECT id FROM users WHERE id >= $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE id >= 42")
     }
     
-    func testWHEREInferior() {
+    @Test
+    func WHEREInferior() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id < 65)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 65)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id < $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id < 65")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 65)
+        #expect(query.query == "SELECT id FROM users WHERE id < $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE id < 65")
     }
     
-    func testWHEREInferiorOrEqual() {
+    @Test
+    func WHEREInferiorOrEqual() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id <= 99)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 99)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id <= $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id <= 99")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 99)
+        #expect(query.query == "SELECT id FROM users WHERE id <= $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE id <= 99")
     }
     
-    func testWhereInList() {
+    @Test
+    func WHEREInList() {
         let query = SQL
             .SELECT(*)
             .FROM(users)
             .WHERE(\.name, IN: ["Alice", "Bob", "Charlie"])
-        
-        XCTAssertEqual(query.parameters.count, 3)
-        XCTAssert(query.parameters[0] as? String == "Alice")
-        XCTAssert(query.parameters[1] as? String == "Bob")
-        XCTAssert(query.parameters[2] as? String == "Charlie")
-        XCTAssertEqual(query.query, "SELECT * FROM users WHERE name IN ($1, $2, $3)")
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE name IN ('Alice', 'Bob', 'Charlie')")
+        #expect(query.parameters.count == 3)
+        #expect(query.parameters[0] as? String == "Alice")
+        #expect(query.parameters[1] as? String == "Bob")
+        #expect(query.parameters[2] as? String == "Charlie")
+        #expect(query.query == "SELECT * FROM users WHERE name IN ($1, $2, $3)")
+        #expect("\(query)" == "SELECT * FROM users WHERE name IN ('Alice', 'Bob', 'Charlie')")
     }
     
-    func testWhereTypeSafeString() throws {
+    @Test
+    func WHERETypeSafeString() throws {
         let query = SQL
             .SELECT(*)
             .FROM(users)
             .WHERE(\.name == "Alice")
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? String == "Alice")
-        XCTAssertEqual(query.query, "SELECT * FROM users WHERE name = $1")
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE name = 'Alice'")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? String == "Alice")
+        #expect(query.query == "SELECT * FROM users WHERE name = $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE name = 'Alice'")
     }
     
-    func testWHERELike() {
+    @Test
+    func WHERELike() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.name, LIKE: "%ob")
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? String == "%ob")
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name like $1")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name like '%ob'")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? String == "%ob")
+        #expect(query.query == "SELECT id FROM users WHERE name like $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE name like '%ob'")
     }
     
-    func testWHERE_IS_NULL() {
+    @Test
+    func WHERE_IS_NULL() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.name)
             .IS_NULL
         
-        XCTAssertEqual(query.parameters.count, 0)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name IS NULL")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name IS NULL")
+        #expect(query.parameters.count == 0)
+        #expect(query.query == "SELECT id FROM users WHERE name IS NULL")
+        #expect("\(query)" == "SELECT id FROM users WHERE name IS NULL")
     }
     
-    func testWHERE_IS_NOT_NULL() {
+    @Test
+    func WHERE_IS_NOT_NULL() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.name)
             .IS_NOT_NULL
-        
-        XCTAssertEqual(query.parameters.count, 0)
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE name IS NOT NULL")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE name IS NOT NULL")
+        #expect(query.parameters.count == 0)
+        #expect(query.query == "SELECT id FROM users WHERE name IS NOT NULL")
+        #expect("\(query)" == "SELECT id FROM users WHERE name IS NOT NULL")
     }
     
-    func testWhereTypeSafeUUID() throws {
+    @Test
+    func WHERETypeSafeUUID() throws {
         let uuid = UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!
         let query = SQL
             .SELECT(*)
             .FROM(users)
             .WHERE(\.uuid == uuid)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? UUID == UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!)
-        XCTAssertEqual(query.query, "SELECT * FROM users WHERE uuid = $1")
-        XCTAssertEqual("\(query)", "SELECT * FROM users WHERE uuid = '5DC4AC7B-37C1-4472-B1F6-974B79624FE5'")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? UUID == UUID(uuidString: "5DC4AC7B-37C1-4472-B1F6-974B79624FE5")!)
+        #expect(query.query == "SELECT * FROM users WHERE uuid = $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE uuid = '5DC4AC7B-37C1-4472-B1F6-974B79624FE5'")
     }
     
     // AND
-    
-    func testWHEREANDEqualSign() {
+    @Test
+    func WHEREANDEqualSign() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id == 1)
             .AND(\.name == "Jack")
-        XCTAssertEqual(query.parameters.count, 2)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssert(query.parameters[1] as? String == "Jack")
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1 AND name = $2")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[0] as? Int == 1)
+        #expect(query.parameters[1] as? String == "Jack")
+        #expect(query.query == "SELECT id FROM users WHERE id = $1 AND name = $2")
+        #expect("\(query)" == "SELECT id FROM users WHERE id = 1 AND name = 'Jack'")
     }
     
     // OR
     
-    func testWHEREOREqualSign() {
+    @Test
+    func WHEREOREqualSign() {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
             .WHERE(\.id == 1)
             .OR(\.name == "john")
-        XCTAssertEqual(query.parameters.count, 2)
-        XCTAssert(query.parameters[0] as? Int == 1)
-        XCTAssert(query.parameters[1] as? String == "john")
-        XCTAssertEqual(query.query, "SELECT id FROM users WHERE id = $1 OR name = $2")
-        XCTAssertEqual("\(query)", "SELECT id FROM users WHERE id = 1 OR name = 'john'")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[0] as? Int == 1)
+        #expect(query.parameters[1] as? String == "john")
+        #expect(query.query == "SELECT id FROM users WHERE id = $1 OR name = $2")
+        #expect("\(query)" == "SELECT id FROM users WHERE id = 1 OR name = 'john'")
     }
 }

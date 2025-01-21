@@ -44,7 +44,7 @@ import Foundation
 
 
 
-public struct TableColumn<T: Table, FieldType> {
+public struct TableColumn<T: Table, FieldType> : Sendable {
     
     public init(name: String) {
         self.name = name
@@ -56,7 +56,7 @@ public struct TableColumn<T: Table, FieldType> {
 }
 
 @propertyWrapper
-public struct TableColumnProperty<T, Value> where T: Table {
+public struct TableColumnProperty<T, Value>: Sendable where T: Table {
     var name: String
     public var wrappedValue: TableColumn<T, Value>
     

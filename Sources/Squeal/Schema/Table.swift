@@ -8,7 +8,7 @@
 import Foundation
 
 
-public protocol Table {
+public protocol Table: Sendable {
     static var schema: String { get }
     init()
 }
