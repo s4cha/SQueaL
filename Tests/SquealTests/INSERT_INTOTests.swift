@@ -81,10 +81,11 @@ final class INSERT_INTOTests: XCTestCase {
     func testFailingInsertInto() {
         let study = Study(id: nil, name: "April", startingCash: 2500.12, partitioning: 100, prolificStudyId: nil, completionLink: nil, showsResults: false, allowsFractionalInvesting: true)
         let studies = StudiesTable()
-        let query = SQL.INSERT(INTO: studies,
-                columns: \.name, \.starting_cash, \.partitioning, \.prolific_study_id, \.completion_link, \.shows_results, \.allows_fractional_investing,
-                VALUES: study.name, study.startingCash, study.partitioning, study.prolificStudyId, study.completionLink, study.showsResults, study.allowsFractionalInvesting)
-        .RETURNING(\.id)
+        let query = SQL
+            .INSERT(INTO: studies,
+                    columns: \.name, \.starting_cash, \.partitioning, \.prolific_study_id, \.completion_link, \.shows_results, \.allows_fractional_investing,
+                    VALUES: study.name, study.startingCash, study.partitioning, study.prolificStudyId, study.completionLink, study.showsResults, study.allowsFractionalInvesting)
+            .RETURNING(\.id)
         
         XCTAssertEqual(query.parameters.count, 7)
         XCTAssert(query.parameters[0] as? String == "April")
