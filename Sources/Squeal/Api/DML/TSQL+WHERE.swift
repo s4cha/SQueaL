@@ -56,7 +56,7 @@ extension PartialTypedWhereSQLQuery {
 }
 
 public protocol WHEREableQuery: TableSQLQuery {
-    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>, IN values: [String]) -> TypedWhereSQLQuery<T>
+    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [U]) -> TypedWhereSQLQuery<T>
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T>
@@ -65,16 +65,14 @@ public protocol WHEREableQuery: TableSQLQuery {
 
 
 public extension WHEREableQuery {
-
-    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [String]) -> TypedWhereSQLQuery<T> {
-        
+    
+    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [U]) -> TypedWhereSQLQuery<T> {
         var pNumber = parameterNumber()
         func nextParamSign() -> String {
             pNumber += 1
             return "$\(pNumber)"
         }
-        
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " IN (\(values.map{_ in "\(nextParamSign())"}.joined(separator: ", ")))", parameters: parameters + values) //TODO fix
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " IN (\(values.map{_ in "\(nextParamSign())"}.joined(separator: ", ")))", parameters: parameters + values)
     }
     
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>, LIKE value: String) -> TypedWhereSQLQuery<T> {
