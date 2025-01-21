@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
-public enum SQLSelectValue: String {
-    case all = "*"
-}
+//
+//public enum SQLSelectValue: String {
+//    case all = "*"
+//}

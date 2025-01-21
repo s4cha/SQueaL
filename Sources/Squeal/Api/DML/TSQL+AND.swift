@@ -7,15 +7,20 @@
 
 import Foundation
 
+public protocol ANDClause: WHEREClause {
+    
+}
 
-public extension TypedWhereSQLQuery {
-    func AND<U: Encodable>(_ kp: KeyPath<T, Field<U>>, equals value: U) -> TypedWhereSQLQuery<T> {
-        let q = query + " " + "AND" + " \(table[keyPath: kp].name)" + " = " + "\(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [value])
-    }
+
+public protocol ANDableQuery: TableSQLQuery {
+    func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
+}
+
+public extension ANDableQuery {
     
     func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T> {
         let q = query + " AND \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
     }
+
 }

@@ -10,3 +10,8 @@ import Foundation
 public class SQL {
     
 }
+
+
+public class TSQL<T: Table> {
+    
+}

@@ -7,7 +7,8 @@
 
 import Foundation
 
-public struct TypedLimitSQLQuery<T: Table>: TableSQLQuery {
+
+public struct TypedHavingSQLQuery<T: Table>: TableSQLQuery, LimitableQuery {
     
     public let table: T
     public var query: String
@@ -20,17 +21,14 @@ public struct TypedLimitSQLQuery<T: Table>: TableSQLQuery {
     }
 }
 
-
-public protocol LimitableQuery: TableSQLQuery {
-
-    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T>
+public protocol HavingableQuery: TableSQLQuery {
+    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T>
 }
 
-public extension LimitableQuery {
+public extension HavingableQuery {
     
-    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T> {
-        return TypedLimitSQLQuery(for: table, query: query + " " + "LIMIT \(value)", parameters: parameters)
+    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T> {
+        return TypedHavingSQLQuery(for: table, query: query + " HAVING \(clause)", parameters: parameters)
     }
 }
-
 

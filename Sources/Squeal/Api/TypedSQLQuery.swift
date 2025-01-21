@@ -7,10 +7,15 @@
 
 import Foundation
 
+public protocol TableSQLQuery<T>: SQLQuery  {
+    associatedtype T: Table
+    var table: T { get }
+}
 
-public struct TypedSQLQuery<T: Table>: SQLQuery {
+
+public struct TypedSQLQuery<T: Table>: TableSQLQuery {
     
-    let table: T
+    public let table: T
     public var query: String = ""
     public var parameters: [(any Encodable)?]
     
@@ -19,11 +24,4 @@ public struct TypedSQLQuery<T: Table>: SQLQuery {
         self.query = query
         self.parameters = parameters
     }
-    
-    init(for table: T) {
-        self.table = table
-        self.query = ""
-        self.parameters = []
-    }
 }
-

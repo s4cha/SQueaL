@@ -7,12 +7,34 @@
 
 import Foundation
 
+public struct TypedUpdateSQLQuery<T: Table>: TableSQLQuery, WHEREableQuery {
+    
+    public let table: T
+    public var query: String
+    public var parameters: [(any Encodable)?]
+        
+    init(for table: T, query: String, parameters: [(any Encodable)?]) {
+        self.table = table
+        self.query = query
+        self.parameters = parameters
+    }
+}
 
 
 public extension SQL {
-
-    static func UPDATE<T, Y: Encodable>(_ table: T, SET keypath: KeyPath<T, Field<Y>>, value: Y?) -> TypedFromSQLQuery<T> {
-        let q = "UPDATE \(table.tableName) SET \(table[keyPath: keypath].name) = $1"
-        return TypedFromSQLQuery(for: table, query: q, parameters: [value])
+    
+    static func UPDATE<T, each U: Encodable>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, (each U)?)) -> TypedUpdateSQLQuery<T> {
+        var q = "UPDATE \(T.schema) SET "
+        let table = T()
+        var parameters = [Encodable]()
+        var setValues = [String]()
+        var nextPIndex = 0
+        for pair in repeat each pairs {
+            nextPIndex = nextPIndex + 1
+            setValues.append(table[keyPath: pair.0].name + " = $\(nextPIndex)")
+            parameters.append(pair.1)
+        }
+        q += setValues.joined(separator: ", ")
+        return TypedUpdateSQLQuery(for: table, query: q, parameters: parameters)
     }
 }

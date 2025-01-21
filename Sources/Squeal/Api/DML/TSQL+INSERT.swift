@@ -11,7 +11,7 @@ import Foundation
 public extension SQL {
     
     static func INSERT<T, each U:Encodable>(INTO table: T,
-                   columns: repeat KeyPath<T, Field<each U>>,
+                   columns: repeat KeyPath<T, TableColumn<T, each U>>,
                    VALUES values: repeat each U) -> TypedInsertSQLQuery<T> {
         
         var columnNames = [String]()
@@ -26,13 +26,13 @@ public extension SQL {
 
         let queryValues = queryParams.enumerated().map { i, _ in "$\(i+1)"}.joined(separator: ", ")
         
-        let q = "INSERT INTO \(table.tableName) (\(columnNames.joined(separator: ", "))) VALUES (\(queryValues))"
+        let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) VALUES (\(queryValues))"
         return TypedInsertSQLQuery(for: table, query: q, parameters: queryParams)
     }
     
     static func INSERT<T, each U: Encodable, X: Sequence>(
         INTO table: T,
-        columns: repeat KeyPath<T, Field<each U>>,
+        columns: repeat KeyPath<T, TableColumn<T, each U>>,
         addValuesFrom array: X,
         mapValues: (X.Element) -> (repeat each U)) -> TypedInsertSQLQuery<T> {
         
@@ -59,20 +59,20 @@ public extension SQL {
         }
         
         let valuesString = valueRows.joined(separator: ", ")
-        let q = "INSERT INTO \(table.tableName) (\(columnNames.joined(separator: ", "))) VALUES \(valuesString)"
+        let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) VALUES \(valuesString)"
         return TypedInsertSQLQuery(for: table, query: q, parameters: newParams) // TODO
     }
     
     @available(macOS 14.0.0, *)
     static func INSERT<T, each U>(INTO table: T,
-                   columns: repeat KeyPath<T, Field<each U>>) -> TypedLoneInsertSQLQuery<T, repeat each U> {
+                   columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedLoneInsertSQLQuery<T, repeat each U> {
         
         var columnNames = [String]()
         for column in repeat each columns {
             columnNames.append(table[keyPath: column].name)
         }
         
-        let q = "INSERT INTO \(table.tableName) (\(columnNames.joined(separator: ", "))) "
+        let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) "
         return TypedLoneInsertSQLQuery(for: table, query: q, parameters: []) // TODO
     }
 }
@@ -130,7 +130,7 @@ public extension TypedInsertSQLQuery {
         TypedSQLQuery(for: table, query: query + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: parameters)
     }
     
-    func RETURNING<U>(_ kp: KeyPath<T, Field<U>>) -> TypedSQLQuery<T> {
+    func RETURNING<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> TypedSQLQuery<T> {
         return TypedSQLQuery(for: table, query: query + " RETURNING \(table[keyPath: kp].name)", parameters: parameters)
     }
 }

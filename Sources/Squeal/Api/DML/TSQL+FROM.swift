@@ -8,8 +8,8 @@
 import Foundation
 
 
-public struct TypedFromSQLQuery<T: Table>: SQLQuery {
-    let table: T
+public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, JoinableQuery, WHEREableQuery, GroupByableQuery, OrderByableQuery, LimitableQuery {
+    public let table: T
     public var query: String
     public var parameters: [(any Encodable)?]
         
@@ -20,17 +20,26 @@ public struct TypedFromSQLQuery<T: Table>: SQLQuery {
     }
 }
 
-public extension TypedSelectSQLQuery {
-    
-    func FROM(_ tableName: String) -> TypedFromSQLQuery<T> {
-        let q = query + " FROM \(tableName)"
-        return TypedFromSQLQuery(for: table, query: q, parameters: [])
-    }
+public protocol FROMableQuery: TableSQLQuery {
+    func FROM(_ table: T) -> TypedFromSQLQuery<T>
+}
+
+public extension FROMableQuery {
     
     func FROM(_ table: T) -> TypedFromSQLQuery<T> {
-        if query.contains("FROM") {
-            return TypedFromSQLQuery(for: table, query: query, parameters: [])
-        }
-        return TypedFromSQLQuery(for: table, query: query + " FROM \(table.tableName)", parameters: [])
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
+    }
+}
+
+
+public protocol FROMableSQLQuery: SQLQuery {
+    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T>
+}
+
+
+public extension FROMableSQLQuery {
+    
+    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T> {
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
     }
 }
