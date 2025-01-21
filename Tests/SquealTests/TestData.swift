@@ -84,13 +84,6 @@ struct InternalType<T> {
 struct UsersTable: Table {
     
     static let schema = "users"
-//    let tableName = "users"
-    
-    enum Columns: String, CaseIterable {
-        case uuid
-        case id
-        case name
-    }
     
     @Column<UUID>(name: "uuid") var uuid
     @Column<Int>(name: "id") var id
