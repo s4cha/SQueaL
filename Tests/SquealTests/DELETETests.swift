@@ -1,26 +1,24 @@
 //
-//  TypedQueryTests.swift
+//  DELETETests.swift
 //  
 //
 //  Created by Sacha Durand Saint Omer on 28/03/2024.
 //
 
-import XCTest
-@testable import Squeal
+import Testing
+import Squeal
 
 
-@available(macOS 14.0.0, *)
-final class DELETETests: XCTestCase {
+struct DELETETests {
     
-    let users = UsersTable()
-    
-    func testDelete() {
+    @Test
+    func DELETE() {
         let query = SQL
             .DELETE_FROM(users)
             .WHERE(\.id == 243)
-        XCTAssertEqual(query.parameters.count, 1)
-        XCTAssert(query.parameters[0] as? Int == 243)
-        XCTAssertEqual(query.query, "DELETE FROM users WHERE id = $1")
-        XCTAssertEqual("\(query)", "DELETE FROM users WHERE id = 243")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 243)
+        #expect(query.query == "DELETE FROM users WHERE id = $1")
+        #expect("\(query)" == "DELETE FROM users WHERE id = 243")
     }
 }
