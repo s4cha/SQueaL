@@ -1,5 +1,5 @@
 # SQueaL
-Type Safe SQL in Swift
+Type Safe SQL for Swift
 
 ![SQueaL demo](demo.gif)
 
