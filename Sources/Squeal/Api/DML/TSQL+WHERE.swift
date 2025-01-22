@@ -8,7 +8,7 @@
 import Foundation
 
 // TODO try return WHereClause?
-public protocol WHEREClause: TableSQLQuery, ANDableQuery, ORableQuery, LimitableQuery, GroupByableQuery, OrderByableQuery {
+public protocol WHEREClause: TableSQLQuery, ANDableQuery, ORableQuery, GroupByableQuery, OrderByableQuery, LimitableQuery, OffsetableQuery {
     
 }
 

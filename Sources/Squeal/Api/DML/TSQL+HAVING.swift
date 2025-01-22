@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct TypedHavingSQLQuery<T: Table>: TableSQLQuery, LimitableQuery {
+public struct TypedHavingSQLQuery<T: Table>: TableSQLQuery, LimitableQuery, OffsetableQuery {
     
     public let table: T
     public var query: String

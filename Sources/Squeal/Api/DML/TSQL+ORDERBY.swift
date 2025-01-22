@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol OrderByClause: TableSQLQuery, LimitableQuery {
+public protocol OrderByClause: TableSQLQuery, LimitableQuery, OffsetableQuery {
     
 }
 
