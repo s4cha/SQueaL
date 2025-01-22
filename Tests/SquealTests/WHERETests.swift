@@ -6,7 +6,7 @@
 //
 
 import Testing
-@testable import Squeal
+import Squeal
 import Foundation
 
 

@@ -41,7 +41,7 @@ public struct PartialTypedWhereSQLQuery<T: Table, U>: TableSQLQuery {
     }
 }
 
-extension PartialTypedWhereSQLQuery {
+public extension PartialTypedWhereSQLQuery {
     var IS_NULL: TypedWhereSQLQuery<T> {
         return TypedWhereSQLQuery(for: table,
                                   query: query + " WHERE \(table[keyPath: keypath].name) IS NULL",
