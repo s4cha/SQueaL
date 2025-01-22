@@ -1,6 +1,8 @@
 # SQueaL
 Type Safe SQL in Swift
 
+![SQueaL demo](demo.gif)
+
 *Squeal is the sound you make when you realize there's a typo in your SQL statement.*
 
 ## Demo time 🍿
@@ -35,8 +37,7 @@ hint: `users` is a `Table` object that represents the `users` table in the datab
 
 
 ## Disclaimer
- - This is early  
- - Use at your own risk  
+ - This is early, use at your own risk
  - Only supports Postgres syntax at the moment
 
 ## Why
