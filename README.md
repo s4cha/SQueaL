@@ -59,7 +59,7 @@ hint: `users` is a `Table` object that represents the `users` table in the datab
 
 ## How
 - By leveraging the incredible Swift 6 type system we can create a strongly typed DSL that match SQL syntax almost one to one.
-- By having a atrongly typed table reference we can enforce correctness and simplify refactorings.
+- By having a strongly typed table reference we can enforce correctness and simplify refactorings.
 - By using protocols we can enforce correct SQL syntax and have autocompletion only suggest valid SQL clauses.
 
 ## What: Example Queries
