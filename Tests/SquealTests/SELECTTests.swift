@@ -12,7 +12,7 @@ import Squeal
 struct SELECTTests {
     
     @Test
-    func SELECTall(){
+    func SELECTall() {
         let query = SQL
             .SELECT(*)
             .FROM(users)

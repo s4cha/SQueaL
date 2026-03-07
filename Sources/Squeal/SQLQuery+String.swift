@@ -11,7 +11,7 @@ import Foundation
 public extension SQLQuery {
     func toString() -> String {
         var q = query
-        for (index, value) in parameters.enumerated() {
+        for (index, value) in parameters.enumerated().reversed() {
             var formattedValue = ""
             if value == nil {
                 formattedValue = "NULL"

@@ -9,77 +9,72 @@ import Foundation
 import Squeal
 
 
-struct UsersTable: Table {
-    
-    static let schema = "users"
-    
-    @Column<UUID>(name: "uuid") var uuid
-    @Column<Int>(name: "id") var id
-    @Column<String>(name: "name") var name
-    @Column<Int>(name: "age") var age
+@Table(schema: "users")
+struct Users {
+    let uuid: UUID
+    let id: Int
+    let name: String
+    let age: Int
 }
 
-
-struct TradesTable: Table {
-    
-    static let schema = "trades"
-    
-    @Column<UUID>(name: "user_id") var user_id
-    @Column<UUID>(name: "study_id") var study_id
-    @Column<String>(name: "type") var type
+@Table(schema: "trades")
+struct Trades {
+    let user_id: UUID
+    let study_id: UUID
+    let type: String
 }
 
-
-struct PersonTable: Table {
-    
-    static let schema = "people"
-    
-    @Column<String>(name: "first_name") var firstname
-    @Column<String>(name: "last_name") var lastname
+@Table(schema: "employees")
+struct Employees {
+    var name: String
+    var department_id: UUID
 }
 
-
-struct StudiesTable: Table {
-    
-    static let schema = "studies"
-        
-    @Column<UUID>(name: "id") var id
-    @Column<String?>(name: "prolific_study_id") var prolific_study_id
-    @Column<String>(name: "name") var name
-    @Column<Double>(name: "starting_cash") var starting_cash
-    @Column<Double>(name: "partitioning") var partitioning
-    @Column<String?>(name: "completion_link") var completion_link
-    @Column<Bool>(name: "shows_results") var shows_results
-    @Column<Bool>(name: "allows_fractional_investing") var allows_fractional_investing
+@Table(schema: "people")
+struct People {
+    let firstname: String
+    let lastname: String
 }
 
-
-struct Employees: Table {
-    static let schema = "employees"
-    @Column<String>(name: "name") var name
-    @Column<UUID>(name: "department_id") var department_id
+@Table(schema: "studies")
+struct Studies {
+    let id: UUID
+    let prolific_study_id: String?
+    let name: String
+    let starting_cash: Double
+    let partitioning: Double
+    let completion_link: String?
+    let shows_results: Bool
+    let allows_fractional_investing: Bool
 }
 
-
-struct Departments: Table {
-    static let schema = "departments"
-    
-    @Column<UUID>(name: "id") var id
-    @Column<String>(name: "name") var name
+@Table(schema: "departments")
+struct Departments {
+    let id: UUID
+    let name: String
 }
 
-struct OrdersTable: Table {
-    
-    static let schema = "orders"
+@Table(schema: "orders")
+struct Orders {
+    let user_id: UUID
+}
 
-    @Column<UUID>(name: "user_id") var user_id
+@Table(schema: "users_departments")
+struct UsersDepartments {
+    let department_id: UUID
+    let user_id: UUID
+    
 }
 
 
 let users = UsersTable()
 let orders = OrdersTable()
-let employees = Employees()
-let departments = Departments()
+let employees = EmployeesTable()
+let departments = DepartmentsTable()
+let users_departments = UsersDepartmentsTable()
+let peopleTable = PeopleTable()
+let people = PeopleTable()
+
 
 
 // TODO
@@ -94,3 +89,4 @@ let departments = Departments()
 // JOIN, HAVING, DISTINcT, BETWEEN,  EXISTS NOT EXISTS
 
 // SELECT AS.
+

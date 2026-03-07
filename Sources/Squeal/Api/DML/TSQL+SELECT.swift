@@ -176,3 +176,13 @@ extension COUNT: SelectField {
     }
 }
 
+public struct RawSQL: SelectField {
+    let expression: String
+    public init(_ expression: String) {
+        self.expression = expression
+    }
+    public func toString() -> String {
+        return expression
+    }
+}
+

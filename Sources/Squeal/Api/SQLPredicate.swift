@@ -34,3 +34,14 @@ public func <= <T,Y>(left: KeyPath<T, TableColumn<T, Y>>, right: Y) -> SQLPredic
     return SQLPredicate(left: left, sign: "<=", right: right)
 }
 
+// Predicate using a TableColumn value directly (for cross-table WHERE clauses)
+public struct TableColumnPredicate<T: Table, Y: Encodable> {
+    let column: TableColumn<T, Y>
+    let sign: String
+    let right: Y
+}
+
+public func == <T: Table, Y: Encodable>(left: TableColumn<T, Y>, right: Y) -> TableColumnPredicate<T, Y> {
+    return TableColumnPredicate(column: left, sign: "=", right: right)
+}
+

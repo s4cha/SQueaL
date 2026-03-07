@@ -27,7 +27,8 @@ struct INSERT_INTOTests {
     @Test
     func INSERT_INTO() {
         let query = SQL
-            .INSERT(INTO: users, columns: \.id, \.name,
+            .INSERT(INTO: users,
+                    columns: \.id, \.name,
                     VALUES: 12, "Jim")
         #expect(query.parameters.count == 2)
         #expect(query.parameters[0] as? Int == 12)
@@ -39,16 +40,16 @@ struct INSERT_INTOTests {
     @available(macOS 14.0.0, *)
     @Test
     func testINSERT_INTO_multiple_values() {
-        let people = [
+        let peopleArray = [
             Person(firstname: "John", lastname: "Doe"),
             Person(firstname: "Ada", lastname: "Lovelace"),
             Person(firstname: "Alan", lastname: "Turing"),
         ]
         let query = SQL
-            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
-            .VALUES(people[0].firstname, people[0].lastname)
-            .VALUES(people[1].firstname, people[1].lastname)
-            .VALUES(people[2].firstname, people[2].lastname)
+            .INSERT(INTO: people, columns: \.firstname, \.lastname)
+            .VALUES(peopleArray[0].firstname, peopleArray[0].lastname)
+            .VALUES(peopleArray[1].firstname, peopleArray[1].lastname)
+            .VALUES(peopleArray[2].firstname, peopleArray[2].lastname)
         
         #expect(query.parameters.count == 6)
         #expect(query.parameters[0] as? String == "John")
@@ -57,25 +58,25 @@ struct INSERT_INTOTests {
         #expect(query.parameters[3] as? String == "Lovelace")
         #expect(query.parameters[4] as? String == "Alan")
         #expect(query.parameters[5] as? String == "Turing")
-        #expect(query.query == "INSERT INTO people (first_name, last_name) VALUES ($1, $2), ($3, $4), ($5, $6)")
-        #expect("\(query)" == "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+        #expect(query.query == "INSERT INTO people (firstname, lastname) VALUES ($1, $2), ($3, $4), ($5, $6)")
+        #expect("\(query)" == "INSERT INTO people (firstname, lastname) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
     
     @available(macOS 14.0.0, *)
     @Test
     func INSERT_INTO_multiple_valuesLoop() {
-        let people = [
+        let peopleArray = [
             Person(firstname: "John", lastname: "Doe"),
             Person(firstname: "Ada", lastname: "Lovelace"),
             Person(firstname: "Alan", lastname: "Turing"),
         ]
         var query = SQL
-            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname)
+            .INSERT(INTO: people, columns: \.firstname, \.lastname)
         
-        for p in people {
+        for p in peopleArray {
             query.ADDVALUES(p.firstname, p.lastname)
         }
-        #expect("\(query)" == "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+        #expect("\(query)" == "INSERT INTO people (firstname, lastname) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
     
     @Test
@@ -111,17 +112,17 @@ struct INSERT_INTOTests {
     
     @Test
     func INSERT_INTO_Map() {
-        let people = [
+        let peopleArray  = [
             Person(firstname: "John", lastname: "Doe"),
             Person(firstname: "Ada", lastname: "Lovelace"),
             Person(firstname: "Alan", lastname: "Turing"),
         ]
         let query = SQL
-            .INSERT(INTO: PersonTable(), columns: \.firstname, \.lastname,
-                    addValuesFrom: people) { p in
+            .INSERT(INTO: people, columns: \.firstname, \.lastname,
+                    addValuesFrom: peopleArray) { p in
                 (p.firstname, p.lastname)
             }
-        #expect("\(query)" == "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+        #expect("\(query)" == "INSERT INTO people (firstname, lastname) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
 }
 

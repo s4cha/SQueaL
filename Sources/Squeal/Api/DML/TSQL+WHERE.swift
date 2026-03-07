@@ -61,6 +61,9 @@ public protocol WHEREableQuery: TableSQLQuery {
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T>
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U>
+    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T>
+    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T>
+    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T>
 }
 
 
@@ -93,6 +96,44 @@ public extension WHEREableQuery {
     
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> PartialTypedWhereSQLQuery<T, U> {
         return PartialTypedWhereSQLQuery(for: table, query: query, parameters: parameters, keypath: kp)
+    }
+    
+    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T> {
+        let q = query + " WHERE \(predicate.column.tableName).\(predicate.column.name) \(predicate.sign) \(nextDollarSign())"
+        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
+    }
+    
+    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T> {
+        let otherTable = U()
+        let column = otherTable[keyPath: predicate.left]
+        let q = query + " WHERE \(column.tableName).\(column.name) \(predicate.sign) \(nextDollarSign())"
+        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
+    }
+    
+    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T> {
+        let operators = [">=", "<=", "!=", ">", "<", "="]
+        for op in operators {
+            let parts = rawString.components(separatedBy: " \(op) ")
+            if parts.count == 2 {
+                let column = parts[0].trimmingCharacters(in: .whitespaces)
+                let rawValue = parts[1].trimmingCharacters(in: .whitespaces)
+                let value: any Encodable
+                if let intValue = Int(rawValue) {
+                    value = intValue
+                } else if let doubleValue = Double(rawValue) {
+                    value = doubleValue
+                } else if (rawValue.hasPrefix("'") && rawValue.hasSuffix("'"))
+                            || (rawValue.hasPrefix("\"") && rawValue.hasSuffix("\"")) {
+                    value = String(rawValue.dropFirst().dropLast())
+                } else {
+                    value = rawValue
+                }
+                let q = query + " WHERE \(column) \(op) \(nextDollarSign())"
+                return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [value])
+            }
+        }
+//        // Fallback: append raw string as-is with no parameters
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(rawString)", parameters: parameters)
     }
 }
 
