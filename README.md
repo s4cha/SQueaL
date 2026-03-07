@@ -66,16 +66,15 @@ hint: `users` is a `Table` object that represents the `users` table in the datab
 
 First define your Type safe schema like so:
 ```swift
-struct UsersTable: Table {
-    
-    static let schema = "users" // Name of your database table
-    
-    @Column<UUID>(name: "uuid") var uuid // Name of your database columns with their type.
-    @Column<Int>(name: "id") var id
-    @Column<String>(name: "name") var name
-    @Column<Int>(name: "age") var age
+@Table(schema: "users") // Name of your database table
+struct Users {
+    let uuid: UUID // Name of your database columns with their type.
+    let id: Int
+    let name: String
+    let age: Int
 }
 ```
+The macro will generate the associated `UsersTable` struct.
 
 
 ### SELECT FROM
