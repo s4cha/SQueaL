@@ -13,6 +13,18 @@ import Foundation
 struct WHERETests {
     
     @Test
+    func WHEREFullString() {
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(users)
+            .WHERE("id = 1")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? Int == 1)
+        #expect(query.query == "SELECT id FROM users WHERE id = $1")
+        #expect("\(query)" == "SELECT id FROM users WHERE id = 1")
+    }
+    
+    @Test
     func WHEREInt() {
         let query = SQL
             .SELECT(\.id)

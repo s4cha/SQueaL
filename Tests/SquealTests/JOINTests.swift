@@ -5,6 +5,7 @@
 //  Created by Sacha Durand Saint Omer on 28/03/2024.
 //
 
+import Foundation
 import Testing
 import Squeal
 
@@ -87,6 +88,58 @@ struct JOINTests {
             .INNER_JOIN(departments, ON: employees.department_id == departments.id)
         #expect("\(query)" == "SELECT employees.name, departments.name FROM employees INNER JOIN departments ON employees.department_id = departments.id")
     }
+    
+    
+    @Test
+    func JOINWhere() {
+        // List user departments many to many relationship
+        let userId = UUID(uuidString: "485DBC0B-4C82-4442-BB2A-1879D4E28A14")!
+        let query = SQL
+            .SELECT(departments.id, departments.name)
+            .FROM(departments)
+            .JOIN(users_departments, ON: departments.id == users_departments.user_id)
+            .WHERE("users_departments.user_id = \(userId)")
+        #expect("\(query)" == "SELECT departments.id, departments.name FROM departments JOIN users_departments ON departments.id = users_departments.user_id WHERE users_departments.user_id = '485DBC0B-4C82-4442-BB2A-1879D4E28A14'")
+    }
+    
+    
+    @Test
+    func JOINWhereTypedv1() {
+        // List user departments many to many relationship
+        let userId = UUID(uuidString: "485DBC0B-4C82-4442-BB2A-1879D4E28A14")!
+        let query = SQL
+            .SELECT(departments.id, departments.name)
+            .FROM(departments)
+            .JOIN(users_departments, ON: departments.id == users_departments.user_id)
+            .WHERE(users_departments.user_id == userId)
+        #expect("\(query)" == "SELECT departments.id, departments.name FROM departments JOIN users_departments ON departments.id = users_departments.user_id WHERE users_departments.user_id = '485DBC0B-4C82-4442-BB2A-1879D4E28A14'")
+    }
+    
+    
+//    @Test
+//    func JOINWhereTypedv2() {
+//        // List user departments many to many relationship
+//        let userId = UUID(uuidString: "485DBC0B-4C82-4442-BB2A-1879D4E28A14")!
+//        let query = SQL
+//            .SELECT(departments.id, departments.name)
+//            .FROM(departments)
+//            .JOIN(users_departments, ON: departments.id == users_departments.user_id)
+//            .WHERE(\UsersDepartmentsTable.user_id == userId)
+//        #expect("\(query)" == "SELECT departments.id, departments.name FROM departments JOIN users_departments ON departments.id = users_departments.user_id WHERE users_departments.user_id = '485DBC0B-4C82-4442-BB2A-1879D4E28A14'")
+//    }
+//    
+
+    
+//    @Test
+//    func JOINWhereTyped() {
+//
+////        let query = SQL
+////            .SELECT(collars.id, collars.name)
+////            .FROM(collars)
+////            .JOIN(user_collars, ON: collars.id == user_collars.collar_id)
+////            .WHERE("user_collars.user_id = \(user.id)")
+////            .WHERE(user_collars.user_id == user.id))
+//    }
 }
 
 

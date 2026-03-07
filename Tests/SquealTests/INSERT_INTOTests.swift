@@ -27,7 +27,8 @@ struct INSERT_INTOTests {
     @Test
     func INSERT_INTO() {
         let query = SQL
-            .INSERT(INTO: users, columns: \.id, \.name,
+            .INSERT(INTO: users,
+                    columns: \.id, \.name,
                     VALUES: 12, "Jim")
         #expect(query.parameters.count == 2)
         #expect(query.parameters[0] as? Int == 12)
