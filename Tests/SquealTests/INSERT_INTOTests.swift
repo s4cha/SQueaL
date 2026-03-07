@@ -122,7 +122,7 @@ struct INSERT_INTOTests {
                     addValuesFrom: peopleArray) { p in
                 (p.firstname, p.lastname)
             }
-        #expect("\(query)" == "INSERT INTO people (first_name, last_name) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
+        #expect("\(query)" == "INSERT INTO people (firstname, lastname) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
 }
 
