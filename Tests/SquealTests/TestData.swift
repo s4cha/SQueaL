@@ -17,7 +17,6 @@ struct Users {
     let age: Int
 }
 
-
 @Table(schema: "trades")
 struct Trades {
     let user_id: UUID
@@ -49,8 +48,6 @@ struct Studies {
     let allows_fractional_investing: Bool
 }
 
-
-
 @Table(schema: "departments")
 struct Departments {
     let id: UUID
@@ -63,12 +60,11 @@ struct Orders {
 }
 
 @Table(schema: "users_departments")
-struct UsersDepartments{
+struct UsersDepartments {
     let department_id: UUID
     let user_id: UUID
     
 }
-
 
 
 let users = UsersTable()
