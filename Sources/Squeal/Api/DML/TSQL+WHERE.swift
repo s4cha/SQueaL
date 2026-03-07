@@ -63,6 +63,7 @@ public protocol WHEREableQuery: TableSQLQuery {
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U>
     func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T>
     func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T>
+    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T>
 }
 
 
@@ -99,6 +100,13 @@ public extension WHEREableQuery {
     
     func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T> {
         let q = query + " WHERE \(predicate.column.tableName).\(predicate.column.name) \(predicate.sign) \(nextDollarSign())"
+        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
+    }
+    
+    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T> {
+        let otherTable = U()
+        let column = otherTable[keyPath: predicate.left]
+        let q = query + " WHERE \(column.tableName).\(column.name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
     }
     
