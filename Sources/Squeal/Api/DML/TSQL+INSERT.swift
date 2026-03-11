@@ -126,11 +126,11 @@ public extension TypedLoneInsertSQLQuery {
 
 public extension TypedInsertSQLQuery {
     
-    func VALUES(_ values: String...) -> TypedSQLQuery<T> {
+    func VALUES(_ values: String...) -> TypedSQLQuery<T, Void> {
         TypedSQLQuery(for: table, query: query + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: parameters)
     }
     
-    func RETURNING<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> TypedSQLQuery<T> {
+    func RETURNING<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> TypedSQLQuery<T, Void> {
         return TypedSQLQuery(for: table, query: query + " RETURNING \(table[keyPath: kp].name)", parameters: parameters)
     }
 }

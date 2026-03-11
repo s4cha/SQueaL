@@ -9,11 +9,12 @@ import Foundation
 
 public protocol TableSQLQuery<T>: SQLQuery  {
     associatedtype T: Table
+    associatedtype Row = Void
     var table: T { get }
 }
 
 
-public struct TypedSQLQuery<T: Table>: TableSQLQuery {
+public struct TypedSQLQuery<T: Table, Row>: TableSQLQuery {
     
     public let table: T
     public var query: String = ""

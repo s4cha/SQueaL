@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TypedSelectSQLQuery<T: Table>: TableSQLQuery, FROMableQuery {
+public struct TypedSelectSQLQuery<T: Table, Row>: TableSQLQuery, FROMableQuery {
     
     
     public let table: T
@@ -35,7 +35,7 @@ public struct SelectSQLQuery: SQLQuery, FROMableSQLQuery {
 
 public extension TSQL {
     
-    static func SELECT(_ function: (Int, Int) -> Int) -> TypedSelectSQLQuery<T> {
+    static func SELECT(_ function: (Int, Int) -> Int) -> TypedSelectSQLQuery<T, Void> {
         let table = T()
         return TypedSelectSQLQuery(for: table, query: "SELECT *", parameters: [])
     }
@@ -48,7 +48,7 @@ public extension TSQL {
         return SelectSQLQuery(query: "SELECT \(fieldNames.joined(separator: ", "))", parameters: [])
     }
     
-    static func SELECT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T> {
+    static func SELECT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
         var columnNames = [String]()
         for column in repeat each columns {
@@ -57,7 +57,7 @@ public extension TSQL {
         return TypedSelectSQLQuery(for: table, query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
     }
     
-    static func SELECT_DISTINCT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T> {
+    static func SELECT_DISTINCT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
         var columnNames = [String]()
         for column in repeat each columns {
@@ -66,7 +66,7 @@ public extension TSQL {
         return TypedSelectSQLQuery(for: table, query: "SELECT DISTINCT \(columnNames.joined(separator: ", "))", parameters: [])
     }
     
-    static func SELECT<each U>(_ aliases: repeat (KeyPath<T, TableColumn<T, each U>>, AS: String)) -> TypedSelectSQLQuery<T> {
+    static func SELECT<each U>(_ aliases: repeat (KeyPath<T, TableColumn<T, each U>>, AS: String)) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
         var columnNames = [String]()
         for alias in repeat each aliases {
@@ -75,7 +75,7 @@ public extension TSQL {
         return TypedSelectSQLQuery(for: table, query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
     }
     
-    static func SELECT_DISTINCT<each U>(_ aliases: repeat (KeyPath<T, TableColumn<T, each U>>, AS: String)) -> TypedSelectSQLQuery<T> {
+    static func SELECT_DISTINCT<each U>(_ aliases: repeat (KeyPath<T, TableColumn<T, each U>>, AS: String)) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
         var columnNames = [String]()
         for alias in repeat each aliases {
@@ -102,7 +102,7 @@ public extension SQL {
         return SelectSQLQuery(query: "SELECT \(fieldNames.joined(separator: ", "))", parameters: [])
     }
  
-    static func SELECT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T> {
+    static func SELECT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
         var columnNames = [String]()
         for column in repeat each columns {
@@ -111,7 +111,7 @@ public extension SQL {
         return TypedSelectSQLQuery(for: table, query: "SELECT \(columnNames.joined(separator: ", "))", parameters: [])
     }
     
-    static func SELECT_DISTINCT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T> {
+    static func SELECT_DISTINCT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
         var columnNames = [String]()
         for column in repeat each columns {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TypedUpdateSQLQuery<T: Table>: TableSQLQuery, WHEREableQuery {
+public struct TypedUpdateSQLQuery<T: Table, Row>: TableSQLQuery, WHEREableQuery {
     
     public let table: T
     public var query: String
@@ -23,7 +23,7 @@ public struct TypedUpdateSQLQuery<T: Table>: TableSQLQuery, WHEREableQuery {
 
 public extension SQL {
     
-    static func UPDATE<T, each U: Encodable>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, (each U)?)) -> TypedUpdateSQLQuery<T> {
+    static func UPDATE<T, each U: Encodable>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, (each U)?)) -> TypedUpdateSQLQuery<T, Void> {
         var q = "UPDATE \(T.schema) SET "
         let table = T()
         var parameters = [Encodable]()

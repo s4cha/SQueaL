@@ -13,12 +13,12 @@ public protocol ANDClause: WHEREClause {
 
 
 public protocol ANDableQuery: TableSQLQuery {
-    func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
+    func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row>
 }
 
 public extension ANDableQuery {
     
-    func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T> {
+    func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row> {
         let q = query + " AND \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
     }

@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct TypedHavingSQLQuery<T: Table>: TableSQLQuery, LimitableQuery, OffsetableQuery {
+public struct TypedHavingSQLQuery<T: Table, Row>: TableSQLQuery, LimitableQuery, OffsetableQuery {
     
     public let table: T
     public var query: String
@@ -22,12 +22,12 @@ public struct TypedHavingSQLQuery<T: Table>: TableSQLQuery, LimitableQuery, Offs
 }
 
 public protocol HavingableQuery: TableSQLQuery {
-    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T>
+    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T, Row>
 }
 
 public extension HavingableQuery {
     
-    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T> {
+    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T, Row> {
         return TypedHavingSQLQuery(for: table, query: query + " HAVING \(clause)", parameters: parameters)
     }
 }

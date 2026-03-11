@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TypedLimitSQLQuery<T: Table>: TableSQLQuery, OffsetableQuery {
+public struct TypedLimitSQLQuery<T: Table, Row>: TableSQLQuery, OffsetableQuery {
     
     public let table: T
     public var query: String
@@ -23,12 +23,12 @@ public struct TypedLimitSQLQuery<T: Table>: TableSQLQuery, OffsetableQuery {
 
 public protocol LimitableQuery: TableSQLQuery {
 
-    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T>
+    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T, Row>
 }
 
 public extension LimitableQuery {
     
-    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T> {
+    func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T, Row> {
         return TypedLimitSQLQuery(for: table, query: query + " " + "LIMIT \(value)", parameters: parameters)
     }
 }

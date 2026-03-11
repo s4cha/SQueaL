@@ -8,7 +8,7 @@
 import Foundation
 
 public extension SQL {
-    static func DELETE_FROM<T>(_ table: T) -> TypedFromSQLQuery<T> {
-        return TypedSelectSQLQuery(for: table, query: "DELETE", parameters: []).FROM(table)
+    static func DELETE_FROM<T>(_ table: T) -> TypedFromSQLQuery<T, Void> {
+        return TypedSelectSQLQuery<T, Void>(for: table, query: "DELETE", parameters: []).FROM(table)
     }
 }
