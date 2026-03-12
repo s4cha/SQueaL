@@ -1,4 +1,9 @@
 # SQueaL
+
+[![Swift](https://img.shields.io/badge/Swift-6.2-F05138?logo=swift&logoColor=white)](https://www.swift.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub tag](https://img.shields.io/github/release/s4cha/Squeal.svg)](https://github.com/s4cha/Squeal/releases)
+
 Type Safe SQL for Swift
 
 ![SQueaL demo](demo.gif)
