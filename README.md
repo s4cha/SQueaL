@@ -161,3 +161,17 @@ let query = SQL
 [Object-Relational Mapping is the Vietnam of Computer Science](https://blog.codinghorror.com/object-relational-mapping-is-the-vietnam-of-computer-science/)  
 [ORM is an anti-pattern](https://seldo.com/posts/orm_is_an_antipattern)  
 [In defence of SQL](https://seldo.com/posts/in_defence_of_sql)
+
+## Installation
+
+Requires **Swift 6.0+**.
+
+In Xcode, go to `File` > `Add Package Dependencies...` and paste:
+```
+https://github.com/s4cha/Squeal
+```
+
+Or add it to your `Package.swift`:
+```swift
+.package(url: "https://github.com/s4cha/Squeal", from: "1.0.0")
+```
