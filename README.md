@@ -4,6 +4,9 @@
 [![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub tag](https://img.shields.io/github/release/s4cha/Squeal.svg)](https://github.com/s4cha/Squeal/releases)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fs4cha%2FSqueal%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/s4cha/Squeal)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fs4cha%2FSqueal%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/s4cha/Squeal)
+
 
 Type Safe SQL for Swift
 
