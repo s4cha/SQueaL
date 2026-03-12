@@ -1,6 +1,7 @@
 # SQueaL
 
 [![Swift](https://img.shields.io/badge/Swift-6.2-F05138?logo=swift&logoColor=white)](https://www.swift.org)
+[![SPM Compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub tag](https://img.shields.io/github/release/s4cha/Squeal.svg)](https://github.com/s4cha/Squeal/releases)
 
