@@ -9,9 +9,11 @@ let package = Package(
     platforms: [.macOS(.v15)],
     products: [
         .library(name: "Squeal", targets: ["Squeal"]),
+        .library(name: "SquealPostgresNIO", targets: ["SquealPostgresNIO"]),
     ],
     dependencies: [
       .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "602.0.0-latest"),
+      .package(url: "https://github.com/vapor/postgres-nio.git", from: "1.21.0"),
     ],
     targets: [
         .macro(
@@ -24,5 +26,12 @@ let package = Package(
         
             .target(name: "Squeal", dependencies: ["SquealMacros"]),
         .testTarget(name: "SquealTests", dependencies: ["Squeal"]),
+        .target(
+            name: "SquealPostgresNIO",
+            dependencies: [
+                "Squeal",
+                .product(name: "PostgresNIO", package: "postgres-nio"),
+            ]
+        ),
     ]
 )
