@@ -6,7 +6,7 @@ import CompilerPluginSupport
 
 let package = Package(
     name: "Squeal",
-    platforms: [.macOS(.v15)],
+    platforms: [.macOS(.v14)],
     products: [
         .library(name: "Squeal", targets: ["Squeal"]),
         .library(name: "SquealPostgresNIO", targets: ["SquealPostgresNIO"]),
