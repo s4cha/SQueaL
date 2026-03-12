@@ -48,13 +48,13 @@ hint: `users` is a `Table` object that represents the `users` table in the datab
 
 ## Why SQueaL?
 
-|  | Raw SQL Strings | Fluent | Structured Queries | **SQueaL** |
-|---|---|---|---|---|
-| Type safety (Safe refactorings) | ❌ | ✅ | ✅ | ✅ |
+|  | Raw SQL Strings | ORM(Fluent, Structured Queries etc) | **SQueaL** |
+|---|---|---|---|
+| Type safety (Safe refactorings) | ❌ | ✅ | ✅ |
 | Autocompletion | ❌ | ✅ | ✅ | ✅ |
-| SQL syntax enforcement (clause order) | ❌ | ❌ | ❌ | ✅ |
-| No new DSL to learn (Learn SQL once) | ✅ | ❌ | ❌ | ✅ |
-| Easy to eject | ✅ | ❌ | ❌ | ✅ |
+| SQL syntax enforcement (clause order) | ❌ | ❌ | ✅ |
+| No new DSL to learn (Learn SQL once) | ✅ | ❌ | ✅ |
+| Easy to eject | ✅ | ❌ | ✅ |
 
 **What if you could have the best of both worlds?** Type safety *and* real SQL.
 
