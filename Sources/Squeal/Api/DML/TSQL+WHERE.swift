@@ -12,7 +12,7 @@ public protocol WHEREClause: TableSQLQuery, ANDableQuery, ORableQuery, GroupByab
     
 }
 
-public struct TypedWhereSQLQuery<T: Table>: WHEREClause {
+public struct TypedWhereSQLQuery<T: Table, Row>: WHEREClause {
     
     
     public let table: T
@@ -26,7 +26,7 @@ public struct TypedWhereSQLQuery<T: Table>: WHEREClause {
     }
 }
 
-public struct PartialTypedWhereSQLQuery<T: Table, U>: TableSQLQuery {
+public struct PartialTypedWhereSQLQuery<T: Table, U, Row>: TableSQLQuery {
     
     public let table: T
     public var query: String = ""
@@ -42,13 +42,13 @@ public struct PartialTypedWhereSQLQuery<T: Table, U>: TableSQLQuery {
 }
 
 public extension PartialTypedWhereSQLQuery {
-    var IS_NULL: TypedWhereSQLQuery<T> {
+    var IS_NULL: TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table,
                                   query: query + " WHERE \(table[keyPath: keypath].name) IS NULL",
                                   parameters: parameters)
     }
     
-    var IS_NOT_NULL: TypedWhereSQLQuery<T> {
+    var IS_NOT_NULL: TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table,
                                   query: query + " WHERE \(table[keyPath: keypath].name) IS NOT NULL",
                                   parameters: parameters)
@@ -56,20 +56,20 @@ public extension PartialTypedWhereSQLQuery {
 }
 
 public protocol WHEREableQuery: TableSQLQuery {
-    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [U]) -> TypedWhereSQLQuery<T>
-    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T>
-    func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T>
-    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T>
-    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U>
-    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T>
-    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T>
-    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T>
+    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [U]) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U, Row>
+    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row>
 }
 
 
 public extension WHEREableQuery {
     
-    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [U]) -> TypedWhereSQLQuery<T> {
+    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [U]) -> TypedWhereSQLQuery<T, Row> {
         var pNumber = parameterNumber()
         func nextParamSign() -> String {
             pNumber += 1
@@ -78,39 +78,39 @@ public extension WHEREableQuery {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " IN (\(values.map{_ in "\(nextParamSign())"}.joined(separator: ", ")))", parameters: parameters + values)
     }
     
-    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>, LIKE value: String) -> TypedWhereSQLQuery<T> {
+    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE \(table[keyPath: kp].name) like \(nextDollarSign())", parameters: parameters + [value])
     }
 
-    func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T> {
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row> {
         let q = query + " WHERE \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table,
                                   query: q,
                                   parameters: parameters + [predicate.right])
     }
     
-    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T> {
+    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T, Row> {
         let q = query + " WHERE \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table, query: q, parameters:  parameters + [predicate.right!])
     }
     
-    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> PartialTypedWhereSQLQuery<T, U> {
+    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> PartialTypedWhereSQLQuery<T, U, Row> {
         return PartialTypedWhereSQLQuery(for: table, query: query, parameters: parameters, keypath: kp)
     }
     
-    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T> {
+    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row> {
         let q = query + " WHERE \(predicate.column.tableName).\(predicate.column.name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
     }
     
-    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T> {
+    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row> {
         let otherTable = U()
         let column = otherTable[keyPath: predicate.left]
         let q = query + " WHERE \(column.tableName).\(column.name) \(predicate.sign) \(nextDollarSign())"
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
     }
     
-    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T> {
+    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T, Row> {
         let operators = [">=", "<=", "!=", ">", "<", "="]
         for op in operators {
             let parts = rawString.components(separatedBy: " \(op) ")

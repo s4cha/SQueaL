@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, JoinableQuery, WHEREableQuery, GroupByableQuery, OrderByableQuery, LimitableQuery, OffsetableQuery {
+public struct TypedFromSQLQuery<T: Table, Row>: TableSQLQuery, JoinableQuery, WHEREableQuery, GroupByableQuery, OrderByableQuery, LimitableQuery, OffsetableQuery {
     public let table: T
     public var query: String
     public var parameters: [(any Encodable)?]
@@ -21,25 +21,25 @@ public struct TypedFromSQLQuery<T: Table>: TableSQLQuery, JoinableQuery, WHEREab
 }
 
 public protocol FROMableQuery: TableSQLQuery {
-    func FROM(_ table: T) -> TypedFromSQLQuery<T>
+    func FROM(_ table: T) -> TypedFromSQLQuery<T, Row>
 }
 
 public extension FROMableQuery {
     
-    func FROM(_ table: T) -> TypedFromSQLQuery<T> {
+    func FROM(_ table: T) -> TypedFromSQLQuery<T, Row> {
         return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
     }
 }
 
 
 public protocol FROMableSQLQuery: SQLQuery {
-    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T>
+    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T, Void>
 }
 
 
 public extension FROMableSQLQuery {
     
-    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T> {
+    func FROM<T>(_ table: T) -> TypedFromSQLQuery<T, Void> {
         return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
     }
 }

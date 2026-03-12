@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TypedOffsetSQLQuery<T: Table>: TableSQLQuery {
+public struct TypedOffsetSQLQuery<T: Table, Row>: TableSQLQuery {
     
     public let table: T
     public var query: String
@@ -23,12 +23,12 @@ public struct TypedOffsetSQLQuery<T: Table>: TableSQLQuery {
 
 public protocol OffsetableQuery: TableSQLQuery {
 
-    func OFFSET(_ value: Int) -> TypedOffsetSQLQuery<T>
+    func OFFSET(_ value: Int) -> TypedOffsetSQLQuery<T, Row>
 }
 
 public extension OffsetableQuery {
     
-    func OFFSET(_ value: Int) -> TypedOffsetSQLQuery<T> {
+    func OFFSET(_ value: Int) -> TypedOffsetSQLQuery<T, Row> {
         return TypedOffsetSQLQuery(for: table, query: query + " " + "OFFSET \(value)", parameters: parameters)
     }
 }

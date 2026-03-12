@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TypedJOINSQLQuery<T: Table>: TableSQLQuery {
+public struct TypedJOINSQLQuery<T: Table, Row>: TableSQLQuery {
     
     public let table: T
     public var query: String
@@ -23,47 +23,47 @@ public struct TypedJOINSQLQuery<T: Table>: TableSQLQuery {
 
 public protocol JoinableQuery: TableSQLQuery {
 
-    func JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T>
-    func INNER_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T>
-    func LEFT_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T>
-    func RIGHT_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T>
-    func FULL_OUTER_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T>
+    func JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    func INNER_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    func LEFT_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    func RIGHT_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    func FULL_OUTER_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
 }
 
 public extension JoinableQuery {
     
-    func JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T> {
+    func JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
         return join(word: "", table2, ON: predicate)
     }
     
-    func JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, T, F>) -> TypedFromSQLQuery<T> {
+    func JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, T, F>) -> TypedFromSQLQuery<T, Row> {
         return joinReverse(word: "", table2, ON: predicate)
     }
     
-    func INNER_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T> {
+    func INNER_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
         return join(word: " INNER", table2, ON: predicate)
     }
     
-    func LEFT_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T> {
+    func LEFT_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
         return join(word: " LEFT", table2, ON: predicate)
     }
     
-    func RIGHT_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T> {
+    func RIGHT_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
         return join(word: " RIGHT", table2, ON: predicate)
     }
     
-    func FULL_OUTER_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T> {
+    func FULL_OUTER_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
         return join(word: " FULL OUTER", table2, ON: predicate)
     }
     
-    private func join<Y: Table, F>(word: String, _ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T> {
+    private func join<Y: Table, F>(word: String, _ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
         let statement = "\(word) JOIN \(Y.schema) ON \(predicate.left.tableName).\(predicate.left.name) = \(predicate.right.tableName).\(predicate.right.name)"
         return TypedFromSQLQuery(for: table,
                                  query: query + statement,
                                  parameters: parameters)
     }
     
-    private func joinReverse<Y: Table, F>(word: String, _ table2: Y, ON predicate: JOINPredicate<Y, T, F>) -> TypedFromSQLQuery<T> {
+    private func joinReverse<Y: Table, F>(word: String, _ table2: Y, ON predicate: JOINPredicate<Y, T, F>) -> TypedFromSQLQuery<T, Row> {
         let statement = "\(word) JOIN \(Y.schema) ON \(predicate.left.tableName).\(predicate.left.name) = \(predicate.right.tableName).\(predicate.right.name)"
         return TypedFromSQLQuery(for: table,
                                  query: query + statement,

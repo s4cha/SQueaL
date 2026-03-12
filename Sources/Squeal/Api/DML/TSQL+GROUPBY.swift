@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct TypedGroupBySQLQuery<T: Table>: TableSQLQuery, HavingableQuery, LimitableQuery, OffsetableQuery {
+public struct TypedGroupBySQLQuery<T: Table, Row>: TableSQLQuery, HavingableQuery, LimitableQuery, OffsetableQuery {
     
     public let table: T
     public var query: String
@@ -22,12 +22,12 @@ public struct TypedGroupBySQLQuery<T: Table>: TableSQLQuery, HavingableQuery, Li
 }
 
 public protocol GroupByableQuery: TableSQLQuery {
-    func GROUP_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedGroupBySQLQuery<T>
+    func GROUP_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedGroupBySQLQuery<T, Row>
 }
 
 public extension GroupByableQuery {
     
-    func GROUP_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedGroupBySQLQuery<T> {
+    func GROUP_BY<X>(_ keypath:  KeyPath<T, TableColumn<T, X>>) -> TypedGroupBySQLQuery<T, Row> {
         return TypedGroupBySQLQuery(for: table, query: query + " GROUP BY " + table[keyPath: keypath].name, parameters: parameters)
     }
 }

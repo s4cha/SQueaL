@@ -23,7 +23,7 @@ struct SELECTTests {
     
     func SELECTCount() {
         let query = SQL
-            .SELECT(COUNT(*))
+            .SELECT(COUNT(*)) // TODO be int
             .FROM(users)
         #expect(query.parameters.count == 0)
         #expect(query.query == "SELECT COUNT(*) FROM users")
