@@ -61,4 +61,31 @@ struct UPDATETests {
         #expect(query.parameters.count == 4)
         #expect(query.query == "UPDATE users SET name = $1, age = $2 WHERE id = $3 AND name = $4")
     }
+    
+    @Test
+    func UPDATEwithRETURNING() {
+        let query = SQL
+            .UPDATE(users, SET: (\.name, "john"))
+            .WHERE(\.id == 12)
+            .RETURNING(\.id)
+        #expect(query.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING id")
+    }
+    
+    @Test
+    func UPDATEwithRETURNINGGmultipleColumns() {
+        let query = SQL
+            .UPDATE(users, SET: (\.name, "john"))
+            .WHERE(\.id == 1)
+            .RETURNING(\.id, \.name)
+        #expect(query.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name")
+    }
+    
+    @Test
+    func UPDATEwithRETURNINGstar() {
+        let query = SQL
+            .UPDATE(users, SET: (\.name, "john"))
+            .WHERE(\.id == 12)
+            .RETURNING(*)
+        #expect(query.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING *")
+    }
 }

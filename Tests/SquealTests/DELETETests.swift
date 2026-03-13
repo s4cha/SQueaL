@@ -76,4 +76,31 @@ struct DELETETests {
         #expect(query.parameters.count == 2)
         #expect(query.query == "DELETE FROM users WHERE id = $1 OR id = $2")
     }
+    
+    @Test
+    func DELETEwithRETURNINGAll() {
+        let query = SQL
+            .DELETE_FROM(users)
+            .WHERE(\.id == 1)
+            .RETURNING(*)
+        #expect(query.query == "DELETE FROM users WHERE id = $1 RETURNING *")
+    }
+    
+    @Test
+    func DELETEwithRETURNINGid() {
+        let query = SQL
+            .DELETE_FROM(users)
+            .WHERE(\.id == 1)
+            .RETURNING(\.id)
+        #expect(query.query == "DELETE FROM users WHERE id = $1 RETURNING id")
+    }
+    
+    @Test
+    func DELETEwithRETURNINGmultipleColumns() {
+        let query = SQL
+            .DELETE_FROM(users)
+            .WHERE(\.id == 1)
+            .RETURNING(\.id, \.name)
+        #expect(query.query == "DELETE FROM users WHERE id = $1 RETURNING id, name")
+    }
 }

@@ -124,6 +124,15 @@ struct INSERT_INTOTests {
             }
         #expect("\(query)" == "INSERT INTO people (firstname, lastname) VALUES ('John', 'Doe'), ('Ada', 'Lovelace'), ('Alan', 'Turing')")
     }
+    
+    @Test
+    func INSERTwithRETURNINGmultipleColumns() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.name,
+                    VALUES: "Alice")
+            .RETURNING(\.id, \.uuid)
+        #expect(query.query == "INSERT INTO users (name) VALUES ($1) RETURNING id, uuid")
+    }
 }
 
 

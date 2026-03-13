@@ -222,47 +222,6 @@ func fullGroupedQuery() {
 //   func RETURNING<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> TypedSQLQuery<T, Void>
 //   func RETURNING(_ all: (Int, Int) -> Int) -> TypedSQLQuery<T, Void>  // for *
 //
-//    @Test
-//    func UPDATEwithRETURNING() {
-//        let query = SQL
-//            .UPDATE(users, SET: (\.name, "john"))
-//            .WHERE(\.id == 12)
-//            .RETURNING(\.id)
-//        #expect(query.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING id")
-//    }
-//
-//    @Test
-//    func DELETEwithRETURNING() {
-//        let query = SQL
-//            .DELETE_FROM(users)
-//            .WHERE(\.id == 1)
-//            .RETURNING(\.id)
-//        #expect(query.query == "DELETE FROM users WHERE id = $1 RETURNING id")
-//    }
-//
-//    @Test
-//    func UPDATEwithRETURNINGstar() {
-//        let query = SQL
-//            .UPDATE(users, SET: (\.name, "john"))
-//            .WHERE(\.id == 12)
-//            .RETURNING(*)
-//        #expect(query.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING *")
-//    }
-
-
-// MARK: - RETURNING multiple columns on INSERT
-//
-// Needs: Extend RETURNING to accept variadic columns:
-//   func RETURNING<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSQLQuery<T, Void>
-//
-//    @Test
-//    func INSERTwithRETURNINGmultipleColumns() {
-//        let query = SQL
-//            .INSERT(INTO: users, columns: \.name,
-//                    VALUES: "Alice")
-//            .RETURNING(\.id, \.uuid)
-//        #expect(query.query == "INSERT INTO users (name) VALUES ($1) RETURNING id, uuid")
-//    }
 
 
 // MARK: - UNION / UNION ALL
