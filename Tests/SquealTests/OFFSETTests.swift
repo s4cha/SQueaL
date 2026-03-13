@@ -76,4 +76,36 @@ struct OffsetTests {
         #expect(query.query == "SELECT * FROM users LIMIT 10 OFFSET 20")
         #expect("\(query)" == "SELECT * FROM users LIMIT 10 OFFSET 20")
     }
+    
+    @Test
+    func OFFSETafterHAVING() {
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .GROUP_BY(\.name)
+            .HAVING("COUNT(*) > 5")
+            .OFFSET(20)
+        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 5 OFFSET 20")
+    }
+    
+    @Test
+    func OFFSETafterORDER_BY() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .ORDER_BY(\.name)
+            .OFFSET(20)
+        #expect(query.query == "SELECT * FROM users ORDER BY name OFFSET 20")
+    }
+
+    @Test
+    func LIMITandOFFSETafterORDER_BY() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .ORDER_BY(\.name, .ASC)
+            .LIMIT(10)
+            .OFFSET(20)
+        #expect(query.query == "SELECT * FROM users ORDER BY name ASC LIMIT 10 OFFSET 20")
+    }
 }

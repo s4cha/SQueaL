@@ -88,4 +88,15 @@ struct ORDER_BYTests {
         #expect(query.query == "SELECT id, name FROM users WHERE id > $1 ORDER BY name")
         #expect("\(query)" == "SELECT id, name FROM users WHERE id > 12 ORDER BY name")
     }
+    
+    @Test
+    func ORDER_BYafterAND() {
+        let query = SQL
+            .SELECT(\.id, \.name)
+            .FROM(users)
+            .WHERE(\.age > 18)
+            .AND(\.name == "Alice")
+            .ORDER_BY(\.name, .ASC)
+        #expect(query.query == "SELECT id, name FROM users WHERE age > $1 AND name = $2 ORDER BY name ASC")
+    }
 }

@@ -64,6 +64,27 @@ struct LimitTests {
         #expect(query.query == "SELECT name FROM users WHERE id = $1 AND name = $2 GROUP BY name LIMIT 3")
         #expect("\(query)" == "SELECT name FROM users WHERE id = 1 AND name = 'jack' GROUP BY name LIMIT 3")
     }
+    
+    @Test
+    func LIMITafterHAVING() {
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .GROUP_BY(\.name)
+            .HAVING("COUNT(*) > 5")
+            .LIMIT(10)
+        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 5 LIMIT 10")
+    }
+    
+    @Test
+    func LIMITafterORDER_BY() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .ORDER_BY(\.name)
+            .LIMIT(10)
+        #expect(query.query == "SELECT * FROM users ORDER BY name LIMIT 10")
+    }
 }
 
 

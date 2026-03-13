@@ -214,4 +214,16 @@ struct WHERETests {
         #expect(query.query == "SELECT id FROM users WHERE id = $1 OR name = $2")
         #expect("\(query)" == "SELECT id FROM users WHERE id = 1 OR name = 'john'")
     }
+    
+    @Test
+    func WHEREINWithIntegers() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.id, IN: [10, 20, 30])
+        #expect(query.parameters.count == 3)
+        #expect(query.query == "SELECT * FROM users WHERE id IN ($1, $2, $3)")
+        #expect("\(query)" == "SELECT * FROM users WHERE id IN (10, 20, 30)")
+    }
+
 }
