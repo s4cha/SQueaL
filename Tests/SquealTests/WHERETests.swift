@@ -225,5 +225,85 @@ struct WHERETests {
         #expect(query.query == "SELECT * FROM users WHERE id IN ($1, $2, $3)")
         #expect("\(query)" == "SELECT * FROM users WHERE id IN (10, 20, 30)")
     }
+    
+    @Test
+    func WHEREnotEqual() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.name != "admin")
+        #expect(query.query == "SELECT * FROM users WHERE name != $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE name != 'admin'")
+    }
+    
+    @Test
+    func WHEREnotEqualInt() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.id != 0)
+        #expect(query.query == "SELECT * FROM users WHERE id != $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE id != 0")
+    }
+    
+    @Test
+    func WHEREbetween() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.age, BETWEEN: 18, AND: 65)
+        #expect(query.parameters.count == 2)
+        #expect(query.query == "SELECT * FROM users WHERE age BETWEEN $1 AND $2")
+        #expect("\(query)" == "SELECT * FROM users WHERE age BETWEEN 18 AND 65")
+    }
+    
+    @Test
+    func WHEREnotIn() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.name, NOT_IN: ["admin", "root"])
+        #expect(query.query == "SELECT * FROM users WHERE name NOT IN ($1, $2)")
+        #expect("\(query)" == "SELECT * FROM users WHERE name NOT IN ('admin', 'root')")
+    }
+    
+    @Test
+    func WHEREnotLike() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.name, NOT_LIKE: "%test%")
+        #expect(query.query == "SELECT * FROM users WHERE name NOT LIKE $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE name NOT LIKE '%test%'")
+    }
+    
+    @Test
+    func WHERELikeStartsWith() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.name, LIKE: "Al%")
+        #expect(query.query == "SELECT * FROM users WHERE name like $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE name like 'Al%'")
+    }
 
+    @Test
+    func WHERELikeContains() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.name, LIKE: "%lic%")
+        #expect(query.query == "SELECT * FROM users WHERE name like $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE name like '%lic%'")
+    }
+
+    @Test
+    func WHERELikeEndsWith() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.name, LIKE: "%son")
+        #expect(query.query == "SELECT * FROM users WHERE name like $1")
+        #expect("\(query)" == "SELECT * FROM users WHERE name like '%son'")
+    }
 }

@@ -57,7 +57,10 @@ public extension PartialTypedWhereSQLQuery {
 
 public protocol WHEREableQuery: TableSQLQuery {
     func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, IN values: [U]) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, NOT_IN values: [U]) -> TypedWhereSQLQuery<T, Row>
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>, NOT_LIKE value: String) -> TypedWhereSQLQuery<T, Row>
+    func WHERE<U: Comparable & Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, BETWEEN low: U, AND high: U) -> TypedWhereSQLQuery<T, Row>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row>
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T, Row>
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U, Row>
@@ -80,6 +83,25 @@ public extension WHEREableQuery {
     
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE \(table[keyPath: kp].name) like \(nextDollarSign())", parameters: parameters + [value])
+    }
+
+    func WHERE<U: Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, NOT_IN values: [U]) -> TypedWhereSQLQuery<T, Row> {
+        var pNumber = parameterNumber()
+        func nextParamSign() -> String {
+            pNumber += 1
+            return "$\(pNumber)"
+        }
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE" + " \(table[keyPath: kp].name)" + " NOT IN (\(values.map{_ in "\(nextParamSign())"}.joined(separator: ", ")))", parameters: parameters + values)
+    }
+
+    func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>, NOT_LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(table[keyPath: kp].name) NOT LIKE \(nextDollarSign())", parameters: parameters + [value])
+    }
+
+    func WHERE<U: Comparable & Encodable>(_ kp: KeyPath<T, TableColumn<T,U>>, BETWEEN low: U, AND high: U) -> TypedWhereSQLQuery<T, Row> {
+        let p1 = nextDollarSign()
+        let p2 = "$\(parameterNumber() + 2)"
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(table[keyPath: kp].name) BETWEEN \(p1) AND \(p2)", parameters: parameters + [low, high])
     }
 
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row> {

@@ -34,6 +34,10 @@ public func <= <T,Y>(left: KeyPath<T, TableColumn<T, Y>>, right: Y) -> SQLPredic
     return SQLPredicate(left: left, sign: "<=", right: right)
 }
 
+public func != <T,Y>(left: KeyPath<T, TableColumn<T, Y>>, right: Y) -> SQLPredicate<T, Y> {
+    return SQLPredicate(left: left, sign: "!=", right: right)
+}
+
 // Predicate using a TableColumn value directly (for cross-table WHERE clauses)
 public struct TableColumnPredicate<T: Table, Y: Encodable> {
     let column: TableColumn<T, Y>

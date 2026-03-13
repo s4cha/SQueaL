@@ -99,4 +99,25 @@ struct ORDER_BYTests {
             .ORDER_BY(\.name, .ASC)
         #expect(query.query == "SELECT id, name FROM users WHERE age > $1 AND name = $2 ORDER BY name ASC")
     }
+    
+    @Test
+    func ORDER_BYafterGROUP_BY() {
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .GROUP_BY(\.name)
+            .ORDER_BY(\.name, .ASC)
+        #expect(query.query == "SELECT name FROM users GROUP BY name ORDER BY name ASC")
+    }
+    
+    @Test
+    func ORDER_BYafterHAVING() {
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .GROUP_BY(\.name)
+            .HAVING("COUNT(*) > 5")
+            .ORDER_BY(\.name, .DESC)
+        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 5 ORDER BY name DESC")
+    }
 }

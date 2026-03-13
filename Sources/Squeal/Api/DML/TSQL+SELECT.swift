@@ -186,3 +186,71 @@ public struct RawSQL: SelectField {
     }
 }
 
+public struct SUM: SelectField {
+    public let string: String
+    
+    public init<T, Y>(_ column: TableColumn<T, Y>) {
+        self.string = "SUM(\(column.tableName).\(column.name))"
+    }
+    
+    public init<T, Y>(_ column: KeyPath<T, TableColumn<T, Y>>) where T: Table {
+        let table = T()
+        self.string = "SUM(\(table[keyPath: column].name))"
+    }
+    
+    public func toString() -> String {
+        return string
+    }
+}
+
+public struct AVG: SelectField {
+    public let string: String
+    
+    public init<T, Y>(_ column: TableColumn<T, Y>) {
+        self.string = "AVG(\(column.tableName).\(column.name))"
+    }
+    
+    public init<T, Y>(_ column: KeyPath<T, TableColumn<T, Y>>) where T: Table {
+        let table = T()
+        self.string = "AVG(\(table[keyPath: column].name))"
+    }
+    
+    public func toString() -> String {
+        return string
+    }
+}
+
+public struct MIN: SelectField {
+    public let string: String
+    
+    public init<T, Y>(_ column: TableColumn<T, Y>) {
+        self.string = "MIN(\(column.tableName).\(column.name))"
+    }
+    
+    public init<T, Y>(_ column: KeyPath<T, TableColumn<T, Y>>) where T: Table {
+        let table = T()
+        self.string = "MIN(\(table[keyPath: column].name))"
+    }
+    
+    public func toString() -> String {
+        return string
+    }
+}
+
+public struct MAX: SelectField {
+    public let string: String
+    
+    public init<T, Y>(_ column: TableColumn<T, Y>) {
+        self.string = "MAX(\(column.tableName).\(column.name))"
+    }
+    
+    public init<T, Y>(_ column: KeyPath<T, TableColumn<T, Y>>) where T: Table {
+        let table = T()
+        self.string = "MAX(\(table[keyPath: column].name))"
+    }
+    
+    public func toString() -> String {
+        return string
+    }
+}
+

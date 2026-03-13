@@ -48,4 +48,13 @@ struct GROUP_BYTests {
         #expect(query.query == "SELECT id FROM users WHERE id = $1 AND name = $2 GROUP BY id")
         #expect("\(query)" == "SELECT id FROM users WHERE id = 12 AND name = 'jack' GROUP BY id")
     }
+    
+    @Test
+    func GROUPBYmultipleColumns() {
+        let query = SQL
+            .SELECT(\.name, \.age)
+            .FROM(users)
+            .GROUP_BY(\.name, \.age)
+        #expect(query.query == "SELECT name, age FROM users GROUP BY name, age")
+    }
 }

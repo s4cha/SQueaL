@@ -256,6 +256,8 @@ struct SELECTTests {
         #expect(query.query == "SELECT DISTINCT name AS username FROM users")
         #expect("\(query)" == "SELECT DISTINCT name AS username FROM users")
     }
+    
+    
 }
     
     

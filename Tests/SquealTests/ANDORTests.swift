@@ -91,4 +91,43 @@ struct ANDTests {
         #expect("\(query)" == "SELECT * FROM users WHERE id = 1 OR name = 'Bob' AND age = 30")
     }
 
+    @Test
+    func ANDwithIN() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.age > 18)
+            .AND(\.name, IN: ["Alice", "Bob"])
+        #expect(query.query == "SELECT * FROM users WHERE age > $1 AND name IN ($2, $3)")
+    }
+
+    @Test
+    func ORwithIN() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.age > 18)
+            .OR(\.name, IN: ["Alice", "Bob"])
+        #expect(query.query == "SELECT * FROM users WHERE age > $1 OR name IN ($2, $3)")
+    }
+
+    @Test
+    func ANDwithLIKE() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.id == 1)
+            .AND(\.name, LIKE: "%alice%")
+        #expect(query.query == "SELECT * FROM users WHERE id = $1 AND name LIKE $2")
+    }
+
+    @Test
+    func ORwithLIKE() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.id == 1)
+            .OR(\.name, LIKE: "%bob%")
+        #expect(query.query == "SELECT * FROM users WHERE id = $1 OR name LIKE $2")
+    }
 }
