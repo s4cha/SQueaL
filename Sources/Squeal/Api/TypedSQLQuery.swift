@@ -26,3 +26,24 @@ public struct TypedSQLQuery<T: Table, Row>: TableSQLQuery {
         self.parameters = parameters
     }
 }
+
+// MARK: - RETURNING support (e.g. after INSERT ... ON CONFLICT ... DO ... RETURNING)
+
+public extension TypedSQLQuery {
+    
+    func RETURNING<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> TypedSQLQuery<T, Void> {
+        return TypedSQLQuery<T, Void>(for: table, query: query + " RETURNING \(table[keyPath: kp].name)", parameters: parameters)
+    }
+    
+    func RETURNING<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSQLQuery<T, Void> {
+        var columnNames = [String]()
+        for column in repeat each columns {
+            columnNames.append(table[keyPath: column].name)
+        }
+        return TypedSQLQuery<T, Void>(for: table, query: query + " RETURNING \(columnNames.joined(separator: ", "))", parameters: parameters)
+    }
+    
+    func RETURNING(_ all: (Int, Int) -> Int) -> TypedSQLQuery<T, Void> {
+        return TypedSQLQuery<T, Void>(for: table, query: query + " RETURNING *", parameters: parameters)
+    }
+}

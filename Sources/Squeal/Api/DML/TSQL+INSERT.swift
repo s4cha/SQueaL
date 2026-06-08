@@ -170,3 +170,75 @@ public struct TypedInsertSQLQuery<T: Table>: SQLQuery {
     }
 }
 
+// MARK: - ON CONFLICT support
+
+public struct OnConflictInsertQuery<T: Table>: SQLQuery {
+    let table: T
+    public var query: String
+    public var parameters: [(any Encodable)?]
+    
+    init(for table: T, query: String, parameters: [(any Encodable)?]) {
+        self.table = table
+        self.query = query
+        self.parameters = parameters
+    }
+}
+
+// Extend insert query types with ON CONFLICT entry points
+
+public extension TypedInsertSQLQuery {
+    
+    func ON_CONFLICT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>, DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        var names: [String] = []
+        for kp in repeat each columns {
+            names.append(table[keyPath: kp].name)
+        }
+        let target = names.isEmpty ? "" : " (\(names.joined(separator: ", ")))"
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT\(target)" + " DO \(DO.rawValue)", parameters: parameters)
+    }
+    
+    func ON_CONFLICT(DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT" + " DO \(DO.rawValue)", parameters: parameters)
+    }
+    
+    func ON_CONFLICT(ON_CONSTRAINT name: String, DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT ON CONSTRAINT \(name)" + " DO \(DO.rawValue)", parameters: parameters)
+    }
+}
+
+public enum ConflictAction: String{
+    case NOTHING = "NOTHING"
+}
+
+
+@available(macOS 14.0.0, *)
+public extension TypedLoneInsertSQLQuery {
+    
+    func ON_CONFLICT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>, DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        var names: [String] = []
+        for kp in repeat each columns {
+            names.append(table[keyPath: kp].name)
+        }
+        let target = names.isEmpty ? "" : " (\(names.joined(separator: ", ")))"
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT\(target)" + " DO \(DO.rawValue)", parameters: parameters)
+    }
+    
+    func ON_CONFLICT(DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT" + " DO \(DO.rawValue)", parameters: parameters)
+    }
+    
+    func ON_CONFLICT(ON_CONSTRAINT name: String, DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT ON CONSTRAINT \(name)" + "DO \(DO.rawValue)", parameters: parameters)
+    }
+}
+
+public extension OnConflictInsertQuery {
+
+    func RETURNING<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSQLQuery<T, Void> {
+        var columnNames = [String]()
+        for column in repeat each columns {
+            columnNames.append(table[keyPath: column].name)
+        }
+        return TypedSQLQuery(for: table, query: query + " RETURNING \(columnNames.joined(separator: ", "))", parameters: parameters)
+    }
+}

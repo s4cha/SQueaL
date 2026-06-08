@@ -133,6 +133,69 @@ struct INSERT_INTOTests {
             .RETURNING(\.id, \.uuid)
         #expect(query.query == "INSERT INTO users (name) VALUES ($1) RETURNING id, uuid")
     }
+    
+    // MARK: - ON CONFLICT
+    
+    @Test
+    func INSERT_ON_CONFLICT_DO_NOTHING_with_columns() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name,
+                    VALUES: 1, "Alice")
+            .ON_CONFLICT(\.id, DO: .NOTHING)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING")
+        #expect(query.parameters.count == 2)
+    }
+    
+    @Test
+    func INSERT_ON_CONFLICT_DO_NOTHING_multiple_columns() {
+        let query = SQL
+            .INSERT(INTO: users_departments, columns: \.user_id, \.department_id,
+                    VALUES: UUID(), UUID())
+            .ON_CONFLICT(\.user_id, \.department_id, DO: .NOTHING)
+        #expect(query.query == "INSERT INTO users_departments (user_id, department_id) VALUES ($1, $2) ON CONFLICT (user_id, department_id) DO NOTHING")
+    }
+    
+    @Test
+    func INSERT_ON_CONFLICT_DO_NOTHING_bare() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name,
+                    VALUES: 1, "Alice")
+            .ON_CONFLICT(DO: .NOTHING)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT DO NOTHING")
+    }
+    
+    @Test
+    func INSERT_ON_CONFLICT_ON_CONSTRAINT_DO_NOTHING() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name,
+                    VALUES: 1, "Alice")
+            .ON_CONFLICT(ON_CONSTRAINT: "users_pkey",  DO: .NOTHING)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT ON CONSTRAINT users_pkey DO NOTHING")
+    }
+    
+    @Test
+    func INSERT_ON_CONFLICT_DO_NOTHING_then_RETURNING() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name,
+                    VALUES: 1, "Alice")
+            
+            .ON_CONFLICT(\.id, DO: .NOTHING)
+            .RETURNING(\.id)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING RETURNING id")
+    }
+    
+    @Test
+    @available(macOS 14.0.0, *)
+    func INSERT_lone_ON_CONFLICT_DO_NOTHING() {
+        let peopleArray = [
+            Person(firstname: "John", lastname: "Doe"),
+        ]
+        let query = SQL
+            .INSERT(INTO: people, columns: \.firstname, \.lastname)
+            .VALUES(peopleArray[0].firstname, peopleArray[0].lastname)
+            .ON_CONFLICT(\.firstname, \.lastname,  DO: .NOTHING)
+        #expect(query.query == "INSERT INTO people (firstname, lastname) VALUES ($1, $2) ON CONFLICT (firstname, lastname) DO NOTHING")
+    }
 }
 
 
