@@ -21,7 +21,11 @@ public extension SQLQuery {
     /// The SQL of `subquery`, with its `$n` placeholders shifted so they follow this query's parameters.
     /// Append `subquery.parameters` to this query's parameters alongside it.
     func embedded(_ subquery: SQLQuery) -> String {
-        let offset = parameterNumber()
-        return subquery.query.replacing(/\$(\d+)/) { match in "$\(Int(match.1)! + offset)" }
+        return shiftingParameters(of: subquery.query, by: parameterNumber())
     }
+}
+
+/// `sql` with every `$n` placeholder renumbered to `$(n + offset)`.
+func shiftingParameters(of sql: String, by offset: Int) -> String {
+    return sql.replacing(/\$(\d+)/) { match in "$\(Int(match.1)! + offset)" }
 }
