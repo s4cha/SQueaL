@@ -86,4 +86,26 @@ struct SubqueryTests {
         #expect(query.parameters.count == 3)
         #expect(query.parameters[2] as? UUID == userId)
     }
+    
+    @Test
+    func UPDATE_SET_subquery_onOptionalColumn() {
+        let projectId = UUID()
+        let query = SQL
+            .UPDATE(projects, SET: (\.department_id, SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).ORDER_BY(\.department_id, .ASC).LIMIT(1)))
+            .WHERE(\.id == projectId)
+        #expect(query.query == "UPDATE projects SET department_id = (SELECT department_id FROM users_departments WHERE user_id = $1 ORDER BY department_id ASC LIMIT 1) WHERE id = $2")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[0] as? UUID == userId)
+        #expect(query.parameters[1] as? UUID == projectId)
+    }
+    
+    @Test
+    func UPDATE_SET_subquery() {
+        let query = SQL
+            .UPDATE(departments, SET: (\.id, SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).LIMIT(1)))
+            .WHERE(\.name == "R&D")
+        #expect(query.query == "UPDATE departments SET id = (SELECT department_id FROM users_departments WHERE user_id = $1 LIMIT 1) WHERE name = $2")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[1] as? String == "R&D")
+    }
 }

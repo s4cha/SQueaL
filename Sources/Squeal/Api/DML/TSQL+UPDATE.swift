@@ -37,4 +37,19 @@ public extension SQL {
         q += setValues.joined(separator: ", ")
         return TypedUpdateSQLQuery(for: table, query: q, parameters: parameters)
     }
+
+    /// `UPDATE table SET column = (subquery)` — the subquery must return a single row & column.
+    static func UPDATE<T, U, Q: TableSQLQuery>(_ table: T, SET pair: (KeyPath<T, TableColumn<T, U>>, Q)) -> TypedUpdateSQLQuery<T, Void> where Q.Row == U {
+        return update(table, column: table[keyPath: pair.0].name, subquery: pair.1)
+    }
+
+    /// `UPDATE table SET column = (subquery)` on a nullable column.
+    static func UPDATE<T, U, Q: TableSQLQuery>(_ table: T, SET pair: (KeyPath<T, TableColumn<T, U?>>, Q)) -> TypedUpdateSQLQuery<T, Void> where Q.Row == U {
+        return update(table, column: table[keyPath: pair.0].name, subquery: pair.1)
+    }
+
+    private static func update<T: Table>(_ table: T, column: String, subquery: some SQLQuery) -> TypedUpdateSQLQuery<T, Void> {
+        // Nothing precedes the subquery, so its $n placeholders need no renumbering.
+        return TypedUpdateSQLQuery(for: table, query: "UPDATE \(T.schema) SET \(column) = (\(subquery.query))", parameters: subquery.parameters)
+    }
 }
