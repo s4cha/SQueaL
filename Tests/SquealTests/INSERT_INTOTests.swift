@@ -197,6 +197,38 @@ struct INSERT_INTOTests {
         #expect(query.query == "INSERT INTO people (firstname, lastname) VALUES ($1, $2) ON CONFLICT (firstname, lastname) DO NOTHING")
     }
     
+    @Test
+    func INSERT_ON_CONFLICT_partialIndex_DO_NOTHING() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name, VALUES: 1, "Alice")
+            .ON_CONFLICT(\.name, WHERE: RawSQL("name IS NOT NULL"), DO: .NOTHING)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (name) WHERE name IS NOT NULL DO NOTHING")
+        #expect(query.parameters.count == 2)
+    }
+    
+    @Test
+    func INSERT_SQLExpr_ON_CONFLICT_partialIndex_RETURNING() {
+        let query = SQL
+            .INSERT(INTO: users,
+                    columns: \.id, \.name,
+                    VALUES: 7, SQLExpr("lower(?)", "ALICE"))
+            .ON_CONFLICT(\.name, WHERE: RawSQL("name IS NOT NULL"), DO: .NOTHING)
+            .RETURNING(\.id)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, lower($2)) ON CONFLICT (name) WHERE name IS NOT NULL DO NOTHING RETURNING id")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[1] as? String == "ALICE")
+    }
+    
+    @available(macOS 14.0.0, *)
+    @Test
+    func INSERT_lone_ON_CONFLICT_partialIndex_DO_NOTHING() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name)
+            .VALUES(1, "Alice")
+            .ON_CONFLICT(\.id, \.name, WHERE: RawSQL("name IS NOT NULL"), DO: .NOTHING)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id, name) WHERE name IS NOT NULL DO NOTHING")
+    }
+    
     // MARK: - INSERT with raw SQL expressions (e.g. PostGIS)
     
     @Test

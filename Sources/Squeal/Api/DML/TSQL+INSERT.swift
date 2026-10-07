@@ -342,6 +342,15 @@ public extension TypedInsertSQLQuery {
         return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT" + " DO \(DO.rawValue)", parameters: parameters)
     }
     
+    /// Conflict target on a partial unique index, e.g. `ON CONFLICT (col) WHERE col IS NOT NULL DO NOTHING`.
+    func ON_CONFLICT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>, WHERE predicate: RawSQL, DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        var names: [String] = []
+        for kp in repeat each columns {
+            names.append(table[keyPath: kp].name)
+        }
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT (\(names.joined(separator: ", "))) WHERE \(predicate.expression) DO \(DO.rawValue)", parameters: parameters)
+    }
+    
     func ON_CONFLICT(ON_CONSTRAINT name: String, DO: ConflictAction) -> OnConflictInsertQuery<T> {
         return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT ON CONSTRAINT \(name)" + " DO \(DO.rawValue)", parameters: parameters)
     }
@@ -366,6 +375,15 @@ public extension TypedLoneInsertSQLQuery {
     
     func ON_CONFLICT(DO: ConflictAction) -> OnConflictInsertQuery<T> {
         return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT" + " DO \(DO.rawValue)", parameters: parameters)
+    }
+    
+    /// Conflict target on a partial unique index, e.g. `ON CONFLICT (col) WHERE col IS NOT NULL DO NOTHING`.
+    func ON_CONFLICT<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>, WHERE predicate: RawSQL, DO: ConflictAction) -> OnConflictInsertQuery<T> {
+        var names: [String] = []
+        for kp in repeat each columns {
+            names.append(table[keyPath: kp].name)
+        }
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT (\(names.joined(separator: ", "))) WHERE \(predicate.expression) DO \(DO.rawValue)", parameters: parameters)
     }
     
     func ON_CONFLICT(ON_CONSTRAINT name: String, DO: ConflictAction) -> OnConflictInsertQuery<T> {
