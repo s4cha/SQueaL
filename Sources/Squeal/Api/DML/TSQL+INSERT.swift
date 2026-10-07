@@ -92,37 +92,7 @@ public extension SQL {
             columnNames.append(table[keyPath: column].name)
         }
         
-        var allParams: [(any Encodable)?] = []
-        var valueFragments: [String] = []
-        var pIndex = 0
-        
-        func nextPlaceholder() -> String {
-            pIndex += 1
-            return "$\(pIndex)"
-        }
-        
-        for v in values {
-            if let expr = v as? SQLExpr {
-                var frag = expr.sql
-                for arg in expr.parameters {
-                    let ph = nextPlaceholder()
-                    if let qRange = frag.range(of: "?") {
-                        frag.replaceSubrange(qRange, with: ph)
-                    }
-                    allParams.append(arg)
-                }
-                valueFragments.append(frag)
-            } else if let raw = v as? RawSQL {
-                valueFragments.append(raw.expression)
-                // no additional parameters
-            } else if let enc = v as? any Encodable {
-                allParams.append(enc)
-                valueFragments.append(nextPlaceholder())
-            } else {
-                // Fallback – treat unknowns as NULL (or could fatalError in debug)
-                valueFragments.append("NULL")
-            }
-        }
+        let (valueFragments, allParams) = renderSQLValues(values, parameterOffset: 0)
         
         let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) VALUES (\(valueFragments.joined(separator: ", ")))"
         return TypedInsertSQLQuery(for: table, query: q, parameters: allParams)
@@ -161,35 +131,7 @@ public extension TypedLoneInsertSQLQuery {
             q += "VALUES "
         }
         
-        var addedParams: [(any Encodable)?] = []
-        var fragments: [String] = []
-        var pIndex = parameterNumber()
-        
-        func nextPlaceholder() -> String {
-            pIndex += 1
-            return "$\(pIndex)"
-        }
-        
-        for v in values {
-            if let expr = v as? SQLExpr {
-                var frag = expr.sql
-                for arg in expr.parameters {
-                    let ph = nextPlaceholder()
-                    if let qRange = frag.range(of: "?") {
-                        frag.replaceSubrange(qRange, with: ph)
-                    }
-                    addedParams.append(arg)
-                }
-                fragments.append(frag)
-            } else if let raw = v as? RawSQL {
-                fragments.append(raw.expression)
-            } else if let enc = v as? any Encodable {
-                addedParams.append(enc)
-                fragments.append(nextPlaceholder())
-            } else {
-                fragments.append("NULL")
-            }
-        }
+        let (fragments, addedParams) = renderSQLValues(values, parameterOffset: parameterNumber())
         
         let valuesRow = "(" + fragments.joined(separator: ", ") + ")"
         q += valuesRow
@@ -228,35 +170,7 @@ public extension TypedLoneInsertSQLQuery {
             q += "VALUES "
         }
         
-        var addedParams: [(any Encodable)?] = []
-        var fragments: [String] = []
-        var pIndex = parameterNumber()
-        
-        func nextPlaceholder() -> String {
-            pIndex += 1
-            return "$\(pIndex)"
-        }
-        
-        for v in values {
-            if let expr = v as? SQLExpr {
-                var frag = expr.sql
-                for arg in expr.parameters {
-                    let ph = nextPlaceholder()
-                    if let qRange = frag.range(of: "?") {
-                        frag.replaceSubrange(qRange, with: ph)
-                    }
-                    addedParams.append(arg)
-                }
-                fragments.append(frag)
-            } else if let raw = v as? RawSQL {
-                fragments.append(raw.expression)
-            } else if let enc = v as? any Encodable {
-                addedParams.append(enc)
-                fragments.append(nextPlaceholder())
-            } else {
-                fragments.append("NULL")
-            }
-        }
+        let (fragments, addedParams) = renderSQLValues(values, parameterOffset: parameterNumber())
         
         let valuesRow = "(" + fragments.joined(separator: ", ") + ")"
         q += valuesRow
@@ -266,6 +180,11 @@ public extension TypedLoneInsertSQLQuery {
 }
 
 public extension TypedInsertSQLQuery {
+
+    /// RETURNING mixing table columns (`table.column`) and `RawSQL` expressions.
+    func RETURNING<each F: SelectField>(_ fields: repeat each F) -> TypedSQLQuery<T, Void> {
+        return TypedSQLQuery(for: table, query: query + returningClause(repeat each fields), parameters: parameters)
+    }
     
     func VALUES(_ values: String...) -> TypedSQLQuery<T, Void> {
         TypedSQLQuery(for: table, query: query + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: parameters)
@@ -392,6 +311,11 @@ public extension TypedLoneInsertSQLQuery {
 }
 
 public extension OnConflictInsertQuery {
+
+    /// RETURNING mixing table columns (`table.column`) and `RawSQL` expressions.
+    func RETURNING<each F: SelectField>(_ fields: repeat each F) -> TypedSQLQuery<T, Void> {
+        return TypedSQLQuery(for: table, query: query + returningClause(repeat each fields), parameters: parameters)
+    }
 
     func RETURNING<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSQLQuery<T, Void> {
         var columnNames = [String]()

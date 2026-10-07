@@ -40,6 +40,11 @@ public struct TypedWhereSQLQuery<T: Table, Row>: WHEREClause {
     public func RETURNING(_ all: (Int, Int) -> Int) -> TypedSQLQuery<T, Void> {
         return TypedSQLQuery(for: table, query: query + " RETURNING *", parameters: parameters)
     }
+
+    /// RETURNING mixing table columns (`table.column`) and `RawSQL` expressions.
+    public func RETURNING<each F: SelectField>(_ fields: repeat each F) -> TypedSQLQuery<T, Void> {
+        return TypedSQLQuery(for: table, query: query + returningClause(repeat each fields), parameters: parameters)
+    }
 }
 
 public struct PartialTypedWhereSQLQuery<T: Table, U, Row>: TableSQLQuery {

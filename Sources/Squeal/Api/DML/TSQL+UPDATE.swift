@@ -38,6 +38,20 @@ public extension SQL {
         return TypedUpdateSQLQuery(for: table, query: q, parameters: parameters)
     }
 
+    /// UPDATE whose SET values mix plain values (bound as parameters) with `SQLExpr` / `RawSQL` expressions,
+    /// e.g. `(\.name, SQLExpr("COALESCE(?, name)", name))` or `(\.updated_at, RawSQL("now()"))`.
+    static func UPDATE<T, each U>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, Any)) -> TypedUpdateSQLQuery<T, Void> {
+        var columnNames = [String]()
+        var values = [Any]()
+        for pair in repeat each pairs {
+            columnNames.append(table[keyPath: pair.0].name)
+            values.append(pair.1)
+        }
+        let (fragments, parameters) = renderSQLValues(values, parameterOffset: 0)
+        let setValues = zip(columnNames, fragments).map { "\($0) = \($1)" }
+        return TypedUpdateSQLQuery(for: table, query: "UPDATE \(T.schema) SET \(setValues.joined(separator: ", "))", parameters: parameters)
+    }
+
     /// `UPDATE table SET column = (subquery)` — the subquery must return a single row & column.
     static func UPDATE<T, U, Q: TableSQLQuery>(_ table: T, SET pair: (KeyPath<T, TableColumn<T, U>>, Q)) -> TypedUpdateSQLQuery<T, Void> where Q.Row == U {
         return update(table, column: table[keyPath: pair.0].name, subquery: pair.1)

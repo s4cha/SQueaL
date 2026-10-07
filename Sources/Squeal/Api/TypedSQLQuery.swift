@@ -27,6 +27,17 @@ public struct TypedSQLQuery<T: Table, Row>: TableSQLQuery {
     }
 }
 
+// MARK: - RETURNING expressions
+
+/// ` RETURNING a, b, …` for fields that may mix table columns (`table.column`) and `RawSQL` expressions.
+func returningClause<each F: SelectField>(_ fields: repeat each F) -> String {
+    var names = [String]()
+    for field in repeat each fields {
+        names.append(field.toString())
+    }
+    return " RETURNING \(names.joined(separator: ", "))"
+}
+
 // MARK: - RETURNING support (e.g. after INSERT ... ON CONFLICT ... DO ... RETURNING)
 
 public extension TypedSQLQuery {
