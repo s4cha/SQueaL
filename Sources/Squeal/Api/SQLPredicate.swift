@@ -49,3 +49,22 @@ public func == <T: Table, Y: Encodable>(left: TableColumn<T, Y>, right: Y) -> Ta
     return TableColumnPredicate(column: left, sign: "=", right: right)
 }
 
+public func != <T: Table, Y: Encodable>(left: TableColumn<T, Y>, right: Y) -> TableColumnPredicate<T, Y> {
+    return TableColumnPredicate(column: left, sign: "!=", right: right)
+}
+
+public func > <T: Table, Y: Encodable>(left: TableColumn<T, Y>, right: Y) -> TableColumnPredicate<T, Y> {
+    return TableColumnPredicate(column: left, sign: ">", right: right)
+}
+
+public func < <T: Table, Y: Encodable>(left: TableColumn<T, Y>, right: Y) -> TableColumnPredicate<T, Y> {
+    return TableColumnPredicate(column: left, sign: "<", right: right)
+}
+
+public func >= <T: Table, Y: Encodable>(left: TableColumn<T, Y>, right: Y) -> TableColumnPredicate<T, Y> {
+    return TableColumnPredicate(column: left, sign: ">=", right: right)
+}
+
+public func <= <T: Table, Y: Encodable>(left: TableColumn<T, Y>, right: Y) -> TableColumnPredicate<T, Y> {
+    return TableColumnPredicate(column: left, sign: "<=", right: right)
+}

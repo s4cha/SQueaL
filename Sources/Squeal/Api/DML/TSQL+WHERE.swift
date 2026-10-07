@@ -110,6 +110,11 @@ public extension WHEREableQuery {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE \(table[keyPath: kp].name) IN (\(embedded(subquery)))", parameters: parameters + subquery.parameters)
     }
 
+    /// WHERE `table.column` IN (subquery) on a column of any table (e.g. a JOINed one).
+    func WHERE<U: Table, Y, Q: TableSQLQuery>(_ column: TableColumn<U, Y>, IN subquery: Q) -> TypedWhereSQLQuery<T, Row> where Q.Row == Y {
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(column.toString()) IN (\(embedded(subquery)))", parameters: parameters + subquery.parameters)
+    }
+    
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table, query: query + " WHERE \(table[keyPath: kp].name) like \(nextDollarSign())", parameters: parameters + [value])
     }

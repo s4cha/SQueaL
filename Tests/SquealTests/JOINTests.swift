@@ -159,3 +159,43 @@ struct JOIN_ORDER_BYTests {
         #expect(query.parameters[0] as? UUID == userId)
     }
 }
+
+struct JOIN_WHERE_qualifiedColumnsTests {
+    
+    @Test
+    func JOIN_WHERE_IN_subquery_and_optionalFilters() {
+        let userId = UUID()
+        let minAge: Int? = 18
+        let maxAge: Int? = nil
+        var filter = SQL
+            .SELECT(users.name, departments.name, RawSQL("upper(departments.name)"))
+            .FROM(users_departments)
+            .JOIN(users, ON: users.uuid == users_departments.user_id)
+            .JOIN(departments, ON: departments.id == users_departments.department_id)
+            .WHERE(departments.id, IN: SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId))
+        if let minAge { filter = filter.AND(users.age >= minAge) }
+        if let maxAge { filter = filter.AND(users.age <= maxAge) }
+        filter = filter.AND(users_departments.user_id == userId)
+        let query = filter.ORDER_BY(users.age, .DESC)
+        
+        #expect(query.query == "SELECT users.name, departments.name, upper(departments.name) FROM users_departments JOIN users ON users.uuid = users_departments.user_id JOIN departments ON departments.id = users_departments.department_id WHERE departments.id IN (SELECT department_id FROM users_departments WHERE user_id = $1) AND users.age >= $2 AND users_departments.user_id = $3 ORDER BY users.age DESC")
+        #expect(query.parameters.count == 3)
+        #expect(query.parameters[0] as? UUID == userId)
+        #expect(query.parameters[1] as? Int == 18)
+        #expect(query.parameters[2] as? UUID == userId)
+    }
+    
+    @Test
+    func qualifiedColumnComparisonOperators() {
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(users)
+            .WHERE(users.age > 1)
+            .AND(users.age < 2)
+            .AND(users.age >= 3)
+            .AND(users.age <= 4)
+            .AND(users.name != "Bob")
+        #expect(query.query == "SELECT id FROM users WHERE users.age > $1 AND users.age < $2 AND users.age >= $3 AND users.age <= $4 AND users.name != $5")
+        #expect(query.parameters.count == 5)
+    }
+}
