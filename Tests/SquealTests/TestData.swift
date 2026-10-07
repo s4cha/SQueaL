@@ -67,7 +67,16 @@ struct UsersDepartments {
 }
 
 
+@Table(schema: "projects")
+struct Projects {
+    let id: UUID
+    let name: String
+    let department_id: UUID?
+}
+
+
 let users = UsersTable()
+let projects = ProjectsTable()
 let orders = OrdersTable()
 let employees = EmployeesTable()
 let departments = DepartmentsTable()

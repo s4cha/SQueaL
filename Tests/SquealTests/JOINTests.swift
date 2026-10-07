@@ -142,3 +142,20 @@ struct JOINTests {
 //    ON users.id = orders.user_id
 //WHERE orders.status = 'pending';
 
+
+struct JOIN_ORDER_BYTests {
+    
+    @Test
+    func JOIN_WHERE_ORDER_BY_joinedColumn() {
+        let userId = UUID()
+        let query = SQL
+            .SELECT(departments.id, departments.name)
+            .FROM(departments)
+            .JOIN(users_departments, ON: users_departments.department_id == departments.id)
+            .WHERE(users_departments.user_id == userId)
+            .ORDER_BY(users_departments.department_id, .ASC)
+        #expect(query.query == "SELECT departments.id, departments.name FROM departments JOIN users_departments ON users_departments.department_id = departments.id WHERE users_departments.user_id = $1 ORDER BY users_departments.department_id ASC")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? UUID == userId)
+    }
+}

@@ -34,6 +34,14 @@ public extension ANDableQuery {
         return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: kp].name) IN (\(values.map{_ in "\(nextParamSign())"}.joined(separator: ", ")))", parameters: parameters + values)
     }
 
+    func AND<U, Q: TableSQLQuery>(_ kp: KeyPath<T, TableColumn<T, U>>, IN subquery: Q) -> TypedWhereSQLQuery<T, Row> where Q.Row == U {
+        return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: kp].name) IN (\(embedded(subquery)))", parameters: parameters + subquery.parameters)
+    }
+
+    func AND<U, Q: TableSQLQuery>(_ kp: KeyPath<T, TableColumn<T, U?>>, IN subquery: Q) -> TypedWhereSQLQuery<T, Row> where Q.Row == U {
+        return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: kp].name) IN (\(embedded(subquery)))", parameters: parameters + subquery.parameters)
+    }
+
     func AND<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: kp].name) LIKE \(nextDollarSign())", parameters: parameters + [value])
     }

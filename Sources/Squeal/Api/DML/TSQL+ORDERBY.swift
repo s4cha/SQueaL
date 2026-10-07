@@ -55,6 +55,11 @@ public extension OrderByableQuery {
         }
         return TypedOrderBySQLQuery(for: table, query: query + " ORDER BY \(columnNames.joined(separator: ", "))", parameters: parameters)
     }
+
+    /// ORDER BY a column of any table (e.g. a JOINed one), qualified as `table.column`.
+    func ORDER_BY<U: Table, X>(_ column: TableColumn<U, X>, _ order: OrderByOrder) -> TypedOrderBySQLQuery<T, Row> {
+        return TypedOrderBySQLQuery(for: table, query: query + " ORDER BY \(column.tableName).\(column.name) \(order.rawValue)", parameters: parameters)
+    }
 }
 
 public enum OrderByOrder: String {
