@@ -151,8 +151,7 @@ struct WHERETests {
         let query = SQL
             .SELECT(\.id)
             .FROM(users)
-            .WHERE(\.name)
-            .IS_NULL
+            .WHERE(\.name).IS_NULL
         
         #expect(query.parameters.count == 0)
         #expect(query.query == "SELECT id FROM users WHERE name IS NULL")

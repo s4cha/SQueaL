@@ -75,6 +75,58 @@ public extension SQL {
         let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) "
         return TypedLoneInsertSQLQuery(for: table, query: q, parameters: []) // TODO
     }
+    
+    /// INSERT that supports a mix of plain Encodable values (bound as parameters) and
+    /// raw SQL expressions (e.g. PostGIS `ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography`).
+    ///
+    /// Use `SQLExpr("...", args...)` (with `?` placeholders) or `RawSQL("...")` for expressions.
+    /// Plain values (any Encodable) are automatically parameterized.
+    static func INSERT<T, each C>(
+        INTO table: T,
+        columns: repeat KeyPath<T, TableColumn<T, each C>>,
+        VALUES values: Any...
+    ) -> TypedInsertSQLQuery<T> {
+        
+        var columnNames = [String]()
+        for column in repeat each columns {
+            columnNames.append(table[keyPath: column].name)
+        }
+        
+        var allParams: [(any Encodable)?] = []
+        var valueFragments: [String] = []
+        var pIndex = 0
+        
+        func nextPlaceholder() -> String {
+            pIndex += 1
+            return "$\(pIndex)"
+        }
+        
+        for v in values {
+            if let expr = v as? SQLExpr {
+                var frag = expr.sql
+                for arg in expr.parameters {
+                    let ph = nextPlaceholder()
+                    if let qRange = frag.range(of: "?") {
+                        frag.replaceSubrange(qRange, with: ph)
+                    }
+                    allParams.append(arg)
+                }
+                valueFragments.append(frag)
+            } else if let raw = v as? RawSQL {
+                valueFragments.append(raw.expression)
+                // no additional parameters
+            } else if let enc = v as? any Encodable {
+                allParams.append(enc)
+                valueFragments.append(nextPlaceholder())
+            } else {
+                // Fallback – treat unknowns as NULL (or could fatalError in debug)
+                valueFragments.append("NULL")
+            }
+        }
+        
+        let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) VALUES (\(valueFragments.joined(separator: ", ")))"
+        return TypedInsertSQLQuery(for: table, query: q, parameters: allParams)
+    }
 }
 
 @available(macOS 14.0.0, *)
@@ -100,6 +152,50 @@ public extension TypedLoneInsertSQLQuery {
         return TypedLoneInsertSQLQuery(for: table, query: query + q, parameters: parameters + queryParams)
     }
     
+    /// VALUES supporting a mix of plain values and raw SQL expressions (e.g. PostGIS).
+    func VALUES(_ values: Any...) -> TypedLoneInsertSQLQuery {
+        var q = ""
+        if query.contains("VALUES (") {
+            q += ", "
+        } else {
+            q += "VALUES "
+        }
+        
+        var addedParams: [(any Encodable)?] = []
+        var fragments: [String] = []
+        var pIndex = parameterNumber()
+        
+        func nextPlaceholder() -> String {
+            pIndex += 1
+            return "$\(pIndex)"
+        }
+        
+        for v in values {
+            if let expr = v as? SQLExpr {
+                var frag = expr.sql
+                for arg in expr.parameters {
+                    let ph = nextPlaceholder()
+                    if let qRange = frag.range(of: "?") {
+                        frag.replaceSubrange(qRange, with: ph)
+                    }
+                    addedParams.append(arg)
+                }
+                fragments.append(frag)
+            } else if let raw = v as? RawSQL {
+                fragments.append(raw.expression)
+            } else if let enc = v as? any Encodable {
+                addedParams.append(enc)
+                fragments.append(nextPlaceholder())
+            } else {
+                fragments.append("NULL")
+            }
+        }
+        
+        let valuesRow = "(" + fragments.joined(separator: ", ") + ")"
+        q += valuesRow
+        return TypedLoneInsertSQLQuery(for: table, query: query + q, parameters: parameters + addedParams)
+    }
+    
     mutating func ADDVALUES(_ values: repeat each V) {
         var q = ""
         if query.contains("VALUES (") {
@@ -121,6 +217,51 @@ public extension TypedLoneInsertSQLQuery {
         q += valuesRow
         query = query + q
         parameters += queryParams
+    }
+    
+    /// ADDVALUES supporting a mix of plain values and raw SQL expressions (e.g. PostGIS).
+    mutating func ADDVALUES(_ values: Any...) {
+        var q = ""
+        if query.contains("VALUES (") {
+            q += ", "
+        } else {
+            q += "VALUES "
+        }
+        
+        var addedParams: [(any Encodable)?] = []
+        var fragments: [String] = []
+        var pIndex = parameterNumber()
+        
+        func nextPlaceholder() -> String {
+            pIndex += 1
+            return "$\(pIndex)"
+        }
+        
+        for v in values {
+            if let expr = v as? SQLExpr {
+                var frag = expr.sql
+                for arg in expr.parameters {
+                    let ph = nextPlaceholder()
+                    if let qRange = frag.range(of: "?") {
+                        frag.replaceSubrange(qRange, with: ph)
+                    }
+                    addedParams.append(arg)
+                }
+                fragments.append(frag)
+            } else if let raw = v as? RawSQL {
+                fragments.append(raw.expression)
+            } else if let enc = v as? any Encodable {
+                addedParams.append(enc)
+                fragments.append(nextPlaceholder())
+            } else {
+                fragments.append("NULL")
+            }
+        }
+        
+        let valuesRow = "(" + fragments.joined(separator: ", ") + ")"
+        q += valuesRow
+        query = query + q
+        parameters += addedParams
     }
 }
 

@@ -196,6 +196,60 @@ struct INSERT_INTOTests {
             .ON_CONFLICT(\.firstname, \.lastname,  DO: .NOTHING)
         #expect(query.query == "INSERT INTO people (firstname, lastname) VALUES ($1, $2) ON CONFLICT (firstname, lastname) DO NOTHING")
     }
+    
+    // MARK: - INSERT with raw SQL expressions (e.g. PostGIS)
+    
+    @Test
+    func INSERT_withSQLExpr_and_RETURNING() {
+        let lng = 2.2945
+        let lat = 48.8584
+        let now = Date()
+        
+        let query = SQL
+            .INSERT(INTO: users,
+                    columns: \.id, \.name, \.age, \.uuid,
+                    VALUES: 42,
+                            SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat),
+                            99,
+                            now)
+            .RETURNING(\.id)
+        
+        #expect(query.query == "INSERT INTO users (id, name, age, uuid) VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography, $4, $5) RETURNING id")
+        #expect(query.parameters.count == 5)
+        #expect(query.parameters[0] as? Int == 42)
+        #expect(query.parameters[1] as? Double == lng)
+        #expect(query.parameters[2] as? Double == lat)
+        #expect(query.parameters[3] as? Int == 99)
+        #expect(query.parameters[4] as? Date == now)
+    }
+    
+    @Test
+    func INSERT_withRawSQL_and_SQLExpr() {
+        let query = SQL
+            .INSERT(INTO: users,
+                    columns: \.id, \.name,
+                    VALUES: 1,
+                            RawSQL("NOW()"))
+        
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, NOW())")
+        #expect(query.parameters.count == 1)
+    }
+    
+    @available(macOS 14.0.0, *)
+    @Test
+    func INSERT_lone_withSQLExpr() {
+        let lng = -0.1278
+        let lat = 51.5074
+        
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name)
+            .VALUES(123, SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat))
+        
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography)")
+        #expect(query.parameters.count == 3)
+        #expect(query.parameters[1] as? Double == lng)
+        #expect(query.parameters[2] as? Double == lat)
+    }
 }
 
 

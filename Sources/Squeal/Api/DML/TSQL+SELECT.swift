@@ -177,12 +177,29 @@ extension COUNT: SelectField {
 }
 
 public struct RawSQL: SelectField {
-    let expression: String
+    public let expression: String
     public init(_ expression: String) {
         self.expression = expression
     }
     public func toString() -> String {
         return expression
+    }
+}
+
+/// A raw SQL expression that can be placed in a VALUES list (or other expression positions).
+/// Use `?` as placeholders for parameters; they are rewritten to the correct positional `$n` at build time.
+///
+/// Example for PostGIS:
+/// ```swift
+/// SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat)
+/// ```
+public struct SQLExpr {
+    public let sql: String
+    public let parameters: [(any Encodable)?]
+    
+    public init(_ sql: String, _ parameters: (any Encodable)?...) {
+        self.sql = sql
+        self.parameters = parameters
     }
 }
 

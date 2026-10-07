@@ -216,14 +216,6 @@ func fullGroupedQuery() {
 //    }
 
 
-// MARK: - RETURNING on UPDATE / DELETE
-//
-// Needs: Add RETURNING method to TypedWhereSQLQuery (or a post-WHERE query type):
-//   func RETURNING<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> TypedSQLQuery<T, Void>
-//   func RETURNING(_ all: (Int, Int) -> Int) -> TypedSQLQuery<T, Void>  // for *
-//
-
-
 // MARK: - UNION / UNION ALL
 //
 // Needs: Add UNION / UNION_ALL operators or methods on query types:
