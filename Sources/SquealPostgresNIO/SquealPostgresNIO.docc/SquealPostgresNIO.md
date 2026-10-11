@@ -44,8 +44,9 @@ Any other type throws ``SquealBindingError`` before the query is sent.
 ### Using it in a server
 
 In Hummingbird or Vapor, create a single `PostgresClient` at startup, run it alongside your
-server, and call `query(_:)` from your route handlers. The `Examples/HummingbirdTodos`
-package in the Squeal repository is a complete, runnable app that does this.
+server, and call `query(_:)` from your route handlers. The `Examples/HummingbirdBlog`
+package in the Squeal repository is a complete, runnable app that does this. Squeal's
+"Using Squeal with Hummingbird" article walks through it.
 
 ## Topics
 

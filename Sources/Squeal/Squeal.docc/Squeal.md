@@ -48,6 +48,7 @@ Run them with the companion `SquealPostgresNIO` module or with any Postgres driv
 - <doc:GettingStarted>
 - <doc:DefiningTables>
 - <doc:ParametersAndSafety>
+- <doc:UsingWithHummingbird>
 
 ### Writing Queries
 
