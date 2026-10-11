@@ -9,6 +9,10 @@ import Foundation
 
 // Format Queries.
 public extension SQLQuery {
+    /// The query with each placeholder replaced by its parameter, for logging and debugging.
+    ///
+    /// Strings and UUIDs are single-quoted, and `nil` becomes `NULL`. Nothing is escaped, so
+    /// never execute this string. Run ``query`` with ``parameters`` instead.
     func toString() -> String {
         var q = query
         for (index, value) in parameters.enumerated().reversed() {
@@ -31,5 +35,6 @@ public extension SQLQuery {
 }
 
 public extension SQLQuery {
+    /// The query with its parameters inlined. See ``toString()``.
     var description: String { return toString() }
 }

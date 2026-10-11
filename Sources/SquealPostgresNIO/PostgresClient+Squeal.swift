@@ -3,6 +3,23 @@ import Squeal
 import Logging
 
 extension PostgresClient {
+    /// Runs a Squeal query, binding its parameters.
+    ///
+    /// ```swift
+    /// let rows = try await client.query(SQL.SELECT(\.id, \.name).FROM(users).WHERE(\.age >= 18))
+    /// for try await (id, name) in rows.decode((UUID, String).self) { … }
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - query: The query to run. Its `query` is sent as the statement, and
+    ///     its `parameters` are bound to `$1…$n`.
+    ///   - logger: The logger for this query. If you don't pass one, PostgresNIO uses the
+    ///     client's background logger.
+    ///   - file: The file that issued the query, for diagnostics.
+    ///   - line: The line that issued the query, for diagnostics.
+    /// - Returns: The rows the query produced.
+    /// - Throws: ``SquealBindingError`` if a parameter can't be encoded for Postgres, or any
+    ///   error PostgresNIO throws while running the query.
     @discardableResult
     public func query(
         _ query: SQLQuery,
@@ -33,7 +50,11 @@ extension PostgresClient {
 }
 
 /// Thrown when a query parameter has no PostgresNIO encoding.
+///
+/// To bind a custom type, make it conform to PostgresNIO's `PostgresEncodable`, or make it
+/// `RawRepresentable` with a `String` raw value.
 public struct SquealBindingError: Error, CustomStringConvertible {
+    /// The name of the type that couldn't be bound.
     public let type: String
     public var description: String { "Squeal: cannot bind parameter of type \(type) to Postgres" }
 }
