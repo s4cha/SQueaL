@@ -1,0 +1,46 @@
+@Tutorials(name: "Building a Blog Backend") {
+    @Intro(title: "Building a Blog Backend with Squeal") {
+        Write the queries behind a small blogging service: users, posts, a feed and some
+        statistics. Then run them on a real Postgres database.
+
+        Along the way you'll see how Squeal keeps your SQL type-safe without hiding it:
+        every query reads like the SQL it produces, and the compiler checks the rest.
+    }
+
+    @Chapter(name: "Squeal Essentials") {
+        Describe your schema in Swift, then read, write and combine data with queries the
+        compiler checks.
+
+        @Image(source: chapter-essentials.svg, alt: "A Squeal query in Swift above the SQL it generates.")
+
+        @TutorialReference(tutorial: "doc:WriteYourFirstQuery")
+        @TutorialReference(tutorial: "doc:WriteData")
+        @TutorialReference(tutorial: "doc:QueryAcrossTables")
+    }
+
+    @Chapter(name: "Connecting to Postgres") {
+        Send your queries to a database and decode the rows that come back.
+
+        @Image(source: chapter-postgres.svg, alt: "Squeal sends a query and its parameters to Postgres, which sends rows back.")
+
+        @TutorialReference(tutorial: "doc:RunQueriesOnPostgres")
+    }
+
+    @Resources {
+        Go further with the articles and the API reference.
+
+        @Documentation(destination: "https://swiftpackageindex.com/s4cha/Squeal/documentation/squeal") {
+            Browse every clause Squeal supports, with examples.
+
+            - <doc:SelectingData>
+            - <doc:ParametersAndSafety>
+            - <doc:EscapeHatches>
+        }
+
+        @Forums(destination: "https://github.com/s4cha/Squeal/issues") {
+            Report a bug or ask for a feature.
+
+            - [Open an issue](https://github.com/s4cha/Squeal/issues/new)
+        }
+    }
+}

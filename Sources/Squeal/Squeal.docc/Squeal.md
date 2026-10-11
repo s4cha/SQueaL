@@ -44,6 +44,7 @@ Run them with the companion `SquealPostgresNIO` module or with any Postgres driv
 
 ### Essentials
 
+- <doc:tutorials/SquealTutorials>
 - <doc:GettingStarted>
 - <doc:DefiningTables>
 - <doc:ParametersAndSafety>

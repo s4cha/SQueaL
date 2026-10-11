@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="SF Mono, Menlo, monospace">
+  <rect width="800" height="600" rx="32" fill="#1d1d1f"/>
+  <rect x="80" y="90" width="640" height="300" rx="20" fill="#2c2c2e"/>
+  <circle cx="116" cy="124" r="8" fill="#ff5f57"/><circle cx="142" cy="124" r="8" fill="#febc2e"/><circle cx="168" cy="124" r="8" fill="#28c840"/>
+  <text x="116" y="190" font-size="30" fill="#f2f2f7">SQL</text>
+  <text x="140" y="232" font-size="30" fill="#f05138">.SELECT<tspan fill="#f2f2f7">(\.id, \.name)</tspan></text>
+  <text x="140" y="274" font-size="30" fill="#f05138">.FROM<tspan fill="#f2f2f7">(users)</tspan></text>
+  <text x="140" y="316" font-size="30" fill="#f05138">.WHERE<tspan fill="#f2f2f7">(\.age &gt;= </tspan><tspan fill="#d0bf69">18</tspan><tspan fill="#f2f2f7">)</tspan></text>
+  <path d="M400 410 v44" stroke="#8e8e93" stroke-width="4" stroke-linecap="round"/>
+  <path d="M386 442 l14 16 l14 -16" fill="none" stroke="#8e8e93" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="80" y="476" width="640" height="64" rx="16" fill="#f05138" fill-opacity="0.15" stroke="#f05138" stroke-width="2"/>
+  <text x="400" y="517" font-size="22" fill="#f2f2f7" text-anchor="middle">SELECT id, name FROM users WHERE age &gt;= $1</text>
+</svg>
