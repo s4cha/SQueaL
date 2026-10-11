@@ -313,13 +313,18 @@ struct DocumentationExamplesTests {
     func joinedColumnInSubquery() {
         let users = usersTable
         let posts = postsTable
-        let adults = SQL.SELECT(\.id).FROM(users).WHERE(\.age >= 18)
+        let prolificAuthors = SQL
+            .SELECT(\.author_id)
+            .FROM(posts)
+            .GROUP_BY(\.author_id)
+            .HAVING("COUNT(*) >= 5")
         let query = SQL
             .SELECT(posts.title, users.name)
             .FROM(posts)
             .JOIN(users, ON: posts.author_id == users.id)
-            .WHERE(users.id, IN: adults)
-        #expect(query.query == "SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id WHERE users.id IN (SELECT id FROM users WHERE age >= $1)")
+            .WHERE(users.id, IN: prolificAuthors)
+        #expect(query.query == "SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= 5)")
+        #expect(query.parameters.isEmpty)
     }
 
     @Test

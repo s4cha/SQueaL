@@ -31,16 +31,25 @@ SQL.SELECT(\.name)
 
 `WHERE(_:IN:)` and `AND(_:IN:)` accept a subquery wherever they accept a list. The
 subquery's column type must match the filtered column's type, or that type's non-optional
-version for nullable columns. To filter on a column of a joined table, pass the column
-itself:
+version for nullable columns.
+
+Subqueries are most useful for conditions a join can't express row by row, such as
+aggregates. For example, this query lists posts by authors who have written at least five
+posts. To filter on a column of a joined table, pass the column itself:
 
 ```swift
-let adults = SQL.SELECT(\.id).FROM(users).WHERE(\.age >= 18)
+let prolificAuthors = SQL
+    .SELECT(\.author_id)
+    .FROM(posts)
+    .GROUP_BY(\.author_id)
+    .HAVING("COUNT(*) >= 5")
 
 SQL.SELECT(posts.title, users.name)
     .FROM(posts)
     .JOIN(users, ON: posts.author_id == users.id)
-    .WHERE(users.id, IN: adults)
+    .WHERE(users.id, IN: prolificAuthors)
+// SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id
+//     WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= 5)
 ```
 
 ### Subqueries as values
