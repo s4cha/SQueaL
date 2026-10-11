@@ -26,7 +26,10 @@ public extension SQL {
     
     /// Starts an `UPDATE` that sets columns to values.
     ///
-    /// Each value must match its column's type and is bound as a parameter.
+    /// Each value is bound as a parameter.
+    ///
+    /// > Warning: Value types aren't checked against the columns yet: a mismatch compiles and
+    /// > fails when Postgres runs the query.
     ///
     /// ```swift
     /// SQL.UPDATE(users, SET: (\.name, "Ada"), (\.age, 37)).WHERE(\.id == id)

@@ -5,7 +5,7 @@ Insert one or many rows, handle conflicts and return generated values.
 ## Overview
 
 `INSERT` takes the table, the columns, and then the values in the same order. Each value
-is type-checked against its column and bound as a parameter.
+is bound as a parameter.
 
 ```swift
 SQL.INSERT(INTO: users,
@@ -14,6 +14,9 @@ SQL.INSERT(INTO: users,
     .RETURNING(\.id)
 // INSERT INTO users (id, email, name, age) VALUES ($1, $2, $3, $4) RETURNING id
 ```
+
+> Warning: Squeal doesn't yet reject values of the wrong type, or a different number of
+> values than columns. Postgres reports these when the query runs. See <doc:WhatSquealChecks>.
 
 ### Inserting several rows
 

@@ -40,6 +40,9 @@ Run them with the companion `SquealPostgresNIO` module or with any Postgres driv
 | No new query language to learn        | ✅              | ❌   | ✅     |
 | You see the exact SQL that runs       | ✅              | ❌   | ✅     |
 
+See <doc:WhatSquealChecks> for the full list of mistakes Squeal catches, and the ones it
+doesn't catch yet.
+
 ## Topics
 
 ### Essentials
@@ -47,6 +50,7 @@ Run them with the companion `SquealPostgresNIO` module or with any Postgres driv
 - <doc:tutorials/SquealTutorials>
 - <doc:GettingStarted>
 - <doc:DefiningTables>
+- <doc:WhatSquealChecks>
 - <doc:ParametersAndSafety>
 - <doc:UsingWithHummingbird>
 

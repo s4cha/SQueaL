@@ -6,8 +6,7 @@ Change and remove rows, and get back the rows you changed.
 
 ### UPDATE
 
-Pass `(column, value)` pairs to `SET`. Each value must match its column's type, and each is
-bound as a parameter:
+Pass `(column, value)` pairs to `SET`. Each value is bound as a parameter:
 
 ```swift
 SQL.UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
@@ -18,6 +17,9 @@ SQL.UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
 
 `WHERE` accepts the same conditions as in a `SELECT`, and you can follow it with `AND` and
 `OR`. See <doc:SelectingData>.
+
+> Warning: Squeal doesn't yet reject a `SET` value of the wrong type. Postgres reports it when
+> the query runs. See <doc:WhatSquealChecks>.
 
 > Warning: An `UPDATE` without a `WHERE` changes every row in the table. Squeal lets you
 > write that, just like SQL does.

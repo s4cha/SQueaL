@@ -12,7 +12,10 @@ public extension SQL {
     
     /// Inserts one row.
     ///
-    /// Each value must match its column's type and is bound as a parameter.
+    /// Each value is bound as a parameter.
+    ///
+    /// > Warning: Value types and counts aren't checked against the columns yet: mismatches
+    /// > compile and fail when Postgres runs the query.
     ///
     /// ```swift
     /// SQL.INSERT(INTO: users, columns: \.name, \.age, VALUES: "Ada", 36)

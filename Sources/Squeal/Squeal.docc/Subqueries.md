@@ -1,14 +1,13 @@
 # Subqueries
 
-Nest one query inside another, with the selected column's type checked against where you
-use it.
+Nest one query inside another, with the selected column's type checked against the column
+you filter.
 
 ## Overview
 
 A `SELECT` of a single key path, such as `SQL.SELECT(\.author_id).FROM(posts)`, records the
-column's type (here `UUID`). Wherever a subquery stands in for a value, Squeal checks that
-type against the column it's compared to or assigned to. A subquery that returns names
-can't fill a column of IDs.
+column's type (here `UUID`). When you filter with `IN`, Squeal checks that type against the
+filtered column, so a subquery that returns names can't filter a column of IDs.
 
 Subqueries also keep their own parameters. Squeal renumbers their placeholders to follow
 the outer query's placeholders, so you can build a subquery once and reuse it anywhere.
@@ -73,3 +72,6 @@ SQL.INSERT(INTO: posts,
 
 > Note: A subquery used as a value must return at most one row. That's a Postgres rule, so
 > add `LIMIT(1)` or filter on a unique column.
+
+> Warning: Squeal doesn't check a subquery's type against the column it fills in
+> `INSERT` or `UPDATE` yet. See <doc:WhatSquealChecks>.

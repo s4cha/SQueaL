@@ -7,7 +7,7 @@
     @Section(title: "Insert rows") {
         @ContentAndMedia {
             `INSERT` takes the table, the columns, then the values in the same order. Each
-            value is checked against its column's type.
+            value is bound as a parameter.
         }
 
         @Steps {
