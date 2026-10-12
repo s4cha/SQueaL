@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// An `UPDATE … SET` waiting for an optional `WHERE` clause.
 public struct TypedUpdateSQLQuery<T: Table, Row>: TableSQLQuery, WHEREableQuery {
     
     public let table: T
@@ -23,6 +24,19 @@ public struct TypedUpdateSQLQuery<T: Table, Row>: TableSQLQuery, WHEREableQuery 
 
 public extension SQL {
     
+    /// Starts an `UPDATE` that sets columns to values.
+    ///
+    /// Each value is bound as a parameter.
+    ///
+    /// > Warning: Value types aren't checked against the columns yet: a mismatch compiles and
+    /// > fails when Postgres runs the query.
+    ///
+    /// ```swift
+    /// SQL.UPDATE(users, SET: (\.name, "Ada"), (\.age, 37)).WHERE(\.id == id)
+    /// // UPDATE users SET name = $1, age = $2 WHERE id = $3
+    /// ```
+    ///
+    /// > Warning: Without a `WHERE`, this updates every row in the table.
     static func UPDATE<T, each U: Encodable>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, (each U)?)) -> TypedUpdateSQLQuery<T, Void> {
         var q = "UPDATE \(T.schema) SET "
         let table = T()

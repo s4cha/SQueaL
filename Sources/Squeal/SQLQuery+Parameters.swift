@@ -9,11 +9,13 @@ import Foundation
 
 
 public extension SQLQuery {
-    
+
+    /// The placeholder for the next parameter added to this query, such as `$3`.
     func nextDollarSign() -> String {
         return "$\(parameterNumber() + 1)"
     }
-    
+
+    /// The number of placeholders already in ``query``.
     func parameterNumber() -> Int {
         return query.filter { $0 == "$" }.count
     }

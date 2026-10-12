@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" font-family="SF Mono, Menlo, monospace">
+  <rect width="800" height="600" rx="32" fill="#1d1d1f"/>
+  <rect x="70" y="200" width="250" height="200" rx="20" fill="#2c2c2e" stroke="#f05138" stroke-width="3"/>
+  <text x="195" y="285" font-size="28" fill="#f05138" text-anchor="middle">Squeal</text>
+  <text x="195" y="330" font-size="20" fill="#aeaeb2" text-anchor="middle">query + $1, $2</text>
+  <path d="M340 270 h120" stroke="#8e8e93" stroke-width="4" stroke-linecap="round"/>
+  <path d="M446 256 l16 14 l-16 14" fill="none" stroke="#8e8e93" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M460 330 h-120" stroke="#8e8e93" stroke-width="4" stroke-linecap="round"/>
+  <path d="M354 316 l-16 14 l16 14" fill="none" stroke="#8e8e93" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="372" font-size="18" fill="#aeaeb2" text-anchor="middle">rows</text>
+  <g transform="translate(490 180)">
+    <path d="M0 40 v160 a120 36 0 0 0 240 0 v-160" fill="#336791"/>
+    <ellipse cx="120" cy="40" rx="120" ry="36" fill="#4a86b8"/>
+    <path d="M0 95 a120 36 0 0 0 240 0 M0 150 a120 36 0 0 0 240 0" fill="none" stroke="#4a86b8" stroke-width="3"/>
+    <text x="120" y="270" font-size="26" fill="#f2f2f7" text-anchor="middle">Postgres</text>
+  </g>
+</svg>

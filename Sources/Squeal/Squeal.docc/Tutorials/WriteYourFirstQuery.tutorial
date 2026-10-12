@@ -1,0 +1,218 @@
+@Tutorial(time: 10) {
+    @Intro(title: "Write Your First Query") {
+        Describe the blog's tables in Swift, write a few `SELECT` queries and see what SQL
+        they produce.
+
+        You'll also see the mistakes Squeal turns into compile errors: typos, wrong types and
+        clauses in the wrong order.
+    }
+
+    @Section(title: "Describe your tables") {
+        @ContentAndMedia {
+            Squeal checks queries against a description of your schema. You write that
+            description once, as plain Swift structs.
+        }
+
+        @Steps {
+            @Step {
+                Create a file named `Schema.swift` in a package that depends on Squeal, and
+                import the module.
+
+                @Code(name: "Schema.swift", file: first-query-schema-01.swift)
+            }
+
+            @Step {
+                Describe the `users` table. Annotate a struct with `@Table`, pass the
+                table's name, and add one stored property per column, using the column's
+                name and Swift type.
+
+                A nullable column, like `bio`, is an optional property.
+
+                @Code(name: "Schema.swift", file: first-query-schema-02.swift)
+            }
+
+            @Step {
+                Describe the `posts` table the same way. Each post belongs to a user through
+                `author_id`.
+
+                @Code(name: "Schema.swift", file: first-query-schema-03.swift)
+            }
+
+            @Step {
+                The macro generates a `UserTable` and a `PostTable` type. Create one value of
+                each. You'll pass these values to your queries.
+
+                @Code(name: "Schema.swift", file: first-query-schema-04.swift)
+            }
+        }
+    }
+
+    @Section(title: "Select rows") {
+        @ContentAndMedia {
+            Queries start from `SQL` and chain clauses in the order you'd write them in SQL.
+            If you know SQL, you already know most of Squeal.
+        }
+
+        @Steps {
+            @Step {
+                In `main.swift`, select every user. `*` is Swift's multiplication operator,
+                so `SELECT(*)` reads exactly like SQL.
+
+                The comment under each query shows the SQL it produces.
+
+                @Code(name: "main.swift", file: first-query-main-01.swift)
+            }
+
+            @Step {
+                Select specific columns with key paths. Autocompletion lists the table's
+                columns as you type `\.`.
+
+                @Code(name: "main.swift", file: first-query-main-02.swift)
+            }
+
+            @Step {
+                Filter rows with `WHERE` and `AND`. Compare columns with Swift's comparison
+                operators.
+
+                Values never end up in the SQL text. Each one becomes a numbered placeholder
+                (`$1`, `$2`) and is sent to the database separately, so a query like this is
+                safe from SQL injection.
+
+                @Code(name: "main.swift", file: first-query-main-03.swift)
+            }
+
+            @Step {
+                Sort and paginate with `ORDER_BY`, `LIMIT` and `OFFSET`. Clauses accept any
+                Swift expression, such as a page number multiplied by the page size.
+
+                @Code(name: "main.swift", file: first-query-main-04.swift)
+            }
+        }
+    }
+
+    @Section(title: "Look at the generated SQL") {
+        @ContentAndMedia {
+            Squeal builds a SQL string and a list of parameters, and nothing more. You can
+            always look at both.
+        }
+
+        @Steps {
+            @Step {
+                Print the `query` property of the `adults` query: the SQL text with
+                placeholders.
+
+                @Code(name: "main.swift", file: first-query-main-05.swift)
+            }
+
+            @Step {
+                Print its `parameters`: the values for the placeholders, in order.
+
+                @Code(name: "main.swift", file: first-query-main-06.swift)
+            }
+
+            @Step {
+                Print the query itself. Its description inlines the parameters, which is
+                handy in logs or for pasting into `psql`.
+
+                Only use this string for reading. When you run a query, send `query` and
+                `parameters` together.
+
+                @Code(name: "main.swift", file: first-query-main-07.swift)
+            }
+        }
+    }
+
+    @Section(title: "Let the compiler catch mistakes") {
+        @ContentAndMedia {
+            With SQL in strings, these mistakes surface when the query runs, or in
+            production. With Squeal, they don't compile.
+        }
+
+        @Steps {
+            @Step {
+                Misspell a column. The compiler rejects it because `UserTable` has no such
+                column.
+
+                @Code(name: "Mistakes.swift", file: first-query-mistake-01.swift)
+            }
+
+            @Step {
+                Compare a column to a value of the wrong type. `age` is an `Int` column, so
+                comparing it to a `String` doesn't compile.
+
+                @Code(name: "Mistakes.swift", file: first-query-mistake-02.swift)
+            }
+
+            @Step {
+                Write clauses in the wrong order. After `LIMIT`, SQL doesn't allow `WHERE`,
+                and neither does Squeal. Autocompletion only offers the clauses that can come
+                next.
+
+                @Code(name: "Mistakes.swift", file: first-query-mistake-03.swift)
+            }
+        }
+    }
+
+    @Assessments {
+        @MultipleChoice {
+            What does `SQL.SELECT(\.id).FROM(users).WHERE(\.name == name)` send to the
+            database?
+
+            @Choice(isCorrect: false) {
+                `SELECT id FROM users WHERE name = 'Ada'`
+
+                @Justification(reaction: "Not quite.") {
+                    That's the query's description, with the value inlined for reading.
+                    Squeal never puts values in the SQL text it sends.
+                }
+            }
+
+            @Choice(isCorrect: true) {
+                `SELECT id FROM users WHERE name = $1`, with `"Ada"` as a separate parameter.
+
+                @Justification(reaction: "That's right!") {
+                    Values are always bound as parameters, which is what makes Squeal queries
+                    safe from SQL injection.
+                }
+            }
+
+            @Choice(isCorrect: false) {
+                A query the database parses into an object model first.
+
+                @Justification(reaction: "Try again.") {
+                    Squeal isn't an ORM. It produces plain SQL plus parameters.
+                }
+            }
+        }
+
+        @MultipleChoice {
+            Which line doesn't compile?
+
+            @Choice(isCorrect: false) {
+                `SQL.SELECT(\.id).FROM(users).WHERE(\.age >= 18).LIMIT(10)`
+
+                @Justification(reaction: "This one compiles.") {
+                    `WHERE` followed by `LIMIT` is valid SQL.
+                }
+            }
+
+            @Choice(isCorrect: true) {
+                `SQL.SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)`
+
+                @Justification(reaction: "Correct!") {
+                    `WHERE` can't follow `LIMIT` in SQL, so the type returned by `LIMIT`
+                    doesn't offer it.
+                }
+            }
+
+            @Choice(isCorrect: false) {
+                `SQL.SELECT(users.id, users.name).FROM(users)`
+
+                @Justification(reaction: "This one compiles.") {
+                    Qualified columns are valid in `SELECT`, and they render as `users.id`
+                    and `users.name`.
+                }
+            }
+        }
+    }
+}

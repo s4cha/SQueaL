@@ -1,0 +1,133 @@
+@Tutorial(time: 15) {
+    @Intro(title: "Run Queries on Postgres") {
+        Connect to a local Postgres database with PostgresNIO, run the queries from the
+        previous tutorials, and decode the rows they return.
+    }
+
+    @Section(title: "Set up the database") {
+        @ContentAndMedia {
+            You need a running PostgreSQL server. On a Mac, you can install one with
+            Homebrew (`brew install postgresql`) or Postgres.app.
+        }
+
+        @Steps {
+            @Step {
+                Create a database named `blog`.
+
+                @Code(name: "Terminal", file: postgres-setup-01.sh)
+            }
+
+            @Step {
+                Create the two tables. Their columns match the `User` and `Post` structs
+                from the first tutorial.
+
+                The unique constraint on `email` is what `ON_CONFLICT(\.email, …)` relies on.
+
+                @Code(name: "Terminal", file: postgres-setup-02.sh)
+            }
+        }
+    }
+
+    @Section(title: "Add the dependencies") {
+        @ContentAndMedia {
+            The `Squeal` module only builds queries. `SquealPostgresNIO` runs them with
+            PostgresNIO, the Postgres client used by Vapor and Hummingbird.
+        }
+
+        @Steps {
+            @Step {
+                Start from a package that depends on Squeal.
+
+                @Code(name: "Package.swift", file: postgres-package-01.swift)
+            }
+
+            @Step {
+                Add PostgresNIO, and add both `SquealPostgresNIO` and `PostgresNIO` to your
+                target.
+
+                @Code(name: "Package.swift", file: postgres-package-02.swift)
+            }
+        }
+    }
+
+    @Section(title: "Run queries") {
+        @ContentAndMedia {
+            `SquealPostgresNIO` adds a `query(_:)` method to `PostgresClient`. It takes any
+            Squeal query and binds its parameters for you.
+        }
+
+        @Steps {
+            @Step {
+                Start a new `main.swift` and create a `PostgresClient`. Adjust the
+                configuration to match your server.
+
+                @Code(name: "main.swift", file: postgres-main-01.swift)
+            }
+
+            @Step {
+                A client must be running before you query it. Run it in a task group, and
+                cancel it once you're done.
+
+                @Code(name: "main.swift", file: postgres-main-02.swift)
+            }
+
+            @Step {
+                Pass a query to `query(_:)`, and decode each row into a tuple of the selected
+                columns' types.
+
+                @Code(name: "main.swift", file: postgres-main-03.swift)
+            }
+
+            @Step {
+                Insert a user, the same way as in the previous tutorial, and decode the ID
+                that `RETURNING` sends back.
+
+                @Code(name: "main.swift", file: postgres-main-04.swift)
+            }
+
+            @Step {
+                Run the program. The first time, the users table is empty, and the insert
+                prints the new ID.
+
+                Run it again. This time the users query prints Ada, and the insert prints
+                nothing: `ON CONFLICT DO NOTHING` skipped the duplicate email, so `RETURNING`
+                had no row to return.
+
+                @Code(name: "Terminal", file: postgres-run-01.sh)
+            }
+        }
+    }
+
+    @Assessments {
+        @MultipleChoice {
+            Why does the second run print no "Created user" line?
+
+            @Choice(isCorrect: true) {
+                The email already exists, so `ON CONFLICT DO NOTHING` skips the insert and
+                `RETURNING` returns no rows.
+
+                @Justification(reaction: "Exactly.") {
+                    `RETURNING` only returns rows that were actually inserted.
+                }
+            }
+
+            @Choice(isCorrect: false) {
+                Squeal caches the query and doesn't send it again.
+
+                @Justification(reaction: "No.") {
+                    Squeal has no cache. Every call to `query(_:)` sends the query to
+                    Postgres.
+                }
+            }
+
+            @Choice(isCorrect: false) {
+                The insert fails with a unique-constraint error.
+
+                @Justification(reaction: "Not here.") {
+                    Without `ON_CONFLICT`, it would fail. With it, Postgres skips the row
+                    without an error.
+                }
+            }
+        }
+    }
+}

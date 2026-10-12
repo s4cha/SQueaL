@@ -1,0 +1,116 @@
+@Tutorial(time: 10) {
+    @Intro(title: "Write Data") {
+        Create users and posts, update them, and clean up old data. Use `RETURNING` to get
+        back the rows you changed.
+    }
+
+    @Section(title: "Insert rows") {
+        @ContentAndMedia {
+            `INSERT` takes the table, the columns, then the values in the same order. Each
+            value is bound as a parameter.
+        }
+
+        @Steps {
+            @Step {
+                Start a new `main.swift` and insert a user.
+
+                @Code(name: "main.swift", file: write-data-main-01.swift)
+            }
+
+            @Step {
+                Make the insert idempotent and get the new user's ID back. `ON_CONFLICT`
+                skips the row if the email is already taken, and `RETURNING` returns the ID
+                of the row that was inserted.
+
+                @Code(name: "main.swift", file: write-data-main-02.swift)
+            }
+
+            @Step {
+                Insert several posts in one statement. `addValuesFrom` takes any sequence,
+                and `mapValues` turns each element into a row.
+
+                @Code(name: "main.swift", file: write-data-main-03.swift)
+            }
+        }
+    }
+
+    @Section(title: "Update rows") {
+        @ContentAndMedia {
+            `UPDATE` takes `(column, value)` pairs. Filter it with `WHERE`, the same way you
+            filter a `SELECT`.
+        }
+
+        @Steps {
+            @Step {
+                Rename a user and return the updated row.
+
+                @Code(name: "main.swift", file: write-data-main-04.swift)
+            }
+
+            @Step {
+                Increment a post's likes in the database rather than in Swift, so concurrent
+                likes don't overwrite each other. `SQLExpr` takes a SQL expression and binds
+                each `?` to a value.
+
+                @Code(name: "main.swift", file: write-data-main-05.swift)
+            }
+
+            @Step {
+                Set a column with a database function. `RawSQL` inserts an expression as is.
+
+                Only use `RawSQL` with fixed text, never with user input. Use `SQLExpr` when
+                the expression needs values.
+
+                @Code(name: "main.swift", file: write-data-main-06.swift)
+            }
+        }
+    }
+
+    @Section(title: "Delete rows") {
+        @ContentAndMedia {
+            `DELETE` reads like SQL too, and it can return the rows it removed.
+        }
+
+        @Steps {
+            @Step {
+                Delete Ada's posts that never got a like, and return their IDs.
+
+                @Code(name: "main.swift", file: write-data-main-07.swift)
+            }
+        }
+    }
+
+    @Assessments {
+        @MultipleChoice {
+            You want to add 1 to a post's `likes` without reading the current value first.
+            What do you write?
+
+            @Choice(isCorrect: false) {
+                `.UPDATE(posts, SET: (\.likes, post.likes + 1))`
+
+                @Justification(reaction: "Close, but risky.") {
+                    This computes the new value in Swift. Two concurrent likes could both
+                    write the same number.
+                }
+            }
+
+            @Choice(isCorrect: true) {
+                `.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))`
+
+                @Justification(reaction: "Exactly!") {
+                    The database computes the new value, and the `1` is still bound as a
+                    parameter.
+                }
+            }
+
+            @Choice(isCorrect: false) {
+                `.UPDATE(posts, SET: (\.likes, RawSQL("likes + \(amount)")))`
+
+                @Justification(reaction: "Avoid this.") {
+                    `RawSQL` doesn't bind parameters, so interpolating a value into it puts
+                    that value in the SQL text.
+                }
+            }
+        }
+    }
+}

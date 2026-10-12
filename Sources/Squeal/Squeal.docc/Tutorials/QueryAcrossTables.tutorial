@@ -1,0 +1,111 @@
+@Tutorial(time: 10) {
+    @Intro(title: "Query Across Tables") {
+        Build the blog's feed with a join, find popular authors with a subquery, and compute
+        per-author statistics with aggregates.
+    }
+
+    @Section(title: "Join posts with their authors") {
+        @ContentAndMedia {
+            When a query involves several tables, refer to columns through table values,
+            such as `users.name`. They render qualified with their table, so they're never
+            ambiguous.
+        }
+
+        @Steps {
+            @Step {
+                Start a new `main.swift` and join each post with its author.
+
+                A join condition only compiles if both columns have the same type. Here,
+                `author_id` and `id` are both `UUID`s.
+
+                @Code(name: "main.swift", file: across-tables-main-01.swift)
+            }
+
+            @Step {
+                Filter and sort on either table. Hide posts by minors, and show the most
+                liked posts first.
+
+                @Code(name: "main.swift", file: across-tables-main-02.swift)
+            }
+        }
+    }
+
+    @Section(title: "Filter with a subquery") {
+        @ContentAndMedia {
+            A `SELECT` of a single key path remembers that column's type. You can use it as a
+            subquery wherever a value of that type is expected.
+        }
+
+        @Steps {
+            @Step {
+                Write a query that selects the IDs of authors with a very popular post.
+
+                @Code(name: "main.swift", file: across-tables-main-03.swift)
+            }
+
+            @Step {
+                Use it in `IN`. Squeal checks that the subquery returns `UUID`s, the type of
+                `users.id`. It also renumbers the subquery's placeholders to follow the outer
+                query's placeholders.
+
+                @Code(name: "main.swift", file: across-tables-main-04.swift)
+            }
+        }
+    }
+
+    @Section(title: "Aggregate") {
+        @ContentAndMedia {
+            `COUNT`, `SUM`, `AVG`, `MIN` and `MAX` work in `SELECT` with `GROUP_BY` and
+            `HAVING`.
+        }
+
+        @Steps {
+            @Step {
+                Count each author's posts and total likes. A `LEFT_JOIN` keeps authors who
+                haven't posted yet.
+
+                @Code(name: "main.swift", file: across-tables-main-05.swift)
+            }
+
+            @Step {
+                Keep only prolific authors with `HAVING`, and sort them by name.
+
+                `HAVING` takes raw SQL, so only use it with fixed text.
+
+                @Code(name: "main.swift", file: across-tables-main-06.swift)
+            }
+        }
+    }
+
+    @Assessments {
+        @MultipleChoice {
+            `SQL.SELECT(\.title).FROM(posts)` returns titles, which are `String`s. What
+            happens if you use it in `.WHERE(\.id, IN: …)` on `users`?
+
+            @Choice(isCorrect: false) {
+                Postgres returns an error when the query runs.
+
+                @Justification(reaction: "Squeal catches it earlier.") {
+                    The mismatch is detected before the query ever reaches Postgres.
+                }
+            }
+
+            @Choice(isCorrect: true) {
+                It doesn't compile.
+
+                @Justification(reaction: "Right!") {
+                    The subquery returns `String`, but `users.id` is a `UUID`, so the types
+                    don't match.
+                }
+            }
+
+            @Choice(isCorrect: false) {
+                The query silently returns no rows.
+
+                @Justification(reaction: "Not with Squeal.") {
+                    The subquery's column type has to match the filtered column's type.
+                }
+            }
+        }
+    }
+}

@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// A query after its `LIMIT` clause. Next, you can add `OFFSET`.
 public struct TypedLimitSQLQuery<T: Table, Row>: TableSQLQuery, OffsetableQuery {
     
     public let table: T
@@ -21,13 +22,16 @@ public struct TypedLimitSQLQuery<T: Table, Row>: TableSQLQuery, OffsetableQuery 
 }
 
 
+/// A query that can be followed by a `LIMIT` clause.
 public protocol LimitableQuery: TableSQLQuery {
 
+    /// Returns at most `value` rows: `LIMIT value`.
     func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T, Row>
 }
 
 public extension LimitableQuery {
     
+    /// Returns at most `value` rows: `LIMIT value`.
     func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T, Row> {
         return TypedLimitSQLQuery(for: table, query: query + " " + "LIMIT \(value)", parameters: parameters)
     }
