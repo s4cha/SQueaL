@@ -12,17 +12,6 @@ import Foundation
 
 struct WHERETests {
     
-    @Test
-    func WHEREFullString() {
-        let query = SQL
-            .SELECT(\.id)
-            .FROM(users)
-            .WHERE("id = 1")
-        #expect(query.parameters.count == 1)
-        #expect(query.parameters[0] as? Int == 1)
-        #expect(query.query == "SELECT id FROM users WHERE id = $1")
-        #expect("\(query)" == "SELECT id FROM users WHERE id = 1")
-    }
     
     @Test
     func WHEREInt() {
@@ -304,5 +293,60 @@ struct WHERETests {
             .WHERE(\.name, LIKE: "%son")
         #expect(query.query == "SELECT * FROM users WHERE name like $1")
         #expect("\(query)" == "SELECT * FROM users WHERE name like '%son'")
+    }
+}
+
+struct WHERE_SQLExprTests {
+
+    @Test
+    func valuesAreBoundAndNumberedAfterExistingParameters() {
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(users)
+            .WHERE(\.age >= 18)
+            .AND(SQLExpr("(name = ? OR name = ?)", "Ada", "Grace"))
+            .OR(SQLExpr("id IN (?, ?)", 1, 2))
+            .LIMIT(10)
+        #expect(query.query == "SELECT id FROM users WHERE age >= $1 AND (name = $2 OR name = $3) OR id IN ($4, $5) LIMIT $6")
+        #expect(query.parameters.count == 6)
+        #expect(query.parameters[2] as? String == "Grace")
+        #expect(query.parameters[5] as? Int == 10)
+    }
+
+    @Test
+    func userInputStaysOutOfTheSQL() {
+        let input = "x' OR name = name OR 'a"
+        let query = SQL.SELECT(\.id).FROM(users).WHERE(SQLExpr("name = ?", input))
+        #expect(query.query == "SELECT id FROM users WHERE name = $1")
+        #expect(query.parameters[0] as? String == input)
+    }
+
+    @Test
+    func worksInUpdateAndDelete() {
+        let update = SQL
+            .UPDATE(users, SET: (\.name, "Ada"))
+            .WHERE(SQLExpr("(age < ? OR age > ?)", 18, 65))
+            .RETURNING(\.id)
+        #expect(update.query == "UPDATE users SET name = $1 WHERE (age < $2 OR age > $3) RETURNING id")
+        let delete = SQL
+            .DELETE(FROM: users)
+            .WHERE(\.id == 1)
+            .AND(SQLExpr("created_at < now() - interval '30 days'"))
+        #expect(delete.query == "DELETE FROM users WHERE id = $1 AND created_at < now() - interval '30 days'")
+        #expect(delete.parameters.count == 1)
+    }
+
+    @Test
+    func groupedConditionAsSubqueryIsRenumbered() {
+        let buyers = SQL
+            .SELECT(\.user_id)
+            .FROM(orders)
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .WHERE(SQLExpr("(age >= ? OR name = ?)", 18, "anonymous"))
+            .AND(\.uuid, IN: buyers)
+            .AND(\.id == 7)
+        #expect(query.query == "SELECT name FROM users WHERE (age >= $1 OR name = $2) AND uuid IN (SELECT user_id FROM orders) AND id = $3")
     }
 }

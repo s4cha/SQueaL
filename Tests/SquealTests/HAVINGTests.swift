@@ -11,20 +11,6 @@ import Squeal
 
 struct HAVINGTests {
     
-    // Covers the deprecated string overload; marked deprecated to silence its warning.
-    @available(*, deprecated)
-    @Test
-    func HAVINGafterSELECT() throws {
-        let query = SQL
-            .SELECT(\.name)
-            .FROM(users)
-            .GROUP_BY(\.name)
-            .HAVING("COUNT(*) > 500")
-        #expect(query.parameters.count == 0)
-        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 500")
-        #expect("\(query)" == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 500")
-    }
-
     @Test
     func HAVING_aggregateComparison_bindsValue() {
         let query = SQL

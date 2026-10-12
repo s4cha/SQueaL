@@ -118,8 +118,9 @@ Squeal checks queries against your Swift description of the schema. It doesn't c
   your ``Table`` definitions and your migrations disagree, queries fail at runtime.
 - **How you decode rows.** With PostgresNIO, `rows.decode((UUID, String).self)` isn't
   checked against the columns you selected.
-- **SQL semantics.** Squeal doesn't add parentheses around `AND` and `OR` conditions. It
-  lets you write `UPDATE` and `DELETE` without `WHERE`, just like SQL. It can't know whether
-  a subquery used as a value returns a single row.
-- **Escape hatches.** ``RawSQL``, `HAVING` with a string and `WHERE` with a string are
-  inserted as you write them. See <doc:EscapeHatches>.
+- **SQL semantics.** Squeal doesn't add parentheses around `AND` and `OR` conditions. Group
+  them yourself with an ``SQLExpr``. It lets you write `UPDATE` and `DELETE` without
+  `WHERE`, just like SQL. It can't know whether a subquery used as a value returns a single
+  row.
+- **Escape hatches.** The text of ``RawSQL`` and ``SQLExpr`` is inserted as you write it.
+  See <doc:EscapeHatches>.

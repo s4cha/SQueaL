@@ -98,8 +98,9 @@ dedicated labels:
 `IN:` subquery (see <doc:Subqueries>).
 
 > Note: Conditions are appended in the order you write them, without parentheses, so
-> Postgres's precedence applies: `AND` binds tighter than `OR`. Squeal can't group
-> conditions with parentheses yet.
+> Postgres's precedence applies: `AND` binds tighter than `OR`. To group conditions, pass
+> an ``SQLExpr``, such as `.AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))`. See
+> <doc:EscapeHatches>.
 
 ### Building filters dynamically
 
@@ -149,9 +150,6 @@ a parameter. For conditions a single comparison can't express, pass an ``SQLExpr
 .HAVING(SQLExpr("COUNT(*) >= ? AND SUM(likes) > ?", 5, 100))
 // HAVING COUNT(*) >= $1 AND SUM(likes) > $2
 ```
-
-> Warning: `HAVING` with a plain string, such as `.HAVING("COUNT(*) > 5")`, is deprecated. The
-> string is inserted verbatim and never parameterized.
 
 ## Topics
 

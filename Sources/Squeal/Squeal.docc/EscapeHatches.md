@@ -32,27 +32,21 @@ SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude)
 
 `SQLExpr` works anywhere a value does in `INSERT … VALUES` and `UPDATE … SET`.
 
-### WHERE with a string
+### Conditions in SQL
 
-`WHERE(_:)` also accepts a string, for conditions Squeal can't express yet:
-
-```swift
-SQL.SELECT(\.id).FROM(users).WHERE("bio IS NULL OR email LIKE '%@example.com'")
-// SELECT id FROM users WHERE bio IS NULL OR email LIKE '%@example.com'
-```
-
-If the string has the form `column <operator> value`, where the operator is `=`, `!=`,
-`<`, `<=`, `>` or `>=` with a space on each side, Squeal binds the value as a parameter:
+`WHERE`, `AND`, `OR` and `HAVING` also accept an ``SQLExpr``, for conditions the typed
+comparisons can't express. The most common case is grouping conditions with parentheses:
 
 ```swift
-SQL.SELECT(\.id).FROM(users).WHERE("age >= 18")
-// SELECT id FROM users WHERE age >= $1
+SQL.SELECT(\.id)
+    .FROM(users)
+    .WHERE(\.age >= 18)
+    .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))
+// SELECT id FROM users WHERE age >= $1 AND (name != $2 OR bio IS NULL)
 ```
 
-> Warning: Squeal splits the string at the first spaced comparison operator it finds. A
-> compound condition that contains one, such as `"(age >= 18 OR bio IS NULL)"`, won't
-> produce the SQL you expect. Strings without a spaced comparison operator are inserted
-> verbatim and are never parameterized, so don't build them from user input.
+The values are bound like any other, and the placeholders are numbered after the ones
+already in the query.
 
 ### Reading and running the generated SQL
 

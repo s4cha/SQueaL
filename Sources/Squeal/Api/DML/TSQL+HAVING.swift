@@ -24,33 +24,11 @@ public struct TypedHavingSQLQuery<T: Table, Row>: TableSQLQuery, LimitableQuery,
 
 /// A query that can be followed by a `HAVING` clause.
 public protocol HavingableQuery: TableSQLQuery {
-    /// Filters groups with a condition written as SQL: `HAVING clause`.
-    ///
-    /// ```swift
-    /// .GROUP_BY(\.author_id).HAVING("COUNT(*) > 5")
-    /// ```
-    ///
-    /// > Warning: The clause is inserted verbatim and isn't parameterized. Never build it from user input.
-    /// > Prefer ``HAVING(_:)-(AggregatePredicate)``, such as `.HAVING(COUNT(*) > 5)`, or pass an ``SQLExpr``.
-    @available(*, deprecated, message: "Not parameterized. Use HAVING(COUNT(*) > n) or HAVING(SQLExpr(\"…?\", value)) to bind values.")
-    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T, Row>
+    
 }
 
 public extension HavingableQuery {
     
-    /// Filters groups with a condition written as SQL: `HAVING clause`.
-    ///
-    /// ```swift
-    /// .GROUP_BY(\.author_id).HAVING("COUNT(*) > 5")
-    /// ```
-    ///
-    /// > Warning: The clause is inserted verbatim and isn't parameterized. Never build it from user input.
-    /// > Prefer ``HAVING(_:)-(AggregatePredicate)``, such as `.HAVING(COUNT(*) > 5)`, or pass an ``SQLExpr``.
-    @available(*, deprecated, message: "Not parameterized. Use HAVING(COUNT(*) > n) or HAVING(SQLExpr(\"…?\", value)) to bind values.")
-    func HAVING(_ clause: String) -> TypedHavingSQLQuery<T, Row> {
-        return TypedHavingSQLQuery(for: table, query: query + " HAVING \(clause)", parameters: parameters)
-    }
-
     /// Filters groups by comparing an aggregate to a value, which is bound as a parameter.
     ///
     /// ```swift

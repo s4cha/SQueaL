@@ -338,12 +338,20 @@ struct DocumentationExamplesTests {
     }
 
     @Test
-    func whereString() {
+    func groupedConditionsWithSQLExpr() {
         let users = usersTable
-        #expect(SQL.SELECT(\.id).FROM(users).WHERE("age >= 18").query == "SELECT id FROM users WHERE age >= $1")
-        #expect(SQL.SELECT(\.id).FROM(users).WHERE("bio IS NULL OR email LIKE '%@example.com'").query == "SELECT id FROM users WHERE bio IS NULL OR email LIKE '%@example.com'")
-        // A string containing a spaced comparison operator is split on it: the right-hand side is bound as one value.
-        #expect(SQL.SELECT(\.id).FROM(users).WHERE("(age >= 18 OR bio IS NULL)").query == "SELECT id FROM users WHERE (age >= $1")
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(users)
+            .WHERE(\.age >= 18)
+            .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))
+        #expect(query.query == "SELECT id FROM users WHERE age >= $1 AND (name != $2 OR bio IS NULL)")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[1] as? String == "admin")
+        let whereOnly = SQL.SELECT(\.id).FROM(users).WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))
+        #expect(whereOnly.query == "SELECT id FROM users WHERE (age >= $1 OR bio IS NULL)")
+        let orGroup = SQL.SELECT(\.id).FROM(users).WHERE(\.name == "admin").OR(SQLExpr("(age >= ? AND bio IS NOT NULL)", 18))
+        #expect(orGroup.query == "SELECT id FROM users WHERE name = $1 OR (age >= $2 AND bio IS NOT NULL)")
     }
 
     @Test

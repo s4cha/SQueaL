@@ -60,10 +60,8 @@ print(query)
 A few APIs take SQL text as is, as escape hatches. Never build their text from user input:
 
 - ``RawSQL``. Use ``SQLExpr`` and its `?` placeholders when an expression needs values.
-- `HAVING(_:)` with a string, which is deprecated. Use `HAVING(COUNT(*) > n)` or an ``SQLExpr``
-  to bind values.
-- `WHERE(_:)` with a string. Its value is bound only when the string has the exact form
-  `column <operator> value`, and anything else is inserted verbatim.
+- The SQL text of an ``SQLExpr``. Its values are bound, so put every value behind a `?`.
+- The constraint name in `ON_CONFLICT(ON_CONSTRAINT:)`.
 - Table and column names, which come from your ``Table`` definitions.
 
 See <doc:EscapeHatches> for how to use these safely.

@@ -49,4 +49,17 @@ public extension ORableQuery {
     func OR<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table, query: query + " OR \(table[keyPath: kp].name) LIKE \(nextDollarSign())", parameters: parameters + [value])
     }
+
+    /// Adds an alternative condition written as a SQL expression whose `?` placeholders are
+    /// bound as parameters.
+    ///
+    /// ```swift
+    /// .WHERE(\.name == "admin")
+    /// .OR(SQLExpr("(age >= ? AND bio IS NOT NULL)", 18))
+    /// // WHERE name = $1 OR (age >= $2 AND bio IS NOT NULL)
+    /// ```
+    func OR(_ expression: SQLExpr) -> TypedWhereSQLQuery<T, Row> {
+        let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
+        return TypedWhereSQLQuery(for: table, query: query + " OR \(fragments[0])", parameters: parameters + newParameters)
+    }
 }
