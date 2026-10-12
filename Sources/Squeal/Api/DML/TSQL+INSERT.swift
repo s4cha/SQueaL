@@ -77,7 +77,6 @@ public extension SQL {
             
             newParams += queryParams
             let queryValues = queryParams.enumerated().map { i, _ in "$\(nextPIndex + i)"}.joined(separator: ", ")
-            print(queryValues)
             nextPIndex += queryParams.count
             valueRows.append("(" + queryValues + ")")
         }
@@ -242,13 +241,6 @@ public extension TypedInsertSQLQuery {
         return TypedSQLQuery(for: table, query: query + returningClause(repeat each fields), parameters: parameters)
     }
     
-    /// Appends a parenthesized list of single-quoted strings.
-    ///
-    /// > Warning: The strings are inlined without escaping or parameters. Prefer the `VALUES:` argument of `INSERT`, which binds every value.
-    func VALUES(_ values: String...) -> TypedSQLQuery<T, Void> {
-        TypedSQLQuery(for: table, query: query + " (\(values.map{"'\($0)'"}.joined(separator: ", ")))", parameters: parameters)
-    }
-    
     /// Returns a column of the inserted row: `RETURNING column`.
     func RETURNING<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> TypedSQLQuery<T, Void> {
         return TypedSQLQuery(for: table, query: query + " RETURNING \(table[keyPath: kp].name)", parameters: parameters)
@@ -398,7 +390,7 @@ public extension TypedLoneInsertSQLQuery {
     
     /// Handles a conflict on a named constraint: `ON CONFLICT ON CONSTRAINT name DO NOTHING`.
     func ON_CONFLICT(ON_CONSTRAINT name: String, DO: ConflictAction) -> OnConflictInsertQuery<T> {
-        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT ON CONSTRAINT \(name)" + "DO \(DO.rawValue)", parameters: parameters)
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT ON CONSTRAINT \(name)" + " DO \(DO.rawValue)", parameters: parameters)
     }
 }
 

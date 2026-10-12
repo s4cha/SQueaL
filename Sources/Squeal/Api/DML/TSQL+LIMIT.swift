@@ -25,15 +25,15 @@ public struct TypedLimitSQLQuery<T: Table, Row>: TableSQLQuery, OffsetableQuery 
 /// A query that can be followed by a `LIMIT` clause.
 public protocol LimitableQuery: TableSQLQuery {
 
-    /// Returns at most `value` rows: `LIMIT value`.
+    /// Returns at most `value` rows: `LIMIT $n`, with `value` bound as a parameter.
     func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T, Row>
 }
 
 public extension LimitableQuery {
     
-    /// Returns at most `value` rows: `LIMIT value`.
+    /// Returns at most `value` rows: `LIMIT $n`, with `value` bound as a parameter.
     func LIMIT(_ value: Int) -> TypedLimitSQLQuery<T, Row> {
-        return TypedLimitSQLQuery(for: table, query: query + " " + "LIMIT \(value)", parameters: parameters)
+        return TypedLimitSQLQuery(for: table, query: query + " LIMIT \(nextDollarSign())", parameters: parameters + [value])
     }
 }
 

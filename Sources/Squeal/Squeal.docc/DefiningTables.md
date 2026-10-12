@@ -39,7 +39,8 @@ struct PostTable: Table {
 
 The macro's rules:
 
-- Each stored `let` or `var` becomes a column with the same name and type.
+- Each stored `let` or `var` becomes a column with the same name and type, unless you set
+  a different name with ``ColumnName(_:)``.
 - Computed properties are skipped.
 - Optional properties become nullable columns. You can compare them with `IS_NULL` and
   `IS_NOT_NULL`, and use them in subqueries that return the non-optional type.
@@ -47,15 +48,30 @@ The macro's rules:
 The original struct is left as is, so you can also use it as your row model. For example,
 make it `Decodable` or decode rows into it.
 
-> Tip: Property names are used verbatim as column names. If your columns are in
-> `snake_case`, name your properties in `snake_case` too, or write the table by hand as
-> shown below.
+### Naming columns differently from properties
+
+By default, a property's name is its column's name. When they differ, for example with a
+`camelCase` property for a `snake_case` column, mark the property with ``ColumnName(_:)``:
+
+```swift
+@Table(schema: "users")
+struct User {
+    let id: UUID
+    @ColumnName("email_address") let email: String
+    @ColumnName("created_at") let createdAt: Date
+}
+
+SQL.SELECT(\.id, \.email).FROM(users).ORDER_BY(\.createdAt, .DESC)
+// SELECT id, email_address FROM users ORDER BY created_at DESC
+```
+
+In Swift you keep using the property name, as in `\.email` or `users.email`. Every clause
+writes the column name into the SQL.
 
 ### Writing a table by hand
 
-The macro is optional. Any type that conforms to ``Table`` works. Write one by hand when a
-column name differs from the property you want in Swift, or when you'd rather not depend on
-macros:
+The macro is optional. Any type that conforms to ``Table`` works, which is useful if you'd
+rather not depend on macros. Pass each column's database name to `Column`:
 
 ```swift
 struct UsersTable: Table {

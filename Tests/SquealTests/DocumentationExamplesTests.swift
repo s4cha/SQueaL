@@ -48,8 +48,8 @@ struct DocumentationExamplesTests {
             .AND(\.name == "Ada")
             .ORDER_BY(\.name, .ASC)
             .LIMIT(10)
-        #expect(query.query == "SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT 10")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT $3")
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? Int == 18)
         #expect(query.parameters[1] as? String == "Ada")
         #expect("\(query)" == "SELECT id, name, email FROM users WHERE age >= 18 AND name = 'Ada' ORDER BY name ASC LIMIT 10")
@@ -144,7 +144,7 @@ struct DocumentationExamplesTests {
             .ORDER_BY((\.likes, .DESC), (\.title, .ASC))
             .LIMIT(20)
             .OFFSET(40)
-        #expect(query.query == "SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT 20 OFFSET 40")
+        #expect(query.query == "SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT $1 OFFSET $2")
     }
 
     @Test
@@ -154,8 +154,12 @@ struct DocumentationExamplesTests {
             .SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
             .FROM(posts)
             .GROUP_BY(\.author_id)
-            .HAVING("COUNT(*) > 5")
-        #expect(query.query == "SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > 5")
+            .HAVING(COUNT(*) > 5)
+        #expect(query.query == "SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > $1")
+        #expect(query.parameters[0] as? Int == 5)
+        let compound = SQL.SELECT(posts.author_id).FROM(posts).GROUP_BY(\.author_id)
+            .HAVING(SQLExpr("COUNT(*) >= ? AND SUM(likes) > ?", 5, 100))
+        #expect(compound.query.hasSuffix("HAVING COUNT(*) >= $1 AND SUM(likes) > $2"))
     }
 
     @Test
@@ -248,7 +252,7 @@ struct DocumentationExamplesTests {
         let query = SQL
             .UPDATE(posts, SET: (\.author_id, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1)))
             .WHERE(\.id == postId)
-        #expect(query.query == "UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT 1) WHERE id = $2")
+        #expect(query.query == "UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT $2) WHERE id = $3")
     }
 
     // MARK: - Inserting Data
@@ -305,8 +309,8 @@ struct DocumentationExamplesTests {
         let query = SQL.INSERT(INTO: posts,
                                columns: \.id, \.author_id, \.title,
                                VALUES: postId, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1), "Hello")
-        #expect(query.query == "INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT 1), $3)")
-        #expect(query.parameters.count == 3)
+        #expect(query.query == "INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT $3), $4)")
+        #expect(query.parameters.count == 4)
     }
 
     @Test
@@ -317,14 +321,14 @@ struct DocumentationExamplesTests {
             .SELECT(\.author_id)
             .FROM(posts)
             .GROUP_BY(\.author_id)
-            .HAVING("COUNT(*) >= 5")
+            .HAVING(COUNT(*) >= 5)
         let query = SQL
             .SELECT(posts.title, users.name)
             .FROM(posts)
             .JOIN(users, ON: posts.author_id == users.id)
             .WHERE(users.id, IN: prolificAuthors)
-        #expect(query.query == "SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= 5)")
-        #expect(query.parameters.isEmpty)
+        #expect(query.query == "SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= $1)")
+        #expect(query.parameters.count == 1)
     }
 
     @Test
@@ -334,12 +338,20 @@ struct DocumentationExamplesTests {
     }
 
     @Test
-    func whereString() {
+    func groupedConditionsWithSQLExpr() {
         let users = usersTable
-        #expect(SQL.SELECT(\.id).FROM(users).WHERE("age >= 18").query == "SELECT id FROM users WHERE age >= $1")
-        #expect(SQL.SELECT(\.id).FROM(users).WHERE("bio IS NULL OR email LIKE '%@example.com'").query == "SELECT id FROM users WHERE bio IS NULL OR email LIKE '%@example.com'")
-        // A string containing a spaced comparison operator is split on it: the right-hand side is bound as one value.
-        #expect(SQL.SELECT(\.id).FROM(users).WHERE("(age >= 18 OR bio IS NULL)").query == "SELECT id FROM users WHERE (age >= $1")
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(users)
+            .WHERE(\.age >= 18)
+            .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))
+        #expect(query.query == "SELECT id FROM users WHERE age >= $1 AND (name != $2 OR bio IS NULL)")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[1] as? String == "admin")
+        let whereOnly = SQL.SELECT(\.id).FROM(users).WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))
+        #expect(whereOnly.query == "SELECT id FROM users WHERE (age >= $1 OR bio IS NULL)")
+        let orGroup = SQL.SELECT(\.id).FROM(users).WHERE(\.name == "admin").OR(SQLExpr("(age >= ? AND bio IS NOT NULL)", 18))
+        #expect(orGroup.query == "SELECT id FROM users WHERE name = $1 OR (age >= $2 AND bio IS NOT NULL)")
     }
 
     @Test

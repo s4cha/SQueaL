@@ -65,3 +65,70 @@ struct TableMacroTests {
         #expect("\(query)" == "SELECT id, name FROM products")
     }
 }
+
+// MARK: - @ColumnName
+
+@Table(schema: "accounts")
+struct Account {
+    let id: UUID
+    @ColumnName("email_address") let email: String
+    @ColumnName("display_name") var displayName: String?
+    @ColumnName("created_at") let createdAt: Date
+}
+
+struct ColumnNameTests {
+
+    let accounts = AccountTable()
+
+    @Test
+    func generatedColumnsUseTheCustomName() {
+        #expect(accounts.email.name == "email_address")
+        #expect(accounts.displayName.name == "display_name")
+        #expect(accounts.createdAt.name == "created_at")
+        #expect(accounts.id.name == "id")
+    }
+
+    @Test
+    func originalStructIsUnchanged() {
+        let account = Account(id: UUID(), email: "ada@example.com", displayName: nil, createdAt: Date())
+        #expect(account.email == "ada@example.com")
+    }
+
+    @Test
+    func keyPathsRenderTheColumnName() {
+        let query = SQL
+            .SELECT(\.id, \.email)
+            .FROM(accounts)
+            .WHERE(\.email == "ada@example.com")
+            .ORDER_BY(\.createdAt, .DESC)
+        #expect(query.query == "SELECT id, email_address FROM accounts WHERE email_address = $1 ORDER BY created_at DESC")
+    }
+
+    @Test
+    func qualifiedColumnsRenderTheColumnName() {
+        let query = SQL
+            .SELECT(accounts.id, accounts.displayName)
+            .FROM(accounts)
+            .WHERE(accounts.email == "ada@example.com")
+        #expect(query.query == "SELECT accounts.id, accounts.display_name FROM accounts WHERE accounts.email_address = $1")
+    }
+
+    @Test
+    func nullableCustomColumn() {
+        let query = SQL.SELECT(\.id).FROM(accounts).WHERE(\.displayName).IS_NULL
+        #expect(query.query == "SELECT id FROM accounts WHERE display_name IS NULL")
+    }
+
+    @Test
+    func insertAndUpdateUseTheColumnName() {
+        let id = UUID()
+        let insert = SQL
+            .INSERT(INTO: accounts, columns: \.id, \.email, VALUES: id, "ada@example.com")
+            .RETURNING(\.createdAt)
+        #expect(insert.query == "INSERT INTO accounts (id, email_address) VALUES ($1, $2) RETURNING created_at")
+        let update = SQL
+            .UPDATE(accounts, SET: (\.displayName, "Ada"))
+            .WHERE(\.id == id)
+        #expect(update.query == "UPDATE accounts SET display_name = $1 WHERE id = $2")
+    }
+}

@@ -25,7 +25,7 @@ public struct TypedOffsetSQLQuery<T: Table, Row>: TableSQLQuery {
 /// A query that can be followed by an `OFFSET` clause.
 public protocol OffsetableQuery: TableSQLQuery {
 
-    /// Skips the first `value` rows: `OFFSET value`.
+    /// Skips the first `value` rows: `OFFSET $n`, with `value` bound as a parameter.
     ///
     /// ```swift
     /// .ORDER_BY(\.id).LIMIT(20).OFFSET(40)   // the third page of 20
@@ -35,13 +35,13 @@ public protocol OffsetableQuery: TableSQLQuery {
 
 public extension OffsetableQuery {
     
-    /// Skips the first `value` rows: `OFFSET value`.
+    /// Skips the first `value` rows: `OFFSET $n`, with `value` bound as a parameter.
     ///
     /// ```swift
     /// .ORDER_BY(\.id).LIMIT(20).OFFSET(40)   // the third page of 20
     /// ```
     func OFFSET(_ value: Int) -> TypedOffsetSQLQuery<T, Row> {
-        return TypedOffsetSQLQuery(for: table, query: query + " " + "OFFSET \(value)", parameters: parameters)
+        return TypedOffsetSQLQuery(for: table, query: query + " OFFSET \(nextDollarSign())", parameters: parameters + [value])
     }
 }
 

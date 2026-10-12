@@ -98,8 +98,9 @@ dedicated labels:
 `IN:` subquery (see <doc:Subqueries>).
 
 > Note: Conditions are appended in the order you write them, without parentheses, so
-> Postgres's precedence applies: `AND` binds tighter than `OR`. Squeal can't group
-> conditions with parentheses yet.
+> Postgres's precedence applies: `AND` binds tighter than `OR`. To group conditions, pass
+> an ``SQLExpr``, such as `.AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))`. See
+> <doc:EscapeHatches>.
 
 ### Building filters dynamically
 
@@ -121,7 +122,7 @@ SQL.SELECT(\.id, \.title)
     .ORDER_BY((\.likes, .DESC), (\.title, .ASC))
     .LIMIT(20)
     .OFFSET(40)
-// SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT 20 OFFSET 40
+// SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT $1 OFFSET $2
 ```
 
 `ORDER_BY` also accepts a single column, with or without a direction
@@ -137,12 +138,18 @@ Use ``COUNT``, ``SUM``, ``AVG``, ``MIN`` and ``MAX`` in `SELECT`, together with
 SQL.SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
     .FROM(posts)
     .GROUP_BY(\.author_id)
-    .HAVING("COUNT(*) > 5")
-// SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > 5
+    .HAVING(COUNT(*) > 5)
+// SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > $1
 ```
 
-> Warning: `HAVING` takes raw SQL and doesn't bind parameters. Don't build its text from
-> user input.
+`HAVING` compares an aggregate to a value with the usual operators, and binds the value as
+a parameter. For conditions a single comparison can't express, pass an ``SQLExpr``. Each
+`?` in it is bound to a value:
+
+```swift
+.HAVING(SQLExpr("COUNT(*) >= ? AND SUM(likes) > ?", 5, 100))
+// HAVING COUNT(*) >= $1 AND SUM(likes) > $2
+```
 
 ## Topics
 

@@ -71,4 +71,18 @@ public extension ANDableQuery {
     func AND<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: kp].name) LIKE \(nextDollarSign())", parameters: parameters + [value])
     }
+
+    /// Adds a condition written as a SQL expression whose `?` placeholders are bound as parameters.
+    ///
+    /// Use it to group conditions with parentheses:
+    ///
+    /// ```swift
+    /// .WHERE(\.age >= 18)
+    /// .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))
+    /// // WHERE age >= $1 AND (name != $2 OR bio IS NULL)
+    /// ```
+    func AND(_ expression: SQLExpr) -> TypedWhereSQLQuery<T, Row> {
+        let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
+        return TypedWhereSQLQuery(for: table, query: query + " AND \(fragments[0])", parameters: parameters + newParameters)
+    }
 }

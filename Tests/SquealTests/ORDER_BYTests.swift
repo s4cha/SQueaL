@@ -116,8 +116,8 @@ struct ORDER_BYTests {
             .SELECT(\.name)
             .FROM(users)
             .GROUP_BY(\.name)
-            .HAVING("COUNT(*) > 5")
+            .HAVING(COUNT(*) > 5)
             .ORDER_BY(\.name, .DESC)
-        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 5 ORDER BY name DESC")
+        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > $1 ORDER BY name DESC")
     }
 }

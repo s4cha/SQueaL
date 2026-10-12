@@ -12,13 +12,28 @@ import Squeal
 struct OffsetTests {
         
     @Test
+    func LIMIT_OFFSET_bindValuesAfterExistingParameters() {
+        let query = SQL
+            .SELECT(*)
+            .FROM(users)
+            .WHERE(\.age >= 18)
+            .LIMIT(10)
+            .OFFSET(20)
+        #expect(query.query == "SELECT * FROM users WHERE age >= $1 LIMIT $2 OFFSET $3")
+        #expect(query.parameters.count == 3)
+        #expect(query.parameters[1] as? Int == 10)
+        #expect(query.parameters[2] as? Int == 20)
+        #expect("\(query)" == "SELECT * FROM users WHERE age >= 18 LIMIT 10 OFFSET 20")
+    }
+
+    @Test
     func OFFSETAfterFROM() {
         let query = SQL
             .SELECT(*)
             .FROM(users)
             .OFFSET(20)
-        #expect(query.parameters.count == 0)
-        #expect(query.query == "SELECT * FROM users OFFSET 20")
+        #expect(query.parameters.count == 1)
+        #expect(query.query == "SELECT * FROM users OFFSET $1")
         #expect("\(query)" == "SELECT * FROM users OFFSET 20")
     }
     
@@ -29,8 +44,8 @@ struct OffsetTests {
             .FROM(users)
             .WHERE(\.id == 34)
             .OFFSET(12)
-        #expect(query.parameters.count == 1)
-        #expect(query.query == "SELECT * FROM users WHERE id = $1 OFFSET 12")
+        #expect(query.parameters.count == 2)
+        #expect(query.query == "SELECT * FROM users WHERE id = $1 OFFSET $2")
         #expect("\(query)" == "SELECT * FROM users WHERE id = 34 OFFSET 12")
     }
     
@@ -42,10 +57,10 @@ struct OffsetTests {
             .WHERE(\.id == 1)
             .AND(\UsersTable.name == "jack")
             .OFFSET(3)
-        #expect(query.parameters.count == 2)
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? Int == 1)
         #expect(query.parameters[1] as? String == "jack")
-        #expect(query.query == "SELECT * FROM users WHERE id = $1 AND name = $2 OFFSET 3")
+        #expect(query.query == "SELECT * FROM users WHERE id = $1 AND name = $2 OFFSET $3")
         #expect("\(query)" == "SELECT * FROM users WHERE id = 1 AND name = 'jack' OFFSET 3")
     }
     
@@ -58,10 +73,10 @@ struct OffsetTests {
             .AND(\.name == "jack")
             .GROUP_BY(\.name)
             .OFFSET(34)
-        #expect(query.parameters.count == 2)
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? Int == 1)
         #expect(query.parameters[1] as? String == "jack")
-        #expect(query.query == "SELECT name FROM users WHERE id = $1 AND name = $2 GROUP BY name OFFSET 34")
+        #expect(query.query == "SELECT name FROM users WHERE id = $1 AND name = $2 GROUP BY name OFFSET $3")
         #expect("\(query)" == "SELECT name FROM users WHERE id = 1 AND name = 'jack' GROUP BY name OFFSET 34")
     }
     
@@ -72,8 +87,8 @@ struct OffsetTests {
             .FROM(users)
             .LIMIT(10)
             .OFFSET(20)
-        #expect(query.parameters.count == 0)
-        #expect(query.query == "SELECT * FROM users LIMIT 10 OFFSET 20")
+        #expect(query.parameters.count == 2)
+        #expect(query.query == "SELECT * FROM users LIMIT $1 OFFSET $2")
         #expect("\(query)" == "SELECT * FROM users LIMIT 10 OFFSET 20")
     }
     
@@ -83,9 +98,9 @@ struct OffsetTests {
             .SELECT(\.name)
             .FROM(users)
             .GROUP_BY(\.name)
-            .HAVING("COUNT(*) > 5")
+            .HAVING(COUNT(*) > 5)
             .OFFSET(20)
-        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 5 OFFSET 20")
+        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > $1 OFFSET $2")
     }
     
     @Test
@@ -95,7 +110,7 @@ struct OffsetTests {
             .FROM(users)
             .ORDER_BY(\.name)
             .OFFSET(20)
-        #expect(query.query == "SELECT * FROM users ORDER BY name OFFSET 20")
+        #expect(query.query == "SELECT * FROM users ORDER BY name OFFSET $1")
     }
 
     @Test
@@ -106,6 +121,6 @@ struct OffsetTests {
             .ORDER_BY(\.name, .ASC)
             .LIMIT(10)
             .OFFSET(20)
-        #expect(query.query == "SELECT * FROM users ORDER BY name ASC LIMIT 10 OFFSET 20")
+        #expect(query.query == "SELECT * FROM users ORDER BY name ASC LIMIT $1 OFFSET $2")
     }
 }

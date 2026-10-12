@@ -20,7 +20,7 @@ let query = SQL
 ```
 
 ```sql
-SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT 10
+SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT $3
 ```
 
 Every value becomes a bound parameter (`$1`, `$2`, …) and is never pasted into the SQL
@@ -71,6 +71,7 @@ doesn't catch yet.
 ### Schema
 
 - ``Table(schema:)``
+- ``ColumnName(_:)``
 - ``Table``
 - ``TableColumn``
 - ``TableColumnProperty``
@@ -81,6 +82,7 @@ doesn't catch yet.
 - ``SQLPredicate``
 - ``TableColumnPredicate``
 - ``JOINPredicate``
+- ``AggregatePredicate``
 
 ### Selectable Expressions
 
@@ -90,6 +92,7 @@ doesn't catch yet.
 - ``AVG``
 - ``MIN``
 - ``MAX``
+- ``SQLAggregate``
 - ``RawSQL``
 - ``SQLExpr``
 

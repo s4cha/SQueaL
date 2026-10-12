@@ -196,7 +196,17 @@ struct INSERT_INTOTests {
             .ON_CONFLICT(\.firstname, \.lastname,  DO: .NOTHING)
         #expect(query.query == "INSERT INTO people (firstname, lastname) VALUES ($1, $2) ON CONFLICT (firstname, lastname) DO NOTHING")
     }
-    
+
+    @Test
+    @available(macOS 14.0.0, *)
+    func INSERT_lone_ON_CONFLICT_ON_CONSTRAINT_DO_NOTHING() {
+        let query = SQL
+            .INSERT(INTO: people, columns: \.firstname, \.lastname)
+            .VALUES("John", "Doe")
+            .ON_CONFLICT(ON_CONSTRAINT: "people_pkey", DO: .NOTHING)
+        #expect(query.query == "INSERT INTO people (firstname, lastname) VALUES ($1, $2) ON CONFLICT ON CONSTRAINT people_pkey DO NOTHING")
+    }
+
     @Test
     func INSERT_ON_CONFLICT_partialIndex_DO_NOTHING() {
         let query = SQL

@@ -90,17 +90,6 @@ struct JOINTests {
     }
     
     
-    @Test
-    func JOINWhere() {
-        // List user departments many to many relationship
-        let userId = UUID(uuidString: "485DBC0B-4C82-4442-BB2A-1879D4E28A14")!
-        let query = SQL
-            .SELECT(departments.id, departments.name)
-            .FROM(departments)
-            .JOIN(users_departments, ON: departments.id == users_departments.user_id)
-            .WHERE("users_departments.user_id = \(userId)")
-        #expect("\(query)" == "SELECT departments.id, departments.name FROM departments JOIN users_departments ON departments.id = users_departments.user_id WHERE users_departments.user_id = '485DBC0B-4C82-4442-BB2A-1879D4E28A14'")
-    }
     
     
     @Test

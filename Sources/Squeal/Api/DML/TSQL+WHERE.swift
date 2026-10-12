@@ -136,12 +136,6 @@ public protocol WHEREableQuery: TableSQLQuery {
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T, Row>
     /// Starts a `NULL` test on a column. Follow it with `IS_NULL` or `IS_NOT_NULL`.
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U, Row>
-    /// Filters rows with a condition written as SQL.
-    ///
-    /// If the string has the form `column <operator> value`, where the operator is `=`, `!=`, `<`, `<=`, `>` or `>=` with a space on each side, the value is bound as a parameter. Otherwise the string is inserted verbatim.
-    ///
-    /// > Warning: The string is split at the first spaced comparison operator, so compound conditions containing one aren't supported. Verbatim strings aren't parameterized, so never build them from user input.
-    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T, Row>
     /// Filters rows with a comparison on a table-qualified column, which can belong to any table in the query.
     ///
     /// ```swift
@@ -283,35 +277,17 @@ public extension WHEREableQuery {
         return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
     }
     
-    /// Filters rows with a condition written as SQL.
+    /// Filters rows with a SQL expression whose `?` placeholders are bound as parameters.
     ///
-    /// If the string has the form `column <operator> value`, where the operator is `=`, `!=`, `<`, `<=`, `>` or `>=` with a space on each side, the value is bound as a parameter. Otherwise the string is inserted verbatim.
+    /// Use it for conditions the typed comparisons can't express, such as grouped conditions:
     ///
-    /// > Warning: The string is split at the first spaced comparison operator, so compound conditions containing one aren't supported. Verbatim strings aren't parameterized, so never build them from user input.
-    func WHERE(_ rawString: String) -> TypedWhereSQLQuery<T, Row> {
-        let operators = [">=", "<=", "!=", ">", "<", "="]
-        for op in operators {
-            let parts = rawString.components(separatedBy: " \(op) ")
-            if parts.count == 2 {
-                let column = parts[0].trimmingCharacters(in: .whitespaces)
-                let rawValue = parts[1].trimmingCharacters(in: .whitespaces)
-                let value: any Encodable
-                if let intValue = Int(rawValue) {
-                    value = intValue
-                } else if let doubleValue = Double(rawValue) {
-                    value = doubleValue
-                } else if (rawValue.hasPrefix("'") && rawValue.hasSuffix("'"))
-                            || (rawValue.hasPrefix("\"") && rawValue.hasSuffix("\"")) {
-                    value = String(rawValue.dropFirst().dropLast())
-                } else {
-                    value = rawValue
-                }
-                let q = query + " WHERE \(column) \(op) \(nextDollarSign())"
-                return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [value])
-            }
-        }
-//        // Fallback: append raw string as-is with no parameters
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(rawString)", parameters: parameters)
+    /// ```swift
+    /// .WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))
+    /// // WHERE (age >= $1 OR bio IS NULL)
+    /// ```
+    func WHERE(_ expression: SQLExpr) -> TypedWhereSQLQuery<T, Row> {
+        let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(fragments[0])", parameters: parameters + newParameters)
     }
 }
 

@@ -8,7 +8,7 @@ let feed = SQL
     .ORDER_BY(posts.likes, .DESC)
     .LIMIT(50)
 // SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id
-//     WHERE users.age >= $1 ORDER BY posts.likes DESC LIMIT 50
+//     WHERE users.age >= $1 ORDER BY posts.likes DESC LIMIT $2
 
 let popularAuthorIds = SQL
     .SELECT(\.author_id)
@@ -37,8 +37,8 @@ let prolificAuthors = SQL
     .FROM(users)
     .LEFT_JOIN(posts, ON: users.id == posts.author_id)
     .GROUP_BY(\.name)
-    .HAVING("COUNT(posts.id) >= 3")
+    .HAVING(COUNT(posts.id) >= 3)
     .ORDER_BY(\.name, .ASC)
 // SELECT users.name, COUNT(posts.id), SUM(posts.likes) FROM users
 //     LEFT JOIN posts ON users.id = posts.author_id GROUP BY name
-//     HAVING COUNT(posts.id) >= 3 ORDER BY name ASC
+//     HAVING COUNT(posts.id) >= $1 ORDER BY name ASC
