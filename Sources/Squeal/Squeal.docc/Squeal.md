@@ -71,6 +71,7 @@ doesn't catch yet.
 ### Schema
 
 - ``Table(schema:)``
+- ``ColumnName(_:)``
 - ``Table``
 - ``TableColumn``
 - ``TableColumnProperty``
