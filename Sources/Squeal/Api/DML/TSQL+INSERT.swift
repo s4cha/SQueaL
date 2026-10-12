@@ -398,7 +398,7 @@ public extension TypedLoneInsertSQLQuery {
     
     /// Handles a conflict on a named constraint: `ON CONFLICT ON CONSTRAINT name DO NOTHING`.
     func ON_CONFLICT(ON_CONSTRAINT name: String, DO: ConflictAction) -> OnConflictInsertQuery<T> {
-        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT ON CONSTRAINT \(name)" + "DO \(DO.rawValue)", parameters: parameters)
+        return OnConflictInsertQuery(for: table, query: query + " ON CONFLICT ON CONSTRAINT \(name)" + " DO \(DO.rawValue)", parameters: parameters)
     }
 }
 
