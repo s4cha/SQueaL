@@ -18,7 +18,7 @@ import Foundation
 ///     .FROM(users)
 ///     .WHERE(\.age >= 18)
 ///     .LIMIT(10)
-/// // SELECT id, name FROM users WHERE age >= $1 LIMIT 10
+/// // SELECT id, name FROM users WHERE age >= $1 LIMIT $2
 /// ```
 ///
 /// `SQL` is a namespace and is never instantiated.

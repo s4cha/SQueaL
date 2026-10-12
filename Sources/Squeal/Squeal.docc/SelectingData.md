@@ -121,7 +121,7 @@ SQL.SELECT(\.id, \.title)
     .ORDER_BY((\.likes, .DESC), (\.title, .ASC))
     .LIMIT(20)
     .OFFSET(40)
-// SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT 20 OFFSET 40
+// SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT $1 OFFSET $2
 ```
 
 `ORDER_BY` also accepts a single column, with or without a direction

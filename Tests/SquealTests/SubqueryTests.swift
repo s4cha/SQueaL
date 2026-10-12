@@ -38,8 +38,8 @@ struct SubqueryTests {
             .WHERE(\.id == departmentId)
             .AND(\.id, IN: departmentIdsOfUser)
             .LIMIT(1)
-        #expect(query.query == "SELECT name FROM departments WHERE id = $1 AND id IN (SELECT department_id FROM users_departments WHERE user_id = $2) LIMIT 1")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "SELECT name FROM departments WHERE id = $1 AND id IN (SELECT department_id FROM users_departments WHERE user_id = $2) LIMIT $3")
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? UUID == departmentId)
         #expect(query.parameters[1] as? UUID == userId)
     }
@@ -93,10 +93,10 @@ struct SubqueryTests {
         let query = SQL
             .UPDATE(projects, SET: (\.department_id, SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).ORDER_BY(\.department_id, .ASC).LIMIT(1)))
             .WHERE(\.id == projectId)
-        #expect(query.query == "UPDATE projects SET department_id = (SELECT department_id FROM users_departments WHERE user_id = $1 ORDER BY department_id ASC LIMIT 1) WHERE id = $2")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "UPDATE projects SET department_id = (SELECT department_id FROM users_departments WHERE user_id = $1 ORDER BY department_id ASC LIMIT $2) WHERE id = $3")
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? UUID == userId)
-        #expect(query.parameters[1] as? UUID == projectId)
+        #expect(query.parameters[2] as? UUID == projectId)
     }
     
     @Test
@@ -104,9 +104,9 @@ struct SubqueryTests {
         let query = SQL
             .UPDATE(departments, SET: (\.id, SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).LIMIT(1)))
             .WHERE(\.name == "R&D")
-        #expect(query.query == "UPDATE departments SET id = (SELECT department_id FROM users_departments WHERE user_id = $1 LIMIT 1) WHERE name = $2")
-        #expect(query.parameters.count == 2)
-        #expect(query.parameters[1] as? String == "R&D")
+        #expect(query.query == "UPDATE departments SET id = (SELECT department_id FROM users_departments WHERE user_id = $1 LIMIT $2) WHERE name = $3")
+        #expect(query.parameters.count == 3)
+        #expect(query.parameters[2] as? String == "R&D")
     }
     
     @Test
@@ -117,10 +117,10 @@ struct SubqueryTests {
                     VALUES: SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).LIMIT(1),
                             "Squeal")
             .RETURNING(projects.id, RawSQL("upper(name)"))
-        #expect(query.query == "INSERT INTO projects (department_id, name) VALUES ((SELECT department_id FROM users_departments WHERE user_id = $1 LIMIT 1), $2) RETURNING projects.id, upper(name)")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "INSERT INTO projects (department_id, name) VALUES ((SELECT department_id FROM users_departments WHERE user_id = $1 LIMIT $2), $3) RETURNING projects.id, upper(name)")
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? UUID == userId)
-        #expect(query.parameters[1] as? String == "Squeal")
+        #expect(query.parameters[2] as? String == "Squeal")
     }
     
     @Test
@@ -132,11 +132,11 @@ struct SubqueryTests {
                     VALUES: projectId,
                             SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).LIMIT(1),
                             SQLExpr("lower(?)", "SQUEAL"))
-        #expect(query.query == "INSERT INTO projects (id, department_id, name) VALUES ($1, (SELECT department_id FROM users_departments WHERE user_id = $2 LIMIT 1), lower($3))")
-        #expect(query.parameters.count == 3)
+        #expect(query.query == "INSERT INTO projects (id, department_id, name) VALUES ($1, (SELECT department_id FROM users_departments WHERE user_id = $2 LIMIT $3), lower($4))")
+        #expect(query.parameters.count == 4)
         #expect(query.parameters[0] as? UUID == projectId)
         #expect(query.parameters[1] as? UUID == userId)
-        #expect(query.parameters[2] as? String == "SQUEAL")
+        #expect(query.parameters[3] as? String == "SQUEAL")
     }
     
     @available(macOS 14.0.0, *)
@@ -145,8 +145,8 @@ struct SubqueryTests {
         let query = SQL
             .INSERT(INTO: projects, columns: \.name, \.department_id)
             .VALUES("Squeal", SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).LIMIT(1))
-        #expect(query.query == "INSERT INTO projects (name, department_id) VALUES ($1, (SELECT department_id FROM users_departments WHERE user_id = $2 LIMIT 1))")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "INSERT INTO projects (name, department_id) VALUES ($1, (SELECT department_id FROM users_departments WHERE user_id = $2 LIMIT $3))")
+        #expect(query.parameters.count == 3)
     }
     
     @Test
@@ -155,8 +155,8 @@ struct SubqueryTests {
             .UPDATE(projects, SET: (\.name, "Squeal"),
                                    (\.department_id, SQL.SELECT(\.department_id).FROM(users_departments).WHERE(\.user_id == userId).LIMIT(1)))
             .WHERE(\.name == "Old")
-        #expect(query.query == "UPDATE projects SET name = $1, department_id = (SELECT department_id FROM users_departments WHERE user_id = $2 LIMIT 1) WHERE name = $3")
-        #expect(query.parameters.count == 3)
-        #expect(query.parameters[2] as? String == "Old")
+        #expect(query.query == "UPDATE projects SET name = $1, department_id = (SELECT department_id FROM users_departments WHERE user_id = $2 LIMIT $3) WHERE name = $4")
+        #expect(query.parameters.count == 4)
+        #expect(query.parameters[3] as? String == "Old")
     }
 }

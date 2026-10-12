@@ -24,4 +24,4 @@ let usersPage = SQL
     .ORDER_BY(\.name, .ASC)
     .LIMIT(20)
     .OFFSET(page * 20)
-// SELECT id, name, email FROM users ORDER BY name ASC LIMIT 20 OFFSET 40
+// SELECT id, name, email FROM users ORDER BY name ASC LIMIT $1 OFFSET $2

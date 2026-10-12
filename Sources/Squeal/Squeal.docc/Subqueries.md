@@ -58,7 +58,7 @@ A subquery can provide the value of a column in `UPDATE … SET`:
 ```swift
 SQL.UPDATE(posts, SET: (\.author_id, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1)))
     .WHERE(\.id == postId)
-// UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT 1) WHERE id = $2
+// UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT $2) WHERE id = $3
 ```
 
 It can also appear in `INSERT … VALUES`, next to plain values:
@@ -67,7 +67,7 @@ It can also appear in `INSERT … VALUES`, next to plain values:
 SQL.INSERT(INTO: posts,
            columns: \.id, \.author_id, \.title,
            VALUES: postId, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1), "Hello")
-// INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT 1), $3)
+// INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT $3), $4)
 ```
 
 > Note: A subquery used as a value must return at most one row. That's a Postgres rule, so

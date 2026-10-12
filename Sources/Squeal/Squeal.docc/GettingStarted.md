@@ -76,10 +76,10 @@ The query holds the SQL text and its parameters separately:
 
 ```swift
 query.query
-// SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT 10
+// SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT $3
 
 query.parameters
-// [18, "Ada"]
+// [18, "Ada", 10]
 ```
 
 For logging and debugging, `description` inlines the parameters so you can read the query

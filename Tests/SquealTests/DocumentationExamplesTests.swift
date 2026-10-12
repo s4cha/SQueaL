@@ -48,8 +48,8 @@ struct DocumentationExamplesTests {
             .AND(\.name == "Ada")
             .ORDER_BY(\.name, .ASC)
             .LIMIT(10)
-        #expect(query.query == "SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT 10")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT $3")
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? Int == 18)
         #expect(query.parameters[1] as? String == "Ada")
         #expect("\(query)" == "SELECT id, name, email FROM users WHERE age >= 18 AND name = 'Ada' ORDER BY name ASC LIMIT 10")
@@ -144,7 +144,7 @@ struct DocumentationExamplesTests {
             .ORDER_BY((\.likes, .DESC), (\.title, .ASC))
             .LIMIT(20)
             .OFFSET(40)
-        #expect(query.query == "SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT 20 OFFSET 40")
+        #expect(query.query == "SELECT id, title FROM posts ORDER BY likes DESC, title ASC LIMIT $1 OFFSET $2")
     }
 
     @Test
@@ -252,7 +252,7 @@ struct DocumentationExamplesTests {
         let query = SQL
             .UPDATE(posts, SET: (\.author_id, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1)))
             .WHERE(\.id == postId)
-        #expect(query.query == "UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT 1) WHERE id = $2")
+        #expect(query.query == "UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT $2) WHERE id = $3")
     }
 
     // MARK: - Inserting Data
@@ -309,8 +309,8 @@ struct DocumentationExamplesTests {
         let query = SQL.INSERT(INTO: posts,
                                columns: \.id, \.author_id, \.title,
                                VALUES: postId, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1), "Hello")
-        #expect(query.query == "INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT 1), $3)")
-        #expect(query.parameters.count == 3)
+        #expect(query.query == "INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT $3), $4)")
+        #expect(query.parameters.count == 4)
     }
 
     @Test

@@ -62,8 +62,8 @@ struct HAVINGTests {
             .HAVING(COUNT(*) >= 2)
             .ORDER_BY(\.name)
             .LIMIT(10)
-        #expect(query.query == "SELECT name FROM users WHERE age >= $1 GROUP BY name HAVING COUNT(*) >= $2 ORDER BY name LIMIT 10")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "SELECT name FROM users WHERE age >= $1 GROUP BY name HAVING COUNT(*) >= $2 ORDER BY name LIMIT $3")
+        #expect(query.parameters.count == 3)
         #expect(query.parameters[0] as? Int == 18)
         #expect(query.parameters[1] as? Int == 2)
     }

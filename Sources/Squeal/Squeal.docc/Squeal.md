@@ -20,7 +20,7 @@ let query = SQL
 ```
 
 ```sql
-SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT 10
+SELECT id, name, email FROM users WHERE age >= $1 AND name = $2 ORDER BY name ASC LIMIT $3
 ```
 
 Every value becomes a bound parameter (`$1`, `$2`, …) and is never pasted into the SQL
