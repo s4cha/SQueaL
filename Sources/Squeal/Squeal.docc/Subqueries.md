@@ -41,14 +41,14 @@ let prolificAuthors = SQL
     .SELECT(\.author_id)
     .FROM(posts)
     .GROUP_BY(\.author_id)
-    .HAVING("COUNT(*) >= 5")
+    .HAVING(COUNT(*) >= 5)
 
 SQL.SELECT(posts.title, users.name)
     .FROM(posts)
     .JOIN(users, ON: posts.author_id == users.id)
     .WHERE(users.id, IN: prolificAuthors)
 // SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id
-//     WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= 5)
+//     WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= $1)
 ```
 
 ### Subqueries as values

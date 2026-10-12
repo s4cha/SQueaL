@@ -70,7 +70,8 @@
             @Step {
                 Keep only prolific authors with `HAVING`, and sort them by name.
 
-                `HAVING` takes raw SQL, so only use it with fixed text.
+                `HAVING` compares an aggregate with the usual operators. Like every value
+                in Squeal, the `3` is bound as a parameter.
 
                 @Code(name: "main.swift", file: across-tables-main-06.swift)
             }

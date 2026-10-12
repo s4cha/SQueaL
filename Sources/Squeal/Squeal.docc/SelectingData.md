@@ -137,12 +137,21 @@ Use ``COUNT``, ``SUM``, ``AVG``, ``MIN`` and ``MAX`` in `SELECT`, together with
 SQL.SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
     .FROM(posts)
     .GROUP_BY(\.author_id)
-    .HAVING("COUNT(*) > 5")
-// SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > 5
+    .HAVING(COUNT(*) > 5)
+// SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > $1
 ```
 
-> Warning: `HAVING` takes raw SQL and doesn't bind parameters. Don't build its text from
-> user input.
+`HAVING` compares an aggregate to a value with the usual operators, and binds the value as
+a parameter. For conditions a single comparison can't express, pass an ``SQLExpr``. Each
+`?` in it is bound to a value:
+
+```swift
+.HAVING(SQLExpr("COUNT(*) >= ? AND SUM(likes) > ?", 5, 100))
+// HAVING COUNT(*) >= $1 AND SUM(likes) > $2
+```
+
+> Warning: `HAVING` with a plain string, such as `.HAVING("COUNT(*) > 5")`, is deprecated. The
+> string is inserted verbatim and never parameterized.
 
 ## Topics
 

@@ -60,9 +60,9 @@ struct ClauseCombinationTests {
             .FROM(users)
             .WHERE(\.age > 18)
             .GROUP_BY(\.name)
-            .HAVING("COUNT(*) > 1")
+            .HAVING(COUNT(*) > 1)
             .LIMIT(50)
-        #expect(query.query == "SELECT name FROM users WHERE age > $1 GROUP BY name HAVING COUNT(*) > 1 LIMIT 50")
+        #expect(query.query == "SELECT name FROM users WHERE age > $1 GROUP BY name HAVING COUNT(*) > $2 LIMIT 50")
     }
 
     // MARK: - WHERE LIKE variants
@@ -135,11 +135,11 @@ func fullGroupedQuery() {
         .FROM(users)
         .WHERE(\.age > 18)
         .GROUP_BY(\.name)
-        .HAVING("COUNT(*) > 1")
+        .HAVING(COUNT(*) > 1)
         .ORDER_BY(\.name, .ASC)
         .LIMIT(10)
         .OFFSET(0)
-    #expect(query.query == "SELECT name FROM users WHERE age > $1 GROUP BY name HAVING COUNT(*) > 1 ORDER BY name ASC LIMIT 10 OFFSET 0")
+    #expect(query.query == "SELECT name FROM users WHERE age > $1 GROUP BY name HAVING COUNT(*) > $2 ORDER BY name ASC LIMIT 10 OFFSET 0")
 }
 
 
@@ -148,15 +148,15 @@ func fullGroupedQuery() {
 // Needs: Add typed HAVING overloads that accept aggregate conditions instead of raw strings.
 //   e.g. .HAVING(COUNT(*) > 5) or .HAVING(SUM(\.age) > 100)
 //
-//    @Test
-//    func HAVINGtyped() {
-//        let query = SQL
-//            .SELECT(\.name)
-//            .FROM(users)
-//            .GROUP_BY(\.name)
-//            .HAVING(COUNT(*) > 5)
-//        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 5")
-//    }
+    @Test
+    func HAVINGtyped() {
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .GROUP_BY(\.name)
+            .HAVING(COUNT(*) > 5)
+        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > $1")
+    }
 
 
 // MARK: - CROSS JOIN
@@ -192,20 +192,16 @@ func fullGroupedQuery() {
 
 
 // MARK: - INSERT ... ON CONFLICT (UPSERT)
-//
-// Needs: Add ON_CONFLICT method to TypedInsertSQLQuery:
-//   func ON_CONFLICT(_ columns: ..., DO_UPDATE_SET: ...) -> ...
-//   func ON_CONFLICT(DO_NOTHING: ...) -> ...
-//
-//    @Test
-//    func INSERT_ON_CONFLICT_DO_NOTHING() {
-//        let query = SQL
-//            .INSERT(INTO: users, columns: \.id, \.name,
-//                    VALUES: 1, "Alice")
-//            .ON_CONFLICT(\.id, DO: .NOTHING)
-//        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING")
-//    }
-//
+
+    @Test
+    func INSERT_ON_CONFLICT_DO_NOTHING() {
+        let query = SQL
+            .INSERT(INTO: users, columns: \.id, \.name,
+                    VALUES: 1, "Alice")
+            .ON_CONFLICT(\.id, DO: .NOTHING)
+        #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING")
+    }
+
 //    @Test
 //    func INSERT_ON_CONFLICT_DO_UPDATE() {
 //        let query = SQL

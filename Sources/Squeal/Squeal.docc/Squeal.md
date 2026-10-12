@@ -81,6 +81,7 @@ doesn't catch yet.
 - ``SQLPredicate``
 - ``TableColumnPredicate``
 - ``JOINPredicate``
+- ``AggregatePredicate``
 
 ### Selectable Expressions
 
@@ -90,6 +91,7 @@ doesn't catch yet.
 - ``AVG``
 - ``MIN``
 - ``MAX``
+- ``SQLAggregate``
 - ``RawSQL``
 - ``SQLExpr``
 

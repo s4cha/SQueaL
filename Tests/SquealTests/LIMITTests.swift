@@ -71,9 +71,9 @@ struct LimitTests {
             .SELECT(\.name)
             .FROM(users)
             .GROUP_BY(\.name)
-            .HAVING("COUNT(*) > 5")
+            .HAVING(COUNT(*) > 5)
             .LIMIT(10)
-        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > 5 LIMIT 10")
+        #expect(query.query == "SELECT name FROM users GROUP BY name HAVING COUNT(*) > $1 LIMIT 10")
     }
     
     @Test

@@ -21,8 +21,8 @@ query.query       // SELECT id FROM users WHERE name = $1
 query.parameters  // ["Robert'); DROP TABLE users;--"]
 ```
 
-Values passed to `WHERE`, `AND`, `OR`, `IN`, `LIKE`, `BETWEEN`, `INSERT … VALUES` and
-`UPDATE … SET` are all bound this way. `nil` becomes `NULL`.
+Values passed to `WHERE`, `AND`, `OR`, `IN`, `LIKE`, `BETWEEN`, `HAVING`, `INSERT … VALUES`
+and `UPDATE … SET` are all bound this way. `nil` becomes `NULL`.
 
 ### Placeholders compose
 
@@ -60,7 +60,8 @@ print(query)
 A few APIs take SQL text as is, as escape hatches. Never build their text from user input:
 
 - ``RawSQL``. Use ``SQLExpr`` and its `?` placeholders when an expression needs values.
-- `HAVING(_:)`, which takes a SQL string.
+- `HAVING(_:)` with a string, which is deprecated. Use `HAVING(COUNT(*) > n)` or an ``SQLExpr``
+  to bind values.
 - `WHERE(_:)` with a string. Its value is bound only when the string has the exact form
   `column <operator> value`, and anything else is inserted verbatim.
 - Table and column names, which come from your ``Table`` definitions.

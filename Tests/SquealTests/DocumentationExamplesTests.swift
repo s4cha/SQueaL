@@ -154,8 +154,12 @@ struct DocumentationExamplesTests {
             .SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
             .FROM(posts)
             .GROUP_BY(\.author_id)
-            .HAVING("COUNT(*) > 5")
-        #expect(query.query == "SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > 5")
+            .HAVING(COUNT(*) > 5)
+        #expect(query.query == "SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > $1")
+        #expect(query.parameters[0] as? Int == 5)
+        let compound = SQL.SELECT(posts.author_id).FROM(posts).GROUP_BY(\.author_id)
+            .HAVING(SQLExpr("COUNT(*) >= ? AND SUM(likes) > ?", 5, 100))
+        #expect(compound.query.hasSuffix("HAVING COUNT(*) >= $1 AND SUM(likes) > $2"))
     }
 
     @Test
@@ -317,14 +321,14 @@ struct DocumentationExamplesTests {
             .SELECT(\.author_id)
             .FROM(posts)
             .GROUP_BY(\.author_id)
-            .HAVING("COUNT(*) >= 5")
+            .HAVING(COUNT(*) >= 5)
         let query = SQL
             .SELECT(posts.title, users.name)
             .FROM(posts)
             .JOIN(users, ON: posts.author_id == users.id)
             .WHERE(users.id, IN: prolificAuthors)
-        #expect(query.query == "SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= 5)")
-        #expect(query.parameters.isEmpty)
+        #expect(query.query == "SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= $1)")
+        #expect(query.parameters.count == 1)
     }
 
     @Test

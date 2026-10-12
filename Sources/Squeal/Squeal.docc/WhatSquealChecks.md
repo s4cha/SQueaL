@@ -121,5 +121,5 @@ Squeal checks queries against your Swift description of the schema. It doesn't c
 - **SQL semantics.** Squeal doesn't add parentheses around `AND` and `OR` conditions. It
   lets you write `UPDATE` and `DELETE` without `WHERE`, just like SQL. It can't know whether
   a subquery used as a value returns a single row.
-- **Escape hatches.** ``RawSQL``, `HAVING` strings and `WHERE` with a string are inserted as
-  you write them. See <doc:EscapeHatches>.
+- **Escape hatches.** ``RawSQL``, `HAVING` with a string and `WHERE` with a string are
+  inserted as you write them. See <doc:EscapeHatches>.
