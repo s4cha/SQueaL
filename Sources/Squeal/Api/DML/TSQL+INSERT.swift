@@ -77,7 +77,6 @@ public extension SQL {
             
             newParams += queryParams
             let queryValues = queryParams.enumerated().map { i, _ in "$\(nextPIndex + i)"}.joined(separator: ", ")
-            print(queryValues)
             nextPIndex += queryParams.count
             valueRows.append("(" + queryValues + ")")
         }
