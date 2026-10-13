@@ -195,9 +195,9 @@ struct DocumentationExamplesTests {
         let query = SQL
             .SELECT(users.name, COUNT(posts.id))
             .FROM(users)
-            .LEFT_JOIN(posts, ON: users.id == posts.author_id)
+            .LEFT_JOIN(posts, ON: posts.author_id == users.id)
             .GROUP_BY(\.name)
-        #expect(query.query == "SELECT users.name, COUNT(posts.id) FROM users LEFT JOIN posts ON users.id = posts.author_id GROUP BY name")
+        #expect(query.query == "SELECT users.name, COUNT(posts.id) FROM users LEFT JOIN posts ON posts.author_id = users.id GROUP BY name")
     }
 
     @Test
@@ -218,10 +218,10 @@ struct DocumentationExamplesTests {
     func manyToManyJoin() {
         let query = SQL
             .SELECT(users.name, departments.name)
-            .FROM(users_departments)
-            .JOIN(users, ON: users.uuid == users_departments.user_id)
+            .FROM(users)
+            .JOIN(users_departments, ON: users_departments.user_id == users.uuid)
             .JOIN(departments, ON: departments.id == users_departments.department_id)
-        #expect(query.query == "SELECT users.name, departments.name FROM users_departments JOIN users ON users.uuid = users_departments.user_id JOIN departments ON departments.id = users_departments.department_id")
+        #expect(query.query == "SELECT users.name, departments.name FROM users JOIN users_departments ON users_departments.user_id = users.uuid JOIN departments ON departments.id = users_departments.department_id")
     }
 
     // MARK: - Subqueries

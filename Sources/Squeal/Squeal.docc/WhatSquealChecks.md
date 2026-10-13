@@ -118,6 +118,8 @@ Squeal checks queries against your Swift description of the schema. It doesn't c
   your ``Table`` definitions and your migrations disagree, queries fail at runtime.
 - **How you decode rows.** With PostgresNIO, `rows.decode((UUID, String).self)` isn't
   checked against the columns you selected.
+- **That a join's other table is in the query.** A join condition must use the joined
+  table, but its other column can come from any table, even one you haven't added yet.
 - **SQL semantics.** Squeal doesn't add parentheses around `AND` and `OR` conditions. Group
   them yourself with an ``SQLExpr``. It lets you write `UPDATE` and `DELETE` without
   `WHERE`, just like SQL. It can't know whether a subquery used as a value returns a single

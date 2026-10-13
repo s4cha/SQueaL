@@ -175,20 +175,16 @@ func fullGroupedQuery() {
 
 
 // MARK: - Multiple JOINs (intermediate table references)
-//
-// Currently JOIN ON clauses must reference the original FROM table on one side.
-// Needs: More flexible JOIN overloads that accept JOINPredicates between any two tables:
-//   func JOIN<A: Table, B: Table, F>(_ table2: B, ON: JOINPredicate<A, B, F>) -> TypedFromSQLQuery<T, Row>
-//
-//    @Test
-//    func multipleJOINsWithIntermediateTable() {
-//        let query = SQL
-//            .SELECT(users.name, departments.name)
-//            .FROM(users)
-//            .JOIN(users_departments, ON: users.uuid == users_departments.user_id)
-//            .JOIN(departments, ON: users_departments.department_id == departments.id)
-//        #expect(query.query == "SELECT users.name, departments.name FROM users JOIN users_departments ON users.uuid = users_departments.user_id JOIN departments ON users_departments.department_id = departments.id")
-//    }
+
+@Test
+func multipleJOINsWithIntermediateTable() {
+    let query = SQL
+        .SELECT(users.name, departments.name)
+        .FROM(users)
+        .JOIN(users_departments, ON: users.uuid == users_departments.user_id)
+        .JOIN(departments, ON: users_departments.department_id == departments.id)
+    #expect(query.query == "SELECT users.name, departments.name FROM users JOIN users_departments ON users.uuid = users_departments.user_id JOIN departments ON users_departments.department_id = departments.id")
+}
 
 
 // MARK: - INSERT ... ON CONFLICT (UPSERT)

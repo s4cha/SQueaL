@@ -188,3 +188,32 @@ struct JOIN_WHERE_qualifiedColumnsTests {
         #expect(query.parameters.count == 5)
     }
 }
+
+struct JOIN_conditionOrderTests {
+
+    @Test
+    func everyJoinKindAcceptsBothOrders() {
+        let base = SQL.SELECT(users.name).FROM(users)
+        let joined = "orders ON orders.user_id = users.uuid"
+        #expect(base.JOIN(orders, ON: orders.user_id == users.uuid).query == "SELECT users.name FROM users JOIN \(joined)")
+        #expect(base.INNER_JOIN(orders, ON: orders.user_id == users.uuid).query == "SELECT users.name FROM users INNER JOIN \(joined)")
+        #expect(base.LEFT_JOIN(orders, ON: orders.user_id == users.uuid).query == "SELECT users.name FROM users LEFT JOIN \(joined)")
+        #expect(base.RIGHT_JOIN(orders, ON: orders.user_id == users.uuid).query == "SELECT users.name FROM users RIGHT JOIN \(joined)")
+        #expect(base.FULL_OUTER_JOIN(orders, ON: orders.user_id == users.uuid).query == "SELECT users.name FROM users FULL OUTER JOIN \(joined)")
+    }
+
+    @Test
+    func chainThroughAnEarlierJoinedTable_eitherOrder() {
+        let userId = UUID()
+        let query = SQL
+            .SELECT(users.name, departments.name)
+            .FROM(users)
+            .JOIN(users_departments, ON: users_departments.user_id == users.uuid)
+            .LEFT_JOIN(departments, ON: departments.id == users_departments.department_id)
+            .WHERE(users_departments.user_id == userId)
+            .ORDER_BY(departments.name, .ASC)
+            .LIMIT(5)
+        #expect(query.query == "SELECT users.name, departments.name FROM users JOIN users_departments ON users_departments.user_id = users.uuid LEFT JOIN departments ON departments.id = users_departments.department_id WHERE users_departments.user_id = $1 ORDER BY departments.name ASC LIMIT $2")
+        #expect(query.parameters.count == 2)
+    }
+}
