@@ -73,13 +73,13 @@ The conflict target can be:
 
 ### Using SQL expressions as values
 
-To let the database compute a value, mix ``RawSQL`` and ``SQLExpr`` in with plain values.
-`SQLExpr` binds its arguments through `?` placeholders:
+To let the database compute a value, mix ``NOW``, ``RawSQL`` and ``SQLExpr`` in with plain
+values. `SQLExpr` binds its arguments through `?` placeholders:
 
 ```swift
 SQL.INSERT(INTO: posts,
            columns: \.id, \.title, \.published_at,
-           VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", title), RawSQL("now()"))
+           VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
 // INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())
 ```
 

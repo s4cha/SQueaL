@@ -56,10 +56,12 @@
             }
 
             @Step {
-                Set a column with a database function. `RawSQL` inserts an expression as is.
+                Set a column to the current time, as computed by the database. `NOW()` is
+                Postgres's `now()`.
 
-                Only use `RawSQL` with fixed text, never with user input. Use `SQLExpr` when
-                the expression needs values.
+                For other database functions, `RawSQL` inserts an expression as is. Only use it
+                with fixed text, never with user input, and use `SQLExpr` when the expression
+                needs values.
 
                 @Code(name: "main.swift", file: write-data-main-06.swift)
             }

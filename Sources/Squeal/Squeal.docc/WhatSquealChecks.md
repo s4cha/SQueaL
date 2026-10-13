@@ -45,6 +45,14 @@ SQL.SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)
 // error: value of type 'TypedLimitSQLQuery<UserTable, UUID>' has no member 'WHERE'
 ```
 
+**Comparing a non-date column with `NOW()`.** ``NOW``, and `NOW()` shifted by an
+``INTERVAL``, only compare with `Date` and `Date?` columns:
+
+```swift
+SQL.SELECT(\.id).FROM(posts).WHERE(\.title < NOW())
+// error: cannot convert value of type 'NOW' to expected argument type 'String'
+```
+
 **A join between columns of different types.** Both sides of a join condition must have the
 same type, so joining a `String` to a `UUID` doesn't compile:
 

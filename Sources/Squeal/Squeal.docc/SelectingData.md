@@ -97,6 +97,34 @@ dedicated labels:
 `AND` and `OR` take a comparison, an `IN:` list or a `LIKE:` pattern. `AND` also accepts an
 `IN:` subquery (see <doc:Subqueries>).
 
+To compare a date column with the database's current time, use ``NOW``. It only compiles
+with `Date` and `Date?` columns:
+
+```swift
+SQL.SELECT(\.id, \.title)
+    .FROM(posts)
+    .WHERE(\.published_at <= NOW())
+// SELECT id, title FROM posts WHERE published_at <= now()
+```
+
+To compare with a time relative to now, add or subtract an ``INTERVAL``. It reads like
+SQL's `INTERVAL 30 DAY`, and it's bound as a parameter:
+
+```swift
+SQL.SELECT(\.id, \.title)
+    .FROM(posts)
+    .WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
+// SELECT id, title FROM posts WHERE published_at >= now() - $1::interval
+// parameters: ["30 days"]
+```
+
+The units are `.YEAR`, `.MONTH`, `.WEEK`, `.DAY`, `.HOUR`, `.MINUTE` and `.SECOND`. Chain intervals
+for combined lengths, such as `NOW() - INTERVAL(2, .HOUR) - INTERVAL(30, .MINUTE)`. The same
+expressions work as values in `INSERT` and `UPDATE`, such as
+`SQL.UPDATE(posts, SET: (\.published_at, NOW() + INTERVAL(1, .DAY)))`.
+
+Comparing with `Date()` instead binds your server's current time as a parameter.
+
 > Note: Conditions are appended in the order you write them, without parentheses, so
 > Postgres's precedence applies: `AND` binds tighter than `OR`. To group conditions, pass
 > an ``SQLExpr``, such as `.AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))`. See

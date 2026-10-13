@@ -83,6 +83,8 @@ doesn't catch yet.
 - ``TableColumnPredicate``
 - ``JOINPredicate``
 - ``AggregatePredicate``
+- ``NOWPredicate``
+- ``NOWComparable``
 
 ### Selectable Expressions
 
@@ -92,6 +94,10 @@ doesn't catch yet.
 - ``AVG``
 - ``MIN``
 - ``MAX``
+- ``NOW``
+- ``INTERVAL``
+- ``ShiftedNOW``
+- ``DatabaseTimestamp``
 - ``SQLAggregate``
 - ``RawSQL``
 - ``SQLExpr``

@@ -117,7 +117,7 @@ public extension SQL {
     ///
     /// ```swift
     /// SQL.INSERT(INTO: posts, columns: \.id, \.title, \.published_at,
-    ///            VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", title), RawSQL("now()"))
+    ///            VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
     /// // INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())
     /// ```
     static func INSERT<T, each C>(
