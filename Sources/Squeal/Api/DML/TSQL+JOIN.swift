@@ -24,83 +24,171 @@ public struct TypedJOINSQLQuery<T: Table, Row>: TableSQLQuery {
 
 /// A query that can be followed by a join.
 public protocol JoinableQuery: TableSQLQuery {
-
     /// Joins another table: `JOIN table2 ON a = b`.
-    func JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// Joins another table: `JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row>
     /// Joins another table: `INNER JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func INNER_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func INNER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// Joins another table: `INNER JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func INNER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row>
     /// Joins another table, keeping rows with no match: `LEFT JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func LEFT_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func LEFT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// Joins another table, keeping rows with no match: `LEFT JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func LEFT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row>
     /// Joins another table, keeping its rows with no match: `RIGHT JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func RIGHT_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func RIGHT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// Joins another table, keeping its rows with no match: `RIGHT JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func RIGHT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row>
     /// Joins another table, keeping unmatched rows from both: `FULL OUTER JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func FULL_OUTER_JOIN<Y: Table, F>(_ table2: Y, ON: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func FULL_OUTER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row>
+    /// Joins another table, keeping unmatched rows from both: `FULL OUTER JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func FULL_OUTER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row>
 }
 
 public extension JoinableQuery {
-    
+
     /// Joins another table: `JOIN table2 ON a = b`.
     ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    ///
     /// ```swift
-    /// SQL.SELECT(posts.title, users.name)
-    ///     .FROM(posts)
-    ///     .JOIN(users, ON: posts.author_id == users.id)
-    /// // SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id
+    /// SQL.SELECT(users.name, posts.title, comments.body)
+    ///     .FROM(users)
+    ///     .JOIN(posts, ON: posts.author_id == users.id)
+    ///     .JOIN(comments, ON: comments.post_id == posts.id)
+    /// // SELECT users.name, posts.title, comments.body FROM users
+    /// //     JOIN posts ON posts.author_id = users.id JOIN comments ON comments.post_id = posts.id
     /// ```
-    func JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
-        return join(word: "", table2, ON: predicate)
+    func JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: "", Y.schema, ON: predicate)
     }
-    
-    /// Joins another table, with the joined table's column on the left of the condition.
-    func JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, T, F>) -> TypedFromSQLQuery<T, Row> {
-        return joinReverse(word: "", table2, ON: predicate)
+
+    /// Joins another table: `JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: "", Y.schema, ON: predicate)
     }
-    
+
     /// Joins another table: `INNER JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func INNER_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
-        return join(word: " INNER", table2, ON: predicate)
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func INNER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " INNER", Y.schema, ON: predicate)
     }
-    
+
+    /// Joins another table: `INNER JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func INNER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " INNER", Y.schema, ON: predicate)
+    }
+
     /// Joins another table, keeping rows with no match: `LEFT JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func LEFT_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
-        return join(word: " LEFT", table2, ON: predicate)
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func LEFT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " LEFT", Y.schema, ON: predicate)
     }
-    
+
+    /// Joins another table, keeping rows with no match: `LEFT JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func LEFT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " LEFT", Y.schema, ON: predicate)
+    }
+
     /// Joins another table, keeping its rows with no match: `RIGHT JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func RIGHT_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
-        return join(word: " RIGHT", table2, ON: predicate)
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func RIGHT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " RIGHT", Y.schema, ON: predicate)
     }
-    
+
+    /// Joins another table, keeping its rows with no match: `RIGHT JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func RIGHT_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " RIGHT", Y.schema, ON: predicate)
+    }
+
     /// Joins another table, keeping unmatched rows from both: `FULL OUTER JOIN table2 ON a = b`.
     ///
-    /// Put the `FROM` table's column on the left of the condition.
-    func FULL_OUTER_JOIN<Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
-        return join(word: " FULL OUTER", table2, ON: predicate)
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func FULL_OUTER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<A, Y, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " FULL OUTER", Y.schema, ON: predicate)
     }
-    
-    private func join<Y: Table, F>(word: String, _ table2: Y, ON predicate: JOINPredicate<T, Y, F>) -> TypedFromSQLQuery<T, Row> {
-        let statement = "\(word) JOIN \(Y.schema) ON \(predicate.left.tableName).\(predicate.left.name) = \(predicate.right.tableName).\(predicate.right.name)"
-        return TypedFromSQLQuery(for: table,
-                                 query: query + statement,
-                                 parameters: parameters)
+
+    /// Joins another table, keeping unmatched rows from both: `FULL OUTER JOIN table2 ON a = b`.
+    ///
+    /// The condition compares a column of the joined table with a column of the same type
+    /// from any table in the query: the `FROM` table or one joined earlier. The columns can be
+    /// written in either order.
+    func FULL_OUTER_JOIN<A: Table, Y: Table, F>(_ table2: Y, ON predicate: JOINPredicate<Y, A, F>) -> TypedFromSQLQuery<T, Row> {
+        return join(word: " FULL OUTER", Y.schema, ON: predicate)
     }
-    
-    private func joinReverse<Y: Table, F>(word: String, _ table2: Y, ON predicate: JOINPredicate<Y, T, F>) -> TypedFromSQLQuery<T, Row> {
-        let statement = "\(word) JOIN \(Y.schema) ON \(predicate.left.tableName).\(predicate.left.name) = \(predicate.right.tableName).\(predicate.right.name)"
+
+    private func join<A: Table, B: Table, F>(word: String, _ schema: String, ON predicate: JOINPredicate<A, B, F>) -> TypedFromSQLQuery<T, Row> {
+        let statement = "\(word) JOIN \(schema) ON \(predicate.left.tableName).\(predicate.left.name) = \(predicate.right.tableName).\(predicate.right.name)"
         return TypedFromSQLQuery(for: table,
                                  query: query + statement,
                                  parameters: parameters)

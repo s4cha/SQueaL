@@ -30,27 +30,34 @@ table and are never ambiguous.
 .FULL_OUTER_JOIN(users, ON: …)  // FULL OUTER JOIN
 ```
 
-`JOIN` accepts the condition in either order. The other join kinds expect the `FROM`
-table's column on the left:
+Every join kind accepts the condition's columns in either order:
 
 ```swift
 SQL.SELECT(users.name, COUNT(posts.id))
     .FROM(users)
-    .LEFT_JOIN(posts, ON: users.id == posts.author_id)
+    .LEFT_JOIN(posts, ON: posts.author_id == users.id)
     .GROUP_BY(\.name)
-// SELECT users.name, COUNT(posts.id) FROM users LEFT JOIN posts ON users.id = posts.author_id GROUP BY name
+// SELECT users.name, COUNT(posts.id) FROM users LEFT JOIN posts ON posts.author_id = users.id GROUP BY name
 ```
 
 ### Joining several tables
 
-Joins chain, so you can follow a many-to-many relationship through a link table:
+Joins chain, and each condition can refer to the `FROM` table or to any table joined before
+it. For example, you can follow a many-to-many relationship through a link table:
 
 ```swift
 SQL.SELECT(users.name, departments.name)
-    .FROM(users_departments)
-    .JOIN(users, ON: users.id == users_departments.user_id)
+    .FROM(users)
+    .JOIN(users_departments, ON: users_departments.user_id == users.id)
     .JOIN(departments, ON: departments.id == users_departments.department_id)
+// SELECT users.name, departments.name FROM users
+//     JOIN users_departments ON users_departments.user_id = users.id
+//     JOIN departments ON departments.id = users_departments.department_id
 ```
+
+A join's condition must use a column of the table being joined, and both columns must have
+the same type. Squeal doesn't check that the condition's other table is already part of
+the query. If it isn't, Postgres reports a missing `FROM`-clause entry when the query runs.
 
 ### Filtering and sorting on joined tables
 
