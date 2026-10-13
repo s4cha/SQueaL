@@ -124,6 +124,14 @@ struct DocumentationExamplesTests {
     }
 
     @Test
+    func whereComparedWithNOW() {
+        let posts = postsTable
+        let query = SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.published_at <= NOW())
+        #expect(query.query == "SELECT id, title FROM posts WHERE published_at <= now()")
+        #expect(query.parameters.isEmpty)
+    }
+
+    @Test
     func whereLabelledConditions() {
         let users = usersTable
         let base = SQL.SELECT(\.id).FROM(users)

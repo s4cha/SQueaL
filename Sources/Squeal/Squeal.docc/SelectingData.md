@@ -97,6 +97,18 @@ dedicated labels:
 `AND` and `OR` take a comparison, an `IN:` list or a `LIKE:` pattern. `AND` also accepts an
 `IN:` subquery (see <doc:Subqueries>).
 
+To compare a date column with the database's current time, use ``NOW``. It only compiles
+with `Date` and `Date?` columns:
+
+```swift
+SQL.SELECT(\.id, \.title)
+    .FROM(posts)
+    .WHERE(\.published_at <= NOW())
+// SELECT id, title FROM posts WHERE published_at <= now()
+```
+
+Comparing with `Date()` instead binds your server's current time as a parameter.
+
 > Note: Conditions are appended in the order you write them, without parentheses, so
 > Postgres's precedence applies: `AND` binds tighter than `OR`. To group conditions, pass
 > an ``SQLExpr``, such as `.AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))`. See

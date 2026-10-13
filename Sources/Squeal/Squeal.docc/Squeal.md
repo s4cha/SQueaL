@@ -83,6 +83,8 @@ doesn't catch yet.
 - ``TableColumnPredicate``
 - ``JOINPredicate``
 - ``AggregatePredicate``
+- ``NOWPredicate``
+- ``NOWComparable``
 
 ### Selectable Expressions
 

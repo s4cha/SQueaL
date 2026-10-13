@@ -63,3 +63,71 @@ struct NOWTests {
         #expect(insert.query == "INSERT INTO posts (id) VALUES ($1) RETURNING posts.id, now()")
     }
 }
+
+struct NOWComparisonTests {
+
+    let posts = PostTable()
+    let users = UserTable()
+    let accounts = AccountTable()
+
+    @Test
+    func everyOperatorOnAnOptionalDateColumn() {
+        let base = SQL.SELECT(\.id).FROM(posts)
+        #expect(base.WHERE(\.published_at < NOW()).query == "SELECT id FROM posts WHERE published_at < now()")
+        #expect(base.WHERE(\.published_at <= NOW()).query == "SELECT id FROM posts WHERE published_at <= now()")
+        #expect(base.WHERE(\.published_at > NOW()).query == "SELECT id FROM posts WHERE published_at > now()")
+        #expect(base.WHERE(\.published_at >= NOW()).query == "SELECT id FROM posts WHERE published_at >= now()")
+        #expect(base.WHERE(\.published_at == NOW()).query == "SELECT id FROM posts WHERE published_at = now()")
+        #expect(base.WHERE(\.published_at != NOW()).query == "SELECT id FROM posts WHERE published_at != now()")
+    }
+
+    @Test
+    func nonOptionalDateColumn_withCustomColumnName() {
+        let query = SQL.SELECT(\.id).FROM(accounts).WHERE(\.createdAt < NOW())
+        #expect(query.query == "SELECT id FROM accounts WHERE created_at < now()")
+    }
+
+    @Test
+    func ANDandOR_bindNothingAndKeepNumbering() {
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(posts)
+            .WHERE(\.likes > 3)
+            .AND(\.published_at <= NOW())
+            .OR(\.title == "Pinned")
+            .LIMIT(10)
+        #expect(query.query == "SELECT id FROM posts WHERE likes > $1 AND published_at <= now() OR title = $2 LIMIT $3")
+        #expect(query.parameters.count == 3)
+    }
+
+    @Test
+    func qualifiedColumnOnAJoinedTable() {
+        let query = SQL
+            .SELECT(users.name, posts.title)
+            .FROM(users)
+            .JOIN(posts, ON: posts.author_id == users.id)
+            .WHERE(posts.published_at <= NOW())
+            .OR(posts.published_at > NOW())
+        #expect(query.query == "SELECT users.name, posts.title FROM users JOIN posts ON posts.author_id = users.id WHERE posts.published_at <= now() OR posts.published_at > now()")
+    }
+
+    @Test
+    func qualifiedColumnOnTheMainTableStaysQualified() {
+        let query = SQL.SELECT(posts.id).FROM(posts).WHERE(posts.published_at <= NOW())
+        #expect(query.query == "SELECT posts.id FROM posts WHERE posts.published_at <= now()")
+    }
+
+    @Test
+    func inUPDATEandDELETE() {
+        let update = SQL
+            .UPDATE(posts, SET: (\.likes, 0))
+            .WHERE(\.published_at > NOW())
+            .RETURNING(\.id)
+        #expect(update.query == "UPDATE posts SET likes = $1 WHERE published_at > now() RETURNING id")
+        let delete = SQL
+            .DELETE(FROM: posts)
+            .WHERE(\.likes < 1)
+            .AND(\.published_at < NOW())
+        #expect(delete.query == "DELETE FROM posts WHERE likes < $1 AND published_at < now()")
+    }
+}
