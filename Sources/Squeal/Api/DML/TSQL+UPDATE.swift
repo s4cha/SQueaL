@@ -53,7 +53,7 @@ public extension SQL {
     }
 
     /// UPDATE whose SET values mix plain values (bound as parameters) with `SQLExpr` / `RawSQL` expressions,
-    /// e.g. `(\.name, SQLExpr("COALESCE(?, name)", name))` or `(\.updated_at, RawSQL("now()"))`.
+    /// e.g. `(\.name, SQLExpr("COALESCE(?, name)", name))` or `(\.updated_at, NOW())`.
     static func UPDATE<T, each U>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, Any)) -> TypedUpdateSQLQuery<T, Void> {
         var columnNames = [String]()
         var values = [Any]()

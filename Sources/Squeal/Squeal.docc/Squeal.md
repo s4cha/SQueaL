@@ -92,6 +92,7 @@ doesn't catch yet.
 - ``AVG``
 - ``MIN``
 - ``MAX``
+- ``NOW``
 - ``SQLAggregate``
 - ``RawSQL``
 - ``SQLExpr``

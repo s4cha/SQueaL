@@ -37,6 +37,6 @@ let like = SQL
 // UPDATE posts SET likes = likes + $1 WHERE id = $2 RETURNING likes
 
 let publish = SQL
-    .UPDATE(posts, SET: (\.published_at, RawSQL("now()")))
+    .UPDATE(posts, SET: (\.published_at, NOW()))
     .WHERE(\.id == postId)
 // UPDATE posts SET published_at = now() WHERE id = $1

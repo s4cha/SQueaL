@@ -27,10 +27,10 @@ SQL.UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
 #### Computed values
 
 To set a column from its current value or from a database function, use ``SQLExpr`` (with
-`?` placeholders for bound values) or ``RawSQL``:
+`?` placeholders for bound values), ``NOW`` for the current time, or ``RawSQL``:
 
 ```swift
-SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.published_at, RawSQL("now()")))
+SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.published_at, NOW()))
     .WHERE(\.id == postId)
 // UPDATE posts SET likes = likes + $1, published_at = now() WHERE id = $2
 ```
