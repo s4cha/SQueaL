@@ -6,8 +6,8 @@ How Squeal keeps your values out of the SQL text.
 
 Every ``SQLQuery`` has two parts:
 
-- ``SQLQuery/query``: the SQL text, with numbered placeholders (`$1`, `$2`, …) where values go.
-- ``SQLQuery/parameters``: the values, in placeholder order.
+- ``SQLFragment/query``: the SQL text, with numbered placeholders (`$1`, `$2`, …) where values go.
+- ``SQLFragment/parameters``: the values, in placeholder order.
 
 The database receives them separately and never parses a value as SQL. That's what makes
 SQL injection impossible, rather than just unlikely:
@@ -52,7 +52,7 @@ print(query)
 ```
 
 > Warning: `description` is for humans only. It doesn't escape anything. Always run a
-> query with ``SQLQuery/query`` and ``SQLQuery/parameters`` together, which is what
+> query with ``SQLFragment/query`` and ``SQLFragment/parameters`` together, which is what
 > `SquealPostgresNIO` does.
 
 ### What is *not* parameterized

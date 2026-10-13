@@ -49,6 +49,19 @@ extension PostgresClient {
     }
 }
 
+extension PostgresClient {
+    /// A `DELETE` without `WHERE` can't be run: it would remove every row in the table.
+    @available(*, unavailable, message: "Add a WHERE clause: this DELETE would remove every row. To delete all rows on purpose, use .WHERE(SQLExpr(\"true\")).")
+    public func query<T>(
+        _ query: TypedDeleteSQLQuery<T>,
+        logger: Logger? = nil,
+        file: String = #fileID,
+        line: Int = #line
+    ) async throws -> PostgresRowSequence {
+        fatalError("unavailable")
+    }
+}
+
 /// Thrown when a query parameter has no PostgresNIO encoding.
 ///
 /// To bind a custom type, make it conform to PostgresNIO's `PostgresEncodable`, or make it

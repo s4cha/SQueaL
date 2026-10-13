@@ -7,16 +7,21 @@
 
 import Foundation
 
-/// A query on a known table `T`.
+/// A query, complete or still being built, on a known table `T`.
 ///
 /// `Row` describes what a `SELECT` of key paths returns: the selected column's type, or a tuple of types. Squeal uses it to type-check subqueries. It's `Void` for queries that don't select key paths.
-public protocol TableSQLQuery<T>: SQLQuery  {
+public protocol TableSQLFragment<T>: SQLFragment {
     /// The table the query reads from or writes to. Key paths in the query resolve against it.
     associatedtype T: Table
     /// The type of the selected columns, used to type-check subqueries.
     associatedtype Row = Void
     /// A value of the query's table, used to resolve key paths to columns.
     var table: T { get }
+}
+
+/// A complete query on a known table `T`, which you can run or use as a subquery.
+public protocol TableSQLQuery<T>: TableSQLFragment, SQLQuery {
+    associatedtype T
 }
 
 

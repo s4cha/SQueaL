@@ -55,6 +55,22 @@ SQL.DELETE(FROM: posts)
 
 `SQL.DELETE_FROM(posts)` is equivalent if you prefer a single word.
 
+A `DELETE` must have a `WHERE`. Until you add one, `SQL.DELETE(FROM: posts)` isn't a query
+you can run, so a `DELETE` that would remove every row doesn't compile:
+
+```swift
+try await client.query(SQL.DELETE(FROM: posts))
+// error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
+//        this DELETE would remove every row. …
+```
+
+To delete every row on purpose, say so with a condition that's always true:
+
+```swift
+SQL.DELETE(FROM: posts).WHERE(SQLExpr("true"))
+// DELETE FROM posts WHERE true
+```
+
 ### RETURNING
 
 After a `WHERE`, `UPDATE` and `DELETE` both accept `RETURNING`, the same way `INSERT` does:
@@ -73,4 +89,5 @@ SQL.UPDATE(users, SET: (\.name, "Ada"))
 
 - ``TypedUpdateSQLQuery``
 - ``DeleteSQLQuery``
+- ``TypedDeleteSQLQuery``
 - ``TypedSQLQuery``

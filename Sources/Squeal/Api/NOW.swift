@@ -200,7 +200,7 @@ public func == <T, V: NOWComparable, R: DatabaseTimestamp>(left: TableColumn<T, 
 /// A condition that the date column doesn't equal the timestamp: `table.column != now()`.
 public func != <T, V: NOWComparable, R: DatabaseTimestamp>(left: TableColumn<T, V>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "!=", right) }
 
-extension SQLQuery {
+extension SQLFragment {
     /// `keyword` followed by the predicate's SQL, with its placeholders numbered after this query's.
     func appending<U: Table, Q: Table>(_ keyword: String, _ predicate: NOWPredicate<U>, in query: Q.Type) -> (query: String, parameters: [(any Encodable)?]) {
         let (fragments, newParameters) = renderSQLValues([predicate.expression(in: query)], parameterOffset: parameterNumber())

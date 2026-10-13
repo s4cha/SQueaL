@@ -101,7 +101,7 @@ public extension PartialTypedWhereSQLQuery {
 }
 
 /// A query that can be followed by a `WHERE` clause.
-public protocol WHEREableQuery: TableSQLQuery {
+public protocol WHEREableQuery: TableSQLFragment {
     /// Matches rows whose column is in a list of values: `WHERE column IN ($1, $2, …)`.
     ///
     /// ```swift

@@ -46,12 +46,19 @@ struct DELETETests {
     }
     
     @Test
-    func DELETEwithoutWHERE() {
-        let query = SQL
-            .DELETE
-            .FROM(users)
-        #expect(query.query == "DELETE FROM users")
-        #expect("\(query)" == "DELETE FROM users")
+    func DELETEwithoutWHERE_isNotARunnableQuery() {
+        let builders: [Any] = [SQL.DELETE.FROM(users), SQL.DELETE(FROM: users), SQL.DELETE_FROM(users)]
+        for builder in builders {
+            #expect(!(builder is any SQLQuery))
+            #expect((builder as? any SQLFragment)?.query == "DELETE FROM users")
+        }
+    }
+
+    @Test
+    func DELETEeveryRowOnPurpose() {
+        let query = SQL.DELETE(FROM: users).WHERE(SQLExpr("true"))
+        #expect(query.query == "DELETE FROM users WHERE true")
+        #expect(query.parameters.isEmpty)
     }
 
     @Test
@@ -97,10 +104,28 @@ struct DELETETests {
     
     @Test
     func DELETEwithRETURNINGmultipleColumns() {
-        let query = SQL
+      let query: SQLQuery = SQL
             .DELETE_FROM(users)
             .WHERE(\.id == 1)
             .RETURNING(\.id, \.name)
         #expect(query.query == "DELETE FROM users WHERE id = $1 RETURNING id, name")
     }
+  
+  
+  @Test
+  func DELETEFROMNotRunnable() {
+      // `let query: SQLQuery = SQL.DELETE_FROM(users)` doesn't compile: without WHERE it can't run.
+      let query = SQL
+          .DELETE_FROM(users)
+      #expect(!((query as Any) is any SQLQuery))
+  }
+  
+  @Test
+  func DELETEFROMNotRunnable2() {
+      // `let query: SQLQuery = SQL.DELETE.FROM(users)` doesn't compile: without WHERE it can't run.
+      let query = SQL
+          .DELETE
+          .FROM(users)
+      #expect(!((query as Any) is any SQLQuery))
+  }
 }

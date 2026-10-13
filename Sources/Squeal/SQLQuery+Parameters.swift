@@ -8,7 +8,7 @@
 import Foundation
 
 
-public extension SQLQuery {
+public extension SQLFragment {
 
     /// The placeholder for the next parameter added to this query, such as `$3`.
     func nextDollarSign() -> String {

@@ -13,8 +13,8 @@ public extension SQL {
     /// ```swift
     /// SQL.DELETE_FROM(posts).WHERE(\.id == id)   // DELETE FROM posts WHERE id = $1
     /// ```
-    static func DELETE_FROM<T>(_ table: T) -> TypedFromSQLQuery<T, Void> {
-        return TypedSelectSQLQuery<T, Void>(for: table, query: "DELETE", parameters: []).FROM(table)
+    static func DELETE_FROM<T>(_ table: T) -> TypedDeleteSQLQuery<T> {
+        return TypedDeleteSQLQuery(for: table)
     }
     
     /// Starts a `DELETE` from a table.
@@ -24,9 +24,10 @@ public extension SQL {
     /// // DELETE FROM posts WHERE likes < $1 RETURNING id
     /// ```
     ///
-    /// > Warning: Without a `WHERE`, this deletes every row in the table.
-    static func DELETE<T>(FROM table: T) -> TypedFromSQLQuery<T, Void> {
-        return TypedSelectSQLQuery<T, Void>(for: table, query: "DELETE", parameters: []).FROM(table)
+    /// The result isn't a query you can run until you add `WHERE`, so a `DELETE` can't
+    /// accidentally remove every row. See ``TypedDeleteSQLQuery``.
+    static func DELETE<T>(FROM table: T) -> TypedDeleteSQLQuery<T> {
+        return TypedDeleteSQLQuery(for: table)
     }
     
     /// Starts a `DELETE`, to be followed by `FROM`: `SQL.DELETE.FROM(posts)`.
@@ -37,7 +38,7 @@ public extension SQL {
 
 
 /// A `DELETE` waiting for its `FROM` clause.
-public struct DeleteSQLQuery: SQLQuery, FROMableSQLQuery {
+public struct DeleteSQLQuery: SQLFragment {
     
     public var query: String
     public var parameters: [(any Encodable)?]
@@ -45,5 +46,38 @@ public struct DeleteSQLQuery: SQLQuery, FROMableSQLQuery {
     init(query: String, parameters: [(any Encodable)?]) {
         self.query = query
         self.parameters = parameters
+    }
+
+    /// Adds the table to delete from. Follow it with `WHERE`.
+    public func FROM<T>(_ table: T) -> TypedDeleteSQLQuery<T> {
+        return TypedDeleteSQLQuery(for: table)
+    }
+}
+
+/// A `DELETE FROM table` waiting for its `WHERE` clause.
+///
+/// It isn't an ``SQLQuery``, so you can't run it, or pass it to `PostgresClient.query(_:)`,
+/// until you add a `WHERE`. A `DELETE` that would remove every row doesn't compile:
+///
+/// ```swift
+/// try await client.query(SQL.DELETE(FROM: posts))
+/// // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
+/// //        this DELETE would remove every row. …
+///
+/// try await client.query(SQL.DELETE(FROM: posts).WHERE(\.likes < 1))   // OK
+/// ```
+///
+/// To delete every row on purpose, say so with a condition that's always true:
+/// `.WHERE(SQLExpr("true"))`.
+public struct TypedDeleteSQLQuery<T: Table>: TableSQLFragment, WHEREableQuery {
+    public typealias Row = Void
+
+    public let table: T
+    public let query: String
+    public let parameters: [(any Encodable)?] = []
+
+    init(for table: T) {
+        self.table = table
+        self.query = "DELETE FROM \(T.schema)"
     }
 }

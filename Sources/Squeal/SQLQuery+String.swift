@@ -8,7 +8,7 @@
 import Foundation
 
 // Format Queries.
-public extension SQLQuery {
+public extension SQLFragment {
     /// The query with each placeholder replaced by its parameter, for logging and debugging.
     ///
     /// Strings and UUIDs are single-quoted, and `nil` becomes `NULL`. Nothing is escaped, so
@@ -34,7 +34,7 @@ public extension SQLQuery {
     }
 }
 
-public extension SQLQuery {
+public extension SQLFragment {
     /// The query with its parameters inlined. See ``toString()``.
     var description: String { return toString() }
 }
