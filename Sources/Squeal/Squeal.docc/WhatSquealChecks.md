@@ -45,8 +45,8 @@ SQL.SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)
 // error: value of type 'TypedLimitSQLQuery<UserTable, UUID>' has no member 'WHERE'
 ```
 
-**Comparing a non-date column with `NOW()`.** ``NOW`` only compares with `Date` and
-`Date?` columns:
+**Comparing a non-date column with `NOW()`.** ``NOW``, and `NOW()` shifted by an
+``INTERVAL``, only compare with `Date` and `Date?` columns:
 
 ```swift
 SQL.SELECT(\.id).FROM(posts).WHERE(\.title < NOW())

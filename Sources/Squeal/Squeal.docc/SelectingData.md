@@ -107,6 +107,22 @@ SQL.SELECT(\.id, \.title)
 // SELECT id, title FROM posts WHERE published_at <= now()
 ```
 
+To compare with a time relative to now, add or subtract an ``INTERVAL``. It reads like
+SQL's `INTERVAL 30 DAY`, and it's bound as a parameter:
+
+```swift
+SQL.SELECT(\.id, \.title)
+    .FROM(posts)
+    .WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
+// SELECT id, title FROM posts WHERE published_at >= now() - $1::interval
+// parameters: ["30 days"]
+```
+
+The units are `.YEAR`, `.MONTH`, `.WEEK`, `.DAY`, `.HOUR`, `.MINUTE` and `.SECOND`. Chain intervals
+for combined lengths, such as `NOW() - INTERVAL(2, .HOUR) - INTERVAL(30, .MINUTE)`. The same
+expressions work as values in `INSERT` and `UPDATE`, such as
+`SQL.UPDATE(posts, SET: (\.published_at, NOW() + INTERVAL(1, .DAY)))`.
+
 Comparing with `Date()` instead binds your server's current time as a parameter.
 
 > Note: Conditions are appended in the order you write them, without parentheses, so

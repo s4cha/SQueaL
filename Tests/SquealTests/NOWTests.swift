@@ -131,3 +131,71 @@ struct NOWComparisonTests {
         #expect(delete.query == "DELETE FROM posts WHERE likes < $1 AND published_at < now()")
     }
 }
+
+struct INTERVALTests {
+
+    let posts = PostTable()
+    let users = UserTable()
+
+    @Test
+    func unitsRenderAsPostgresIntervalText() {
+        #expect(INTERVAL(1, .YEAR).text == "1 years")
+        #expect(INTERVAL(2, .MONTH).text == "2 months")
+        #expect(INTERVAL(3, .WEEK).text == "3 weeks")
+        #expect(INTERVAL(30, .DAY).text == "30 days")
+        #expect(INTERVAL(4, .HOUR).text == "4 hours")
+        #expect(INTERVAL(5, .MINUTE).text == "5 minutes")
+        #expect(INTERVAL(6, .SECOND).text == "6 seconds")
+        #expect(INTERVAL(-7, .DAY).text == "-7 days")
+    }
+
+    @Test
+    func comparisonBindsTheIntervalAfterExistingParameters() {
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(posts)
+            .WHERE(\.likes > 10)
+            .AND(\.published_at >= NOW() - INTERVAL(30, .DAY))
+            .LIMIT(5)
+        #expect(query.query == "SELECT id FROM posts WHERE likes > $1 AND published_at >= now() - $2::interval LIMIT $3")
+        #expect(query.parameters.count == 3)
+        #expect(query.parameters[1] as? String == "30 days")
+        #expect("\(query)" == "SELECT id FROM posts WHERE likes > 10 AND published_at >= now() - '30 days'::interval LIMIT 5")
+    }
+
+    @Test
+    func chainedIntervals() {
+        let query = SQL
+            .SELECT(\.id)
+            .FROM(posts)
+            .WHERE(\.published_at < NOW() - INTERVAL(2, .HOUR) + INTERVAL(30, .MINUTE))
+        #expect(query.query == "SELECT id FROM posts WHERE published_at < now() - $1::interval + $2::interval")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[0] as? String == "2 hours")
+        #expect(query.parameters[1] as? String == "30 minutes")
+    }
+
+    @Test
+    func qualifiedColumnOnAJoinedTable() {
+        let query = SQL
+            .SELECT(users.name)
+            .FROM(users)
+            .JOIN(posts, ON: posts.author_id == users.id)
+            .WHERE(posts.published_at > NOW() - INTERVAL(1, .WEEK))
+        #expect(query.query == "SELECT users.name FROM users JOIN posts ON posts.author_id = users.id WHERE posts.published_at > now() - $1::interval")
+    }
+
+    @Test
+    func asAValueInUPDATEandINSERT() {
+        let id = UUID()
+        let update = SQL
+            .UPDATE(posts, SET: (\.title, "Scheduled"), (\.published_at, NOW() + INTERVAL(1, .DAY)))
+            .WHERE(\.id == id)
+        #expect(update.query == "UPDATE posts SET title = $1, published_at = now() + $2::interval WHERE id = $3")
+        #expect(update.parameters.count == 3)
+        #expect(update.parameters[1] as? String == "1 days")
+        #expect(update.parameters[2] as? UUID == id)
+        let insert = SQL.INSERT(INTO: posts, columns: \.id, \.published_at, VALUES: id, NOW() + INTERVAL(2, .HOUR))
+        #expect(insert.query == "INSERT INTO posts (id, published_at) VALUES ($1, now() + $2::interval)")
+    }
+}

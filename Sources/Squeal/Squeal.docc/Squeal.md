@@ -95,6 +95,9 @@ doesn't catch yet.
 - ``MIN``
 - ``MAX``
 - ``NOW``
+- ``INTERVAL``
+- ``ShiftedNOW``
+- ``DatabaseTimestamp``
 - ``SQLAggregate``
 - ``RawSQL``
 - ``SQLExpr``

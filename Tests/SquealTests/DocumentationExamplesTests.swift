@@ -132,6 +132,14 @@ struct DocumentationExamplesTests {
     }
 
     @Test
+    func whereComparedWithAnInterval() {
+        let posts = postsTable
+        let query = SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
+        #expect(query.query == "SELECT id, title FROM posts WHERE published_at >= now() - $1::interval")
+        #expect(query.parameters[0] as? String == "30 days")
+    }
+
+    @Test
     func whereLabelledConditions() {
         let users = usersTable
         let base = SQL.SELECT(\.id).FROM(users)

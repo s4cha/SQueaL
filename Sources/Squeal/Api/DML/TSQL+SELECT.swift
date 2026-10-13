@@ -303,6 +303,11 @@ public struct SQLExpr {
         self.sql = sql
         self.parameters = parameters
     }
+
+    init(sql: String, parameters: [(any Encodable)?]) {
+        self.sql = sql
+        self.parameters = parameters
+    }
 }
 
 /// The `SUM` aggregate: `SUM(posts.likes)`.

@@ -11,7 +11,7 @@ import Foundation
 /// numbered after the `parameterOffset` parameters already in the query.
 /// - `SQLExpr`: its SQL, with each `?` replaced by the next `$n` and its arguments bound.
 /// - `RawSQL`: inlined as is.
-/// - `NOW`: inlined as `now()`.
+/// - `NOW` and `ShiftedNOW`: rendered like an `SQLExpr` (`now()`, `now() - $n::interval`).
 /// - a query (e.g. `SQL.SELECT(…)…LIMIT(1)`): inlined as a parenthesized subquery, its `$n` renumbered.
 /// - any other `Encodable` (including nil optionals): bound as the next `$n`.
 func renderSQLValues(_ values: [Any], parameterOffset: Int) -> (fragments: [String], parameters: [(any Encodable)?]) {
@@ -25,7 +25,7 @@ func renderSQLValues(_ values: [Any], parameterOffset: Int) -> (fragments: [Stri
     }
 
     for v in values {
-        if let expr = v as? SQLExpr {
+        if let expr = (v as? SQLExpr) ?? (v as? DatabaseTimestamp)?.timestampExpression {
             var frag = expr.sql
             for arg in expr.parameters {
                 let ph = nextPlaceholder()
@@ -37,8 +37,6 @@ func renderSQLValues(_ values: [Any], parameterOffset: Int) -> (fragments: [Stri
             fragments.append(frag)
         } else if let raw = v as? RawSQL {
             fragments.append(raw.expression)
-        } else if let now = v as? NOW {
-            fragments.append(now.toString())
         } else if let subquery = v as? SQLQuery {
             fragments.append("(\(shiftingParameters(of: subquery.query, by: pIndex)))")
             parameters += subquery.parameters
