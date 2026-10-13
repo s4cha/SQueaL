@@ -7,8 +7,22 @@
 
 import Foundation
 
-/// An `UPDATE … SET` waiting for an optional `WHERE` clause.
-public struct TypedUpdateSQLQuery<T: Table, Row>: TableSQLQuery, WHEREableQuery {
+/// An `UPDATE … SET` waiting for its `WHERE` clause.
+///
+/// It isn't an ``SQLQuery``, so you can't run it, or pass it to `PostgresClient.query(_:)`,
+/// until you add a `WHERE`. An `UPDATE` that would change every row doesn't compile:
+///
+/// ```swift
+/// try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")))
+/// // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
+/// //        this UPDATE would change every row. …
+///
+/// try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")).WHERE(\.id == id))   // OK
+/// ```
+///
+/// To update every row on purpose, say so with a condition that's always true:
+/// `.WHERE(SQLExpr("true"))`.
+public struct TypedUpdateSQLQuery<T: Table, Row>: TableSQLFragment, WHEREableQuery {
     
     public let table: T
     public var query: String
@@ -30,6 +44,9 @@ public extension SQL {
     ///
     /// > Warning: Value types aren't checked against the columns yet: a mismatch compiles and
     /// > fails when Postgres runs the query.
+    ///
+    /// The result isn't a query you can run until you add `WHERE`, so an `UPDATE` can't
+    /// accidentally change every row. See ``TypedUpdateSQLQuery``.
     ///
     /// ```swift
     /// SQL.UPDATE(users, SET: (\.name, "Ada"), (\.age, 37)).WHERE(\.id == id)

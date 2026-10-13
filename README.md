@@ -41,7 +41,7 @@ hint: `users` is a `Table` object that represents the `users` table in the datab
  - [X] Type safety
  - [X] Autocompletion
  - [X] Valid SQL Syntax enforcement
- - [X] No accidental `DELETE` of every row: a `DELETE` without `WHERE` doesn't compile
+ - [X] No accidental `DELETE` or `UPDATE` of every row: without `WHERE`, they don't compile
  - [X] Safer refactorings
  - [X] Generates a SQL string so you can escape the tool whenever needed.
 
@@ -57,7 +57,7 @@ hint: `users` is a `Table` object that represents the `users` table in the datab
 | Type safety (Safe refactorings) | ❌ | ✅ | ✅ |
 | Autocompletion | ❌ | ✅ | ✅ | ✅ |
 | SQL syntax enforcement (clause order) | ❌ | ❌ | ✅ |
-| `DELETE` without `WHERE` won't compile | ❌ | ❌ | ✅ |
+| `DELETE`/`UPDATE` without `WHERE` won't compile | ❌ | ❌ | ✅ |
 | No new DSL to learn (Learn SQL once) | ✅ | ❌ | ✅ |
 | Easy to eject | ✅ | ❌ | ✅ |
 

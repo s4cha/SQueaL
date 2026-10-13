@@ -17,7 +17,7 @@ value in `INSERT` or `UPDATE`:
 SQL.SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
 // SELECT users.id, upper(name) AS shout FROM users
 
-SQL.UPDATE(posts, SET: (\.title, RawSQL("initcap(title)")))
+SQL.UPDATE(posts, SET: (\.title, RawSQL("initcap(title)"))).WHERE(\.id == postId)
 ```
 
 ### SQLExpr

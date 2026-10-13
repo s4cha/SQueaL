@@ -37,7 +37,7 @@ Run them with the companion `SquealPostgresNIO` module or with any Postgres driv
 | Type-safe columns and values          | ❌              | ✅   | ✅     |
 | Autocompletion                        | ❌              | ✅   | ✅     |
 | Clause order checked at compile time  | ❌              | ❌   | ✅     |
-| `DELETE` without `WHERE` won't compile | ❌              | ❌   | ✅     |
+| `DELETE`/`UPDATE` without `WHERE` won't compile | ❌ | ❌ | ✅ |
 | No new query language to learn        | ✅              | ❌   | ✅     |
 | You see the exact SQL that runs       | ✅              | ❌   | ✅     |
 

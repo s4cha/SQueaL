@@ -60,6 +60,17 @@ extension PostgresClient {
     ) async throws -> PostgresRowSequence {
         fatalError("unavailable")
     }
+
+    /// An `UPDATE` without `WHERE` can't be run: it would change every row in the table.
+    @available(*, unavailable, message: "Add a WHERE clause: this UPDATE would change every row. To update all rows on purpose, use .WHERE(SQLExpr(\"true\")).")
+    public func query<T, Row>(
+        _ query: TypedUpdateSQLQuery<T, Row>,
+        logger: Logger? = nil,
+        file: String = #fileID,
+        line: Int = #line
+    ) async throws -> PostgresRowSequence {
+        fatalError("unavailable")
+    }
 }
 
 /// Thrown when a query parameter has no PostgresNIO encoding.

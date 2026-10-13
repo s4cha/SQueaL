@@ -21,8 +21,16 @@ SQL.UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
 > Warning: Squeal doesn't yet reject a `SET` value of the wrong type. Postgres reports it when
 > the query runs. See <doc:WhatSquealChecks>.
 
-> Warning: An `UPDATE` without a `WHERE` changes every row in the table. Squeal lets you
-> write that, just like SQL does.
+An `UPDATE` must have a `WHERE`. Until you add one, `SQL.UPDATE(…, SET: …)` isn't a query
+you can run, so an `UPDATE` that would change every row doesn't compile:
+
+```swift
+try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")))
+// error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
+//        this UPDATE would change every row. …
+```
+
+To update every row on purpose, say so with `.WHERE(SQLExpr("true"))`.
 
 #### Computed values
 
@@ -40,6 +48,8 @@ A common pattern is a partial update that keeps the current value when the new o
 
 ```swift
 SQL.UPDATE(users, SET: (\.name, SQLExpr("COALESCE(?, name)", newName)))
+    .WHERE(\.id == id)
+// UPDATE users SET name = COALESCE($1, name) WHERE id = $2
 ```
 
 You can also set a column from a subquery. See <doc:Subqueries>.

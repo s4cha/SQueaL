@@ -435,8 +435,9 @@ struct DocumentationExamplesTests {
         let users = usersTable
         let newName: String? = nil
         let query = SQL.UPDATE(users, SET: (\.name, SQLExpr("COALESCE(?, name)", newName)))
-        #expect(query.query == "UPDATE users SET name = COALESCE($1, name)")
-        #expect(query.parameters.count == 1)
+            .WHERE(\.id == userId)
+        #expect(query.query == "UPDATE users SET name = COALESCE($1, name) WHERE id = $2")
+        #expect(query.parameters.count == 2)
     }
 
     @Test

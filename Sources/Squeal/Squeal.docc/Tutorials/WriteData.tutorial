@@ -88,7 +88,7 @@
             What do you write?
 
             @Choice(isCorrect: false) {
-                `.UPDATE(posts, SET: (\.likes, post.likes + 1))`
+                `.UPDATE(posts, SET: (\.likes, post.likes + 1)).WHERE(\.id == postId)`
 
                 @Justification(reaction: "Close, but risky.") {
                     This computes the new value in Swift. Two concurrent likes could both
@@ -97,7 +97,7 @@
             }
 
             @Choice(isCorrect: true) {
-                `.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))`
+                `.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1))).WHERE(\.id == postId)`
 
                 @Justification(reaction: "Exactly!") {
                     The database computes the new value, and the `1` is still bound as a
@@ -106,7 +106,7 @@
             }
 
             @Choice(isCorrect: false) {
-                `.UPDATE(posts, SET: (\.likes, RawSQL("likes + \(amount)")))`
+                `.UPDATE(posts, SET: (\.likes, RawSQL("likes + \(amount)"))).WHERE(\.id == postId)`
 
                 @Justification(reaction: "Avoid this.") {
                     `RawSQL` doesn't bind parameters, so interpolating a value into it puts

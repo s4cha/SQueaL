@@ -37,14 +37,20 @@ SQL.SELECT(users.id).FROM(users).WHERE(users.age >= "18")
 //        'TableColumn<UserTable, Int>' and 'String'
 ```
 
-**A `DELETE` without `WHERE`.** Until you add a `WHERE`, a `DELETE` isn't a query you can
-run, so it can't remove every row by accident:
+**A `DELETE` or `UPDATE` without `WHERE`.** Until you add a `WHERE`, a `DELETE` or an
+`UPDATE` isn't a query you can run, so it can't remove or change every row by accident:
 
 ```swift
 try await client.query(SQL.DELETE(FROM: posts))
 // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
 //        this DELETE would remove every row. …
+
+try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")))
+// error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
+//        this UPDATE would change every row. …
 ```
+
+To affect every row on purpose, say so with `.WHERE(SQLExpr("true"))`.
 
 **Clauses in the wrong order.** Each clause returns a type that only offers the clauses SQL
 allows next, so autocompletion never suggests an invalid one:
@@ -120,7 +126,7 @@ When it changes, the compiler finds the queries you need to update:
 > ```swift
 > SQL.INSERT(INTO: users, columns: \.id, \.name, VALUES: UUID())   // 2 columns, 1 value
 > SQL.INSERT(INTO: users, columns: \.age, VALUES: "eighteen")       // String into an Int column
-> SQL.UPDATE(users, SET: (\.age, "eighteen"))                       // same
+> SQL.UPDATE(users, SET: (\.age, "eighteen")).WHERE(\.id == id)      // same
 > ```
 >
 > The overloads that accept ``SQLExpr``, ``RawSQL`` and subqueries take untyped values, and
@@ -138,8 +144,7 @@ Squeal checks queries against your Swift description of the schema. It doesn't c
 - **That a join's other table is in the query.** A join condition must use the joined
   table, but its other column can come from any table, even one you haven't added yet.
 - **SQL semantics.** Squeal doesn't add parentheses around `AND` and `OR` conditions. Group
-  them yourself with an ``SQLExpr``. It lets you write an `UPDATE` without `WHERE`, just
-  like SQL. It can't know whether a subquery used as a value returns a single
-  row.
+  them yourself with an ``SQLExpr``. It can't know whether a subquery used as a value
+  returns a single row.
 - **Escape hatches.** The text of ``RawSQL`` and ``SQLExpr`` is inserted as you write it.
   See <doc:EscapeHatches>.

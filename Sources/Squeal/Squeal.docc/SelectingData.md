@@ -121,7 +121,7 @@ SQL.SELECT(\.id, \.title)
 The units are `.YEAR`, `.MONTH`, `.WEEK`, `.DAY`, `.HOUR`, `.MINUTE` and `.SECOND`. Chain intervals
 for combined lengths, such as `NOW() - INTERVAL(2, .HOUR) - INTERVAL(30, .MINUTE)`. The same
 expressions work as values in `INSERT` and `UPDATE`, such as
-`SQL.UPDATE(posts, SET: (\.published_at, NOW() + INTERVAL(1, .DAY)))`.
+`SQL.UPDATE(posts, SET: (\.published_at, NOW() + INTERVAL(1, .DAY))).WHERE(\.id == postId)`.
 
 Comparing with `Date()` instead binds your server's current time as a parameter.
 

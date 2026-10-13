@@ -40,12 +40,23 @@ struct UPDATETests {
     }
     
     @Test
-    func UPDATEwithoutWHERE() {
+    func UPDATEwithoutWHERE_isNotARunnableQuery() {
+        // `let query: SQLQuery = SQL.UPDATE(users, SET: …)` doesn't compile: without WHERE it can't run.
         let query = SQL
             .UPDATE(users, SET: (\.name, "john"))
+        #expect(!((query as Any) is any SQLQuery))
         #expect(query.parameters.count == 1)
         #expect(query.query == "UPDATE users SET name = $1")
         #expect("\(query)" == "UPDATE users SET name = 'john'")
+        let withExpressions = SQL.UPDATE(users, SET: (\.name, SQLExpr("upper(name)")))
+        #expect(!((withExpressions as Any) is any SQLQuery))
+    }
+
+    @Test
+    func UPDATEeveryRowOnPurpose() {
+        let query = SQL.UPDATE(users, SET: (\.age, 0)).WHERE(SQLExpr("true"))
+        #expect(query.query == "UPDATE users SET age = $1 WHERE true")
+        #expect(query.parameters.count == 1)
     }
 
     @Test
