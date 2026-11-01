@@ -28,7 +28,7 @@ public struct TypedWhereSQLQuery<T: Table, Row>: WHEREClause {
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 
     /// Returns a column of the affected rows: `RETURNING column`.
@@ -79,7 +79,7 @@ public struct PartialTypedWhereSQLQuery<T: Table, U, Row>: TableSQLQuery {
     init(for table: T, query: String, parameters: [(any Encodable)?], keypath: KeyPath<T, TableColumn<T, U>>) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
         self.keypath = keypath
     }
 }

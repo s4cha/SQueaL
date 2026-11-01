@@ -164,12 +164,22 @@ let query = SQL
   .WHERE(\.id == stock.id!)
 ```
 
+Like `DELETE`, an `UPDATE` without `WHERE` doesn't compile. To update every row on purpose,
+use `.WHERE(SQLExpr("true"))`.
+
 ### DELETE
 ```swift
 let query = SQL
   .DELETE_FROM(users)
    .WHERE(\.id == 243)
 ```
+
+A `DELETE` without `WHERE` doesn't compile, so you can't wipe a table by accident:
+```swift
+try await client.query(SQL.DELETE_FROM(users))
+// error: Add a WHERE clause: this DELETE would remove every row.
+```
+To delete every row on purpose, say so: `.WHERE(SQLExpr("true"))`.
 
 ## ORM issues great reads
 [What ORMs have taught me: just learn SQL](https://wozniak.ca/blog/2014/08/03/1/index.html)  

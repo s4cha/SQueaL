@@ -7,6 +7,23 @@
 
 import Foundation
 
+/// `parameters` with every optional unwrapped, so each entry is either `nil` (bound as `NULL`)
+/// or a plain, non-optional value.
+///
+/// Optional values can arrive wrapped inside another value, such as a `Double?` passed where
+/// `Any` is expected, which stores `Optional(Optional(0.2))`. Drivers expect `0.2`.
+func normalizedParameters(_ parameters: [(any Encodable)?]) -> [(any Encodable)?] {
+    return parameters.map { $0.flatMap(unwrappedEncodable) }
+}
+
+/// `value` with any (possibly nested) optionals unwrapped, or nil if one of them is `.none`.
+private func unwrappedEncodable(_ value: any Encodable) -> (any Encodable)? {
+    let mirror = Mirror(reflecting: value)
+    guard mirror.displayStyle == .optional else { return value }
+    guard let wrapped = mirror.children.first?.value as? any Encodable else { return nil }
+    return unwrappedEncodable(wrapped)
+}
+
 /// Renders a list of values for a VALUES row or a SET clause, binding parameters as `$n`
 /// numbered after the `parameterOffset` parameters already in the query.
 /// - `SQLExpr`: its SQL, with each `?` replaced by the next `$n` and its arguments bound.

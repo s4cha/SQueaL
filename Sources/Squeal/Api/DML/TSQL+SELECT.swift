@@ -20,7 +20,7 @@ public struct TypedSelectSQLQuery<T: Table, Row>: TableSQLQuery, FROMableQuery {
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 
@@ -32,7 +32,7 @@ public struct SelectSQLQuery: SQLQuery, FROMableSQLQuery {
         
     init(query: String, parameters: [(any Encodable)?]) {
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 
@@ -301,12 +301,12 @@ public struct SQLExpr {
     /// Creates an expression whose `?` placeholders are bound, in order, to `parameters`.
     public init(_ sql: String, _ parameters: (any Encodable)?...) {
         self.sql = sql
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 
     init(sql: String, parameters: [(any Encodable)?]) {
         self.sql = sql
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 

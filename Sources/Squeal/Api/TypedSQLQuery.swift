@@ -36,7 +36,7 @@ public struct TypedSQLQuery<T: Table, Row>: TableSQLQuery {
     public init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 

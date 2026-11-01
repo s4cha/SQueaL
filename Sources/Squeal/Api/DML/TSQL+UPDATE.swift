@@ -31,7 +31,7 @@ public struct TypedUpdateSQLQuery<T: Table, Row>: TableSQLFragment, WHEREableQue
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 

@@ -213,7 +213,7 @@ public extension TypedLoneInsertSQLQuery {
         
         q += valuesRow
         query = query + q
-        parameters += queryParams
+        parameters += normalizedParameters(queryParams)
     }
     
     /// Adds a row in place. Its values can mix plain values, ``SQLExpr``, ``RawSQL`` and subqueries.
@@ -230,7 +230,7 @@ public extension TypedLoneInsertSQLQuery {
         let valuesRow = "(" + fragments.joined(separator: ", ") + ")"
         q += valuesRow
         query = query + q
-        parameters += addedParams
+        parameters += normalizedParameters(addedParams)
     }
 }
 
@@ -269,7 +269,7 @@ public struct TypedLoneInsertSQLQuery<T: Table, each V: Encodable>: SQLQuery {
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 
@@ -285,7 +285,7 @@ public struct TypedInsertSQLQuery<T: Table>: SQLQuery {
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 
@@ -300,7 +300,7 @@ public struct OnConflictInsertQuery<T: Table>: SQLQuery {
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 

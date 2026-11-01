@@ -22,7 +22,7 @@ public struct TypedOrderBySQLQuery<T: Table, Row>: OrderByClause {
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
     
     /// Sorts in ascending order: appends `ASC`.

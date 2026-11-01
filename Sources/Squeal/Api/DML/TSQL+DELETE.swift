@@ -45,7 +45,7 @@ public struct DeleteSQLQuery: SQLFragment {
         
     init(query: String, parameters: [(any Encodable)?]) {
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 
     /// Adds the table to delete from. Follow it with `WHERE`.

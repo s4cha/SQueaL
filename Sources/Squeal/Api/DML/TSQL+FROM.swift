@@ -19,7 +19,7 @@ public struct TypedFromSQLQuery<T: Table, Row>: TableSQLQuery, JoinableQuery, WH
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 

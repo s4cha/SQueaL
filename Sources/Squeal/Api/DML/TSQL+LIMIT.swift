@@ -17,7 +17,7 @@ public struct TypedLimitSQLQuery<T: Table, Row>: TableSQLQuery, OffsetableQuery 
     init(for table: T, query: String, parameters: [(any Encodable)?]) {
         self.table = table
         self.query = query
-        self.parameters = parameters
+        self.parameters = normalizedParameters(parameters)
     }
 }
 
