@@ -43,14 +43,25 @@ SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.published_at, NOW(
 // UPDATE posts SET likes = likes + $1, published_at = now() WHERE id = $2
 ```
 
-A common pattern is a partial update that keeps the current value when the new one is
-`nil`:
+#### Partial updates
+
+A common pattern is a partial update, where `nil` means "keep the current value". Use
+``COALESCE``, with the new value and the column to fall back to:
 
 ```swift
-SQL.UPDATE(users, SET: (\.name, SQLExpr("COALESCE(?, name)", newName)))
+SQL.UPDATE(users, SET:
+        (\.name, COALESCE(newName, users.name)),
+        (\.bio, COALESCE(newBio, users.bio)))
     .WHERE(\.id == id)
-// UPDATE users SET name = COALESCE($1, name) WHERE id = $2
+// UPDATE users SET name = COALESCE($1, users.name), bio = COALESCE($2, users.bio) WHERE id = $3
 ```
+
+The new value must have the column's type, and it's bound as a parameter. Write the column
+as a table column (`users.name`), because a key path inside a `SET` pair can't tell which
+table it belongs to.
+
+If every field of a patch can be `nil`, return early when they all are: an `UPDATE` that
+changes nothing still writes a new version of the row.
 
 You can also set a column from a subquery. See <doc:Subqueries>.
 

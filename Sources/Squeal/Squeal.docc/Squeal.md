@@ -96,6 +96,7 @@ doesn't catch yet.
 - ``MIN``
 - ``MAX``
 - ``NOW``
+- ``COALESCE``
 - ``INTERVAL``
 - ``ShiftedNOW``
 - ``DatabaseTimestamp``

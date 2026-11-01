@@ -29,6 +29,7 @@ private func unwrappedEncodable(_ value: any Encodable) -> (any Encodable)? {
 /// - `SQLExpr`: its SQL, with each `?` replaced by the next `$n` and its arguments bound.
 /// - `RawSQL`: inlined as is.
 /// - `NOW` and `ShiftedNOW`: rendered like an `SQLExpr` (`now()`, `now() - $n::interval`).
+/// - `COALESCE`: rendered like an `SQLExpr` (`COALESCE($n, table.column)`).
 /// - a query (e.g. `SQL.SELECT(…)…LIMIT(1)`): inlined as a parenthesized subquery, its `$n` renumbered.
 /// - any other `Encodable` (including nil optionals): bound as the next `$n`.
 func renderSQLValues(_ values: [Any], parameterOffset: Int) -> (fragments: [String], parameters: [(any Encodable)?]) {
@@ -42,7 +43,7 @@ func renderSQLValues(_ values: [Any], parameterOffset: Int) -> (fragments: [Stri
     }
 
     for v in values {
-        if let expr = (v as? SQLExpr) ?? (v as? DatabaseTimestamp)?.timestampExpression {
+        if let expr = (v as? SQLExpr) ?? (v as? DatabaseTimestamp)?.timestampExpression ?? (v as? SQLValueExpression)?.valueExpression {
             var frag = expr.sql
             for arg in expr.parameters {
                 let ph = nextPlaceholder()

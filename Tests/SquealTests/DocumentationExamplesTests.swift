@@ -434,10 +434,14 @@ struct DocumentationExamplesTests {
     func partialUpdate() {
         let users = usersTable
         let newName: String? = nil
-        let query = SQL.UPDATE(users, SET: (\.name, SQLExpr("COALESCE(?, name)", newName)))
+        let newBio: String? = "Hello"
+        let query = SQL
+            .UPDATE(users, SET:
+                (\.name, COALESCE(newName, users.name)),
+                (\.bio, COALESCE(newBio, users.bio)))
             .WHERE(\.id == userId)
-        #expect(query.query == "UPDATE users SET name = COALESCE($1, name) WHERE id = $2")
-        #expect(query.parameters.count == 2)
+        #expect(query.query == "UPDATE users SET name = COALESCE($1, users.name), bio = COALESCE($2, users.bio) WHERE id = $3")
+        #expect(query.parameters.count == 3)
     }
 
     @Test

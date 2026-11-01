@@ -26,7 +26,7 @@ When an expression needs values, use ``SQLExpr``. Write `?` wherever a value goe
 replaces each `?` with the next numbered placeholder and binds the value:
 
 ```swift
-SQLExpr("COALESCE(?, name)", newName)
+SQLExpr("left(?, 140)", bio)
 SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude)
 ```
 
