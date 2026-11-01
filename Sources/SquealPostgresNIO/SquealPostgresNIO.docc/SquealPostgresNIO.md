@@ -36,8 +36,10 @@ Each value in the query's `parameters` is bound as follows:
 - `nil`, including a `nil` optional such as `Int?.none`, binds as `NULL`.
 - Types PostgresNIO can encode (`String`, `Int`, `Double`, `Bool`, `UUID`, `Date`, arrays of
   these, and so on) bind natively.
-- A `RawRepresentable` type with a `String` raw value, such as a Swift `enum` backed by a
-  Postgres text or enum column, binds its `rawValue`.
+- A `RawRepresentable` type with a `String` raw value, such as a Swift `enum`, binds its
+  `rawValue` without a declared type. Postgres infers the type from where the value is used,
+  so the same Swift enum works with a `text` column and with a Postgres enum column, such as
+  `CREATE TYPE trade_type AS ENUM ('buy', 'sell')`, without any cast.
 
 Any other type throws ``SquealBindingError`` before the query is sent.
 

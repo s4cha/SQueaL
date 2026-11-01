@@ -37,7 +37,9 @@ extension PostgresClient {
                 continue
             }
             if let value = value as? any RawRepresentable<String> {
-                bindings.append(value.rawValue)
+                // Bound without a declared type, so Postgres infers it from the column: a Swift
+                // enum works with both a Postgres enum column and a text column.
+                bindings.append(UntypedText(value.rawValue))
             } else if let value = value as? PostgresThrowingDynamicTypeEncodable {
                 try bindings.append(value)
             } else {
@@ -76,11 +78,30 @@ extension PostgresClient {
 /// Thrown when a query parameter has no PostgresNIO encoding.
 ///
 /// To bind a custom type, make it conform to PostgresNIO's `PostgresEncodable`, or make it
-/// `RawRepresentable` with a `String` raw value.
+/// `RawRepresentable` with a `String` raw value. String-backed enums bind to both text and
+/// Postgres enum columns.
 public struct SquealBindingError: Error, CustomStringConvertible {
     /// The name of the type that couldn't be bound.
     public let type: String
     public var description: String { "Squeal: cannot bind parameter of type \(type) to Postgres" }
+}
+
+/// Text sent with an unspecified type (OID 0), so Postgres infers the type from where the
+/// parameter is used, such as `trade_type` in `INSERT INTO trades (type) VALUES ($1)`.
+/// Bound as `text`, a Postgres enum column would reject it.
+private struct UntypedText: PostgresNonThrowingEncodable {
+    let value: String
+
+    init(_ value: String) {
+        self.value = value
+    }
+
+    static var psqlType: PostgresDataType { .null }
+    static var psqlFormat: PostgresFormat { .text }
+
+    func encode<JSONEncoder: PostgresJSONEncoder>(into byteBuffer: inout ByteBuffer, context: PostgresEncodingContext<JSONEncoder>) {
+        byteBuffer.writeString(value)
+    }
 }
 
 /// Recursively unwraps (possibly nested) Optionals hidden behind `Any`, returning nil for `.none`.
