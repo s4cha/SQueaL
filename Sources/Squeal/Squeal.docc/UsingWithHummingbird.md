@@ -79,8 +79,10 @@ protocol BlogRepository: Sendable {
 }
 ```
 
-Then implement it with Squeal. Each method builds its query, runs it with
-`client.query(_:)`, and decodes the rows into a tuple of the selected columns' types:
+Then implement it with Squeal. Each method builds its query and runs it with
+`client.rows(_:)`, `client.firstRow(_:)` or `client.execute(_:)`, which decode rows into
+tuples of the selected columns' types. This query selects qualified columns from a join, so
+it passes the types with `as:`:
 
 ```swift
 struct PostgresBlogRepository: BlogRepository {
@@ -95,12 +97,8 @@ struct PostgresBlogRepository: BlogRepository {
             .ORDER_BY(posts.created_at, .DESC)
             .LIMIT(limit)
             .OFFSET(offset)
-        let rows = try await client.query(query, logger: logger)
-        var feed: [Post] = []
-        for try await (id, title, authorName, likes, createdAt) in rows.decode((UUID, String, String, Int, Date).self) {
-            feed.append(Post(id: id, title: title, authorName: authorName, likes: likes, createdAt: createdAt))
-        }
-        return feed
+        let rows = try await client.rows(query, as: (UUID, String, String, Int, Date).self, logger: logger)
+        return rows.map { Post(id: $0.0, title: $0.1, authorName: $0.2, likes: $0.3, createdAt: $0.4) }
     }
 }
 ```
@@ -115,11 +113,7 @@ func like(postId: UUID) async throws -> Int? {
         .UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
         .WHERE(\.id == postId)
         .RETURNING(\.likes)
-    let rows = try await client.query(query, logger: logger)
-    for try await likes in rows.decode(Int.self) {
-        return likes
-    }
-    return nil
+    return try await client.firstRow(query, as: Int.self, logger: logger)
 }
 ```
 

@@ -95,8 +95,8 @@ print(query)
 
 ### Run it
 
-With `SquealPostgresNIO`, pass the query straight to a `PostgresClient`. You get PostgresNIO's
-usual row sequence back, and you decode rows with its typed `decode` API:
+With `SquealPostgresNIO`, pass the query straight to a `PostgresClient`. `rows(_:)` decodes
+every row into the types of the selected columns:
 
 ```swift
 import PostgresNIO
@@ -104,11 +104,14 @@ import SquealPostgresNIO
 
 let client = PostgresClient(configuration: config)
 
-let rows = try await client.query(query)
-for try await (id, name, email) in rows.decode((UUID, String, String).self) {
+let adults = try await client.rows(query)   // [(UUID, String, String)]
+for (id, name, email) in adults {
     print(id, name, email)
 }
 ```
+
+`firstRow(_:)` returns only the first row, or `nil`, and `execute(_:)` runs a statement whose
+rows you don't need.
 
 `PostgresClient` must be running before you query it. See PostgresNIO's documentation for
 how to configure and run a client.

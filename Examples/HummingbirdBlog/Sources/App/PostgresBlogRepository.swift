@@ -4,8 +4,8 @@ import PostgresNIO
 import Squeal
 import SquealPostgresNIO
 
-/// `BlogRepository` backed by Postgres. Each method builds a Squeal query, runs it with
-/// `client.query(_:)` and decodes the rows into tuples of the selected columns' types.
+/// `BlogRepository` backed by Postgres. Each method builds a Squeal query and runs it with
+/// SquealPostgresNIO's `rows`, `firstRow` or `execute`, which decode rows into tuples.
 struct PostgresBlogRepository: BlogRepository {
     let client: PostgresClient
     let logger: Logger
@@ -18,11 +18,8 @@ struct PostgresBlogRepository: BlogRepository {
                     VALUES: UUID(), email, name)
             .ON_CONFLICT(\.email, DO: .NOTHING)
             .RETURNING(\.id, \.email, \.name)
-        let rows = try await client.query(query, logger: logger)
-        for try await (id, email, name) in rows.decode((UUID, String, String).self) {
-            return User(id: id, email: email, name: name)
-        }
-        return nil
+        let row = try await client.firstRow(query, as: (UUID, String, String).self, logger: logger)
+        return row.map { User(id: $0.0, email: $0.1, name: $0.2) }
     }
 
     func createPost(authorId: UUID, title: String) async throws -> UUID {
@@ -30,7 +27,7 @@ struct PostgresBlogRepository: BlogRepository {
         let query = SQL.INSERT(INTO: posts,
                                columns: \.id, \.author_id, \.title,
                                VALUES: id, authorId, title)
-        try await client.query(query, logger: logger)
+        try await client.execute(query, logger: logger)
         return id
     }
 
@@ -42,12 +39,8 @@ struct PostgresBlogRepository: BlogRepository {
             .ORDER_BY(posts.created_at, .DESC)
             .LIMIT(limit)
             .OFFSET(offset)
-        let rows = try await client.query(query, logger: logger)
-        var feed: [Post] = []
-        for try await (id, title, authorName, likes, createdAt) in rows.decode((UUID, String, String, Int, Date).self) {
-            feed.append(Post(id: id, title: title, authorName: authorName, likes: likes, createdAt: createdAt))
-        }
-        return feed
+        let rows = try await client.rows(query, as: (UUID, String, String, Int, Date).self, logger: logger)
+        return rows.map { Post(id: $0.0, title: $0.1, authorName: $0.2, likes: $0.3, createdAt: $0.4) }
     }
 
     /// Returns the new like count, or `nil` if the post doesn't exist.
@@ -56,11 +49,7 @@ struct PostgresBlogRepository: BlogRepository {
             .UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
             .WHERE(\.id == postId)
             .RETURNING(\.likes)
-        let rows = try await client.query(query, logger: logger)
-        for try await likes in rows.decode(Int.self) {
-            return likes
-        }
-        return nil
+        return try await client.firstRow(query, as: Int.self, logger: logger)
     }
 
     func deletePost(id: UUID) async throws -> Bool {
@@ -68,10 +57,6 @@ struct PostgresBlogRepository: BlogRepository {
             .DELETE(FROM: posts)
             .WHERE(\.id == id)
             .RETURNING(\.id)
-        let rows = try await client.query(query, logger: logger)
-        for try await _ in rows.decode(UUID.self) {
-            return true
-        }
-        return false
+        return try await client.firstRow(query, as: UUID.self, logger: logger) != nil
     }
 }

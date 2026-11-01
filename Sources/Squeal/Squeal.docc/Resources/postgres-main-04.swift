@@ -17,27 +17,28 @@ let client = PostgresClient(
 try await withThrowingDiscardingTaskGroup { group in
     group.addTask { await client.run() }
 
-    let rows = try await client.query(
+    let rows = try await client.rows(
         SQL
             .SELECT(\.id, \.name, \.email)
             .FROM(users)
             .ORDER_BY(\.name, .ASC)
             .LIMIT(20)
     )
-    for try await (id, name, email) in rows.decode((UUID, String, String).self) {
+    for (id, name, email) in rows {
         print(id, name, email)
     }
 
-    let inserted = try await client.query(
+    let insertedId = try await client.firstRow(
         SQL
             .INSERT(INTO: users,
                     columns: \.id, \.email, \.name, \.age,
                     VALUES: UUID(), "ada@example.com", "Ada", 36)
             .ON_CONFLICT(\.email, DO: .NOTHING)
-            .RETURNING(\.id)
+            .RETURNING(\.id),
+        as: UUID.self
     )
-    for try await id in inserted.decode(UUID.self) {
-        print("Created user", id)
+    if let insertedId {
+        print("Created user", insertedId)
     }
 
     group.cancelAll()

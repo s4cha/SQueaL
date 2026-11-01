@@ -139,8 +139,9 @@ Squeal checks queries against your Swift description of the schema. It doesn't c
 
 - **That your description matches the database.** Squeal doesn't read your database. If
   your ``Table`` definitions and your migrations disagree, queries fail at runtime.
-- **How you decode rows.** With PostgresNIO, `rows.decode((UUID, String).self)` isn't
-  checked against the columns you selected.
+- **How you decode rows, in some cases.** `client.rows(_:)` decodes a `SELECT` of key paths
+  into its own row type, so that's checked. The types you pass with `rows(_:as:)`, for
+  qualified columns, expressions or `RETURNING`, aren't checked against the query.
 - **That a join's other table is in the query.** A join condition must use the joined
   table, but its other column can come from any table, even one you haven't added yet.
 - **SQL semantics.** Squeal doesn't add parentheses around `AND` and `OR` conditions. Group

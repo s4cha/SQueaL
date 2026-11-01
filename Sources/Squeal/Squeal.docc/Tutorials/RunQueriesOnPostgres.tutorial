@@ -72,15 +72,16 @@
             }
 
             @Step {
-                Pass a query to `query(_:)`, and decode each row into a tuple of the selected
-                columns' types.
+                Pass a query to `rows(_:)`. It decodes each row into a tuple of the selected
+                columns' types, which the query already knows: here `(UUID, String, String)`.
 
                 @Code(name: "main.swift", file: postgres-main-03.swift)
             }
 
             @Step {
-                Insert a user, the same way as in the previous tutorial, and decode the ID
-                that `RETURNING` sends back.
+                Insert a user, the same way as in the previous tutorial, and read the ID that
+                `RETURNING` sends back with `firstRow(_:as:)`. It's `nil` when `ON CONFLICT`
+                skipped the row. `RETURNING` doesn't carry a row type, so you pass it.
 
                 @Code(name: "main.swift", file: postgres-main-04.swift)
             }

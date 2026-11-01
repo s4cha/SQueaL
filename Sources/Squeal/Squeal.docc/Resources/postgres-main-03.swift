@@ -17,14 +17,14 @@ let client = PostgresClient(
 try await withThrowingDiscardingTaskGroup { group in
     group.addTask { await client.run() }
 
-    let rows = try await client.query(
+    let rows = try await client.rows(
         SQL
             .SELECT(\.id, \.name, \.email)
             .FROM(users)
             .ORDER_BY(\.name, .ASC)
             .LIMIT(20)
     )
-    for try await (id, name, email) in rows.decode((UUID, String, String).self) {
+    for (id, name, email) in rows {
         print(id, name, email)
     }
 
