@@ -86,6 +86,8 @@ doesn't catch yet.
 - ``AggregatePredicate``
 - ``NOWPredicate``
 - ``NOWComparable``
+- ``EXISTS``
+- ``NOT_EXISTS``
 
 ### Selectable Expressions
 

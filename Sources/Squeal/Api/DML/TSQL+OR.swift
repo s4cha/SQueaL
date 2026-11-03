@@ -62,4 +62,19 @@ public extension ORableQuery {
         let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
         return TypedWhereSQLQuery(for: table, query: query + " OR \(fragments[0])", parameters: parameters + newParameters)
     }
+
+    /// Adds an alternative comparison of two table-qualified columns: `OR a.x = b.y`.
+    func OR<A: Table, B: Table, F>(_ predicate: JOINPredicate<A, B, F>) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " OR \(predicate.sql)", parameters: parameters)
+    }
+
+    /// Adds an alternative condition that a subquery returns any row: `OR EXISTS (SELECT …)`.
+    func OR(_ condition: EXISTS) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " OR \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    }
+
+    /// Adds an alternative condition that a subquery returns no row: `OR NOT EXISTS (SELECT …)`.
+    func OR(_ condition: NOT_EXISTS) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " OR \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    }
 }

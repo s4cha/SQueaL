@@ -28,6 +28,14 @@ struct Post {
     let published_at: Date?
 }
 
+/// `posts` with the nullable `editor_id` from the Joins article.
+@Table(schema: "posts")
+struct EditedPost {
+    let id: UUID
+    let title: String
+    let editor_id: UUID?
+}
+
 private let usersTable = UserTable()
 private let postsTable = PostTable()
 
@@ -240,7 +248,48 @@ struct DocumentationExamplesTests {
         #expect(query.query == "SELECT users.name, departments.name FROM users JOIN users_departments ON users_departments.user_id = users.uuid JOIN departments ON departments.id = users_departments.department_id")
     }
 
+    @Test
+    func joinOnNullableForeignKey() {
+        let users = usersTable
+        let posts = EditedPostTable()
+        let query = SQL
+            .SELECT(posts.title, users.name)
+            .FROM(posts)
+            .LEFT_JOIN(users, ON: posts.editor_id == users.id)
+        #expect(query.query == "SELECT posts.title, users.name FROM posts LEFT JOIN users ON posts.editor_id = users.id")
+    }
+
     // MARK: - Subqueries
+
+    @Test
+    func existsSubquery() {
+        let users = usersTable
+        let posts = postsTable
+        let popularPosts = SQL
+            .SELECT(\.id)
+            .FROM(posts)
+            .WHERE(posts.author_id == users.id)
+            .AND(\.likes > 1000)
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .WHERE(\.age >= 18)
+            .AND(EXISTS(popularPosts))
+        #expect(query.query == "SELECT name FROM users WHERE age >= $1 AND EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id AND likes > $2)")
+        #expect(query.parameters.count == 2)
+        #expect(query.parameters[1] as? Int == 1000)
+    }
+
+    @Test
+    func notExistsSubquery() {
+        let users = usersTable
+        let posts = postsTable
+        let query = SQL
+            .SELECT(\.name)
+            .FROM(users)
+            .WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
+        #expect(query.query == "SELECT name FROM users WHERE NOT EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)")
+    }
 
     @Test
     func whereInSubquery() {

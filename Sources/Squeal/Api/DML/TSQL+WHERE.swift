@@ -289,5 +289,31 @@ public extension WHEREableQuery {
         let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
         return TypedWhereSQLQuery(for: table, query: query + " WHERE \(fragments[0])", parameters: parameters + newParameters)
     }
-}
 
+    /// Filters rows by comparing two table-qualified columns: `WHERE a.x = b.y`.
+    ///
+    /// In a subquery, it can refer to a column of the outer query:
+    ///
+    /// ```swift
+    /// SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)
+    /// // SELECT id FROM posts WHERE posts.author_id = users.id
+    /// ```
+    func WHERE<A: Table, B: Table, F>(_ predicate: JOINPredicate<A, B, F>) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(predicate.sql)", parameters: parameters)
+    }
+
+    /// Filters rows on whether a subquery returns any row: `WHERE EXISTS (SELECT …)`.
+    ///
+    /// ```swift
+    /// .WHERE(EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
+    /// // WHERE EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)
+    /// ```
+    func WHERE(_ condition: EXISTS) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    }
+
+    /// Filters rows on whether a subquery returns no row: `WHERE NOT EXISTS (SELECT …)`.
+    func WHERE(_ condition: NOT_EXISTS) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    }
+}

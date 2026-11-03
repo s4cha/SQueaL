@@ -85,4 +85,19 @@ public extension ANDableQuery {
         let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
         return TypedWhereSQLQuery(for: table, query: query + " AND \(fragments[0])", parameters: parameters + newParameters)
     }
+
+    /// Adds a comparison of two table-qualified columns: `AND a.x = b.y`.
+    func AND<A: Table, B: Table, F>(_ predicate: JOINPredicate<A, B, F>) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " AND \(predicate.sql)", parameters: parameters)
+    }
+
+    /// Adds a condition that a subquery returns any row: `AND EXISTS (SELECT …)`.
+    func AND(_ condition: EXISTS) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " AND \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    }
+
+    /// Adds a condition that a subquery returns no row: `AND NOT EXISTS (SELECT …)`.
+    func AND(_ condition: NOT_EXISTS) -> TypedWhereSQLQuery<T, Row> {
+        return TypedWhereSQLQuery(for: table, query: query + " AND \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    }
 }
