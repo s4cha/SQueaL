@@ -41,7 +41,7 @@ public extension FROMableQuery {
     /// SQL.SELECT(\.id).FROM(users)   // SELECT id FROM users
     /// ```
     func FROM(_ table: T) -> TypedFromSQLQuery<T, Row> {
-        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: parameters)
     }
 }
 
@@ -65,6 +65,6 @@ public extension FROMableSQLQuery {
     /// SQL.SELECT(users.id).FROM(users)   // SELECT users.id FROM users
     /// ```
     func FROM<T>(_ table: T) -> TypedFromSQLQuery<T, Void> {
-        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: [])
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: parameters)
     }
 }

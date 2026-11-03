@@ -57,9 +57,10 @@ public struct TypedWhereSQLQuery<T: Table, Row>: WHEREClause {
         return TypedSQLQuery(for: table, query: query + " RETURNING *", parameters: parameters)
     }
 
-    /// RETURNING mixing table columns (`table.column`) and `RawSQL` expressions.
+    /// RETURNING mixing table columns (`table.column`), expressions such as `RawSQL`, and subqueries.
     public func RETURNING<each F: SelectField>(_ fields: repeat each F) -> TypedSQLQuery<T, Void> {
-        return TypedSQLQuery(for: table, query: query + returningClause(repeat each fields), parameters: parameters)
+        let (query, parameters) = appendingReturning(repeat each fields, to: self)
+        return TypedSQLQuery(for: table, query: query, parameters: parameters)
     }
 }
 

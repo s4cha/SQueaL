@@ -99,6 +99,7 @@ doesn't catch yet.
 - ``MAX``
 - ``NOW``
 - ``COALESCE``
+- ``SUBQUERY``
 - ``INTERVAL``
 - ``ShiftedNOW``
 - ``DatabaseTimestamp``

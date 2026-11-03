@@ -236,9 +236,10 @@ public extension TypedLoneInsertSQLQuery {
 
 public extension TypedInsertSQLQuery {
 
-    /// RETURNING mixing table columns (`table.column`) and `RawSQL` expressions.
+    /// RETURNING mixing table columns (`table.column`), expressions such as `RawSQL`, and subqueries.
     func RETURNING<each F: SelectField>(_ fields: repeat each F) -> TypedSQLQuery<T, Void> {
-        return TypedSQLQuery(for: table, query: query + returningClause(repeat each fields), parameters: parameters)
+        let (query, parameters) = appendingReturning(repeat each fields, to: self)
+        return TypedSQLQuery(for: table, query: query, parameters: parameters)
     }
     
     /// Returns a column of the inserted row: `RETURNING column`.
@@ -396,9 +397,10 @@ public extension TypedLoneInsertSQLQuery {
 
 public extension OnConflictInsertQuery {
 
-    /// RETURNING mixing table columns (`table.column`) and `RawSQL` expressions.
+    /// RETURNING mixing table columns (`table.column`), expressions such as `RawSQL`, and subqueries.
     func RETURNING<each F: SelectField>(_ fields: repeat each F) -> TypedSQLQuery<T, Void> {
-        return TypedSQLQuery(for: table, query: query + returningClause(repeat each fields), parameters: parameters)
+        let (query, parameters) = appendingReturning(repeat each fields, to: self)
+        return TypedSQLQuery(for: table, query: query, parameters: parameters)
     }
 
     /// Returns columns of the inserted rows: `RETURNING a, b, …`.

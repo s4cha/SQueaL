@@ -281,6 +281,21 @@ struct DocumentationExamplesTests {
     }
 
     @Test
+    func selectSubquery() {
+        let users = usersTable
+        let posts = postsTable
+        let latestTitle = SQL
+            .SELECT(\.title)
+            .FROM(posts)
+            .WHERE(posts.author_id == users.id)
+            .ORDER_BY(\.published_at, .DESC)
+            .LIMIT(1)
+        let query = SQL.SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
+        #expect(query.query == "SELECT users.name, (SELECT title FROM posts WHERE posts.author_id = users.id ORDER BY published_at DESC LIMIT $1) FROM users")
+        #expect(query.parameters.count == 1)
+    }
+
+    @Test
     func notExistsSubquery() {
         let users = usersTable
         let posts = postsTable

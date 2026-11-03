@@ -83,6 +83,27 @@ SQL.SELECT(\.name)
 
 Both work in `WHERE`, `AND` and `OR`, including in `UPDATE` and `DELETE`.
 
+### Subqueries in the SELECT list
+
+Wrap a subquery in ``SUBQUERY`` to select its value as a column. It's usually correlated
+with the outer row through a column comparison, for example each user's latest post title:
+
+```swift
+let latestTitle = SQL
+    .SELECT(\.title)
+    .FROM(posts)
+    .WHERE(posts.author_id == users.id)
+    .ORDER_BY(\.published_at, .DESC)
+    .LIMIT(1)
+
+SQL.SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
+// SELECT users.name, (SELECT title FROM posts WHERE posts.author_id = users.id
+//     ORDER BY published_at DESC LIMIT $1) FROM users
+```
+
+The subquery must return one column and at most one row, and its value is `NULL` when it
+returns no row, so decode it as an optional. ``SUBQUERY`` also works in `RETURNING`.
+
 ### Subqueries as values
 
 A subquery can provide the value of a column in `UPDATE … SET`:
