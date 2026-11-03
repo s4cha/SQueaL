@@ -51,6 +51,38 @@ SQL.SELECT(posts.title, users.name)
 //     WHERE users.id IN (SELECT author_id FROM posts GROUP BY author_id HAVING COUNT(*) >= $1)
 ```
 
+### EXISTS and NOT EXISTS
+
+`EXISTS` filters on whether a subquery returns any row, and `NOT_EXISTS` on whether it
+returns none. The subquery usually refers to the outer query's table with a column
+comparison, so it runs once per outer row:
+
+```swift
+let popularPosts = SQL
+    .SELECT(\.id)
+    .FROM(posts)
+    .WHERE(posts.author_id == users.id)
+    .AND(\.likes > 1000)
+
+SQL.SELECT(\.name)
+    .FROM(users)
+    .WHERE(\.age >= 18)
+    .AND(EXISTS(popularPosts))
+// SELECT name FROM users WHERE age >= $1
+//     AND EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id AND likes > $2)
+```
+
+`NOT_EXISTS` finds rows with nothing related, such as users who haven't posted:
+
+```swift
+SQL.SELECT(\.name)
+    .FROM(users)
+    .WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
+// SELECT name FROM users WHERE NOT EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)
+```
+
+Both work in `WHERE`, `AND` and `OR`, including in `UPDATE` and `DELETE`.
+
 ### Subqueries as values
 
 A subquery can provide the value of a column in `UPDATE … SET`:

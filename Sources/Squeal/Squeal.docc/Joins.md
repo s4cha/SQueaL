@@ -56,7 +56,18 @@ SQL.SELECT(users.name, departments.name)
 ```
 
 A join's condition must use a column of the table being joined, and both columns must have
-the same type. Squeal doesn't check that the condition's other table is already part of
+the same type. A nullable column can be compared with a non-nullable column of the same
+wrapped type, so a nullable foreign key joins on the key it references. With a
+`posts.editor_id` column of type `UUID?`:
+
+```swift
+SQL.SELECT(posts.title, users.name)
+    .FROM(posts)
+    .LEFT_JOIN(users, ON: posts.editor_id == users.id)
+// SELECT posts.title, users.name FROM posts LEFT JOIN users ON posts.editor_id = users.id
+```
+
+Conditions can use `==`, `!=`, `<`, `<=`, `>` and `>=`. Squeal doesn't check that the condition's other table is already part of
 the query. If it isn't, Postgres reports a missing `FROM`-clause entry when the query runs.
 
 ### Filtering and sorting on joined tables
@@ -69,6 +80,13 @@ are written qualified:
 .AND(users.name != "admin")      // AND users.name != $2
 .ORDER_BY(users.name, .DESC)     // ORDER BY users.name DESC
 .WHERE(users.id, IN: subquery)   // WHERE users.id IN (…)
+```
+
+They also compare two columns, with the same operators as join conditions. This is how a
+subquery refers to the outer query (see <doc:Subqueries>):
+
+```swift
+.AND(posts.author_id == users.id)   // AND posts.author_id = users.id
 ```
 
 ## Topics

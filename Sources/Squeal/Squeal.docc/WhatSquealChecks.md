@@ -68,8 +68,9 @@ SQL.SELECT(\.id).FROM(posts).WHERE(\.title < NOW())
 // error: cannot convert value of type 'NOW' to expected argument type 'String'
 ```
 
-**A join between columns of different types.** Both sides of a join condition must have the
-same type, so joining a `String` to a `UUID` doesn't compile:
+**A comparison between columns of different types.** Both sides of a join condition, or of
+a column comparison in `WHERE`, must have the same type (a nullable column matches its
+non-optional type), so joining a `String` to a `UUID` doesn't compile:
 
 ```swift
 SQL.SELECT(posts.title).FROM(posts).JOIN(users, ON: posts.title == users.id)
@@ -144,6 +145,8 @@ Squeal checks queries against your Swift description of the schema. It doesn't c
   qualified columns, expressions or `RETURNING`, aren't checked against the query.
 - **That a join's other table is in the query.** A join condition must use the joined
   table, but its other column can come from any table, even one you haven't added yet.
+  Likewise, a column comparison in `WHERE` or in an `EXISTS` subquery can name any table,
+  and Postgres reports it when the query runs.
 - **SQL semantics.** Squeal doesn't add parentheses around `AND` and `OR` conditions. Group
   them yourself with an ``SQLExpr``. It can't know whether a subquery used as a value
   returns a single row.

@@ -188,26 +188,78 @@ public extension JoinableQuery {
     }
 
     private func join<A: Table, B: Table, F>(word: String, _ schema: String, ON predicate: JOINPredicate<A, B, F>) -> TypedFromSQLQuery<T, Row> {
-        let statement = "\(word) JOIN \(schema) ON \(predicate.left.tableName).\(predicate.left.name) = \(predicate.right.tableName).\(predicate.right.name)"
+        let statement = "\(word) JOIN \(schema) ON \(predicate.sql)"
         return TypedFromSQLQuery(for: table,
                                  query: query + statement,
                                  parameters: parameters)
     }
 }
 
-
-
-
-/// A join condition between two columns of the same type.
+/// A comparison between two table-qualified columns of the same type, such as `posts.author_id == users.id`.
 ///
-/// You create one by comparing two table-qualified columns with `==`: `posts.author_id == users.id`.
+/// Use it as a `JOIN … ON` condition, or in `WHERE`, `AND` and `OR`, for example to compare
+/// a column of a subquery's table with a column of the outer query:
+///
+/// ```swift
+/// .WHERE(posts.author_id == users.id)        // WHERE posts.author_id = users.id
+/// .AND(orders.shipped_at > orders.created_at) // AND orders.shipped_at > orders.created_at
+/// ```
+///
+/// A nullable column can be compared with a non-nullable column of the same wrapped type,
+/// such as a nullable foreign key with the primary key it references.
 public struct JOINPredicate<A: Table, B: Table, F> {
-    let left: TableColumn<A, F>
-    let right: TableColumn<B, F>
+    let left: String
     let sign: String
+    let right: String
+
+    init<L, R>(_ left: TableColumn<A, L>, _ sign: String, _ right: TableColumn<B, R>) {
+        self.left = left.toString()
+        self.sign = sign
+        self.right = right.toString()
+    }
+
+    /// The condition as SQL: `a.x = b.y`.
+    var sql: String { "\(left) \(sign) \(right)" }
 }
 
-/// A join condition that two columns are equal. Both columns must have the same type.
-public func == <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> {
-    return JOINPredicate(left: left, right: right, sign: "=") //SQLPredicate(left: left, sign: "=", right: right)
-}
+/// Two columns are equal: `a.x = b.y`. Both columns must have the same type.
+public func == <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "=", right) }
+/// A nullable column equals a non-nullable column: `a.x = b.y`.
+public func == <A,B,F>(left: TableColumn<A, F?>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "=", right) }
+/// A column equals a nullable column: `a.x = b.y`.
+public func == <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F?>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "=", right) }
+
+/// Two columns differ: `a.x != b.y`.
+public func != <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "!=", right) }
+/// A nullable column differs from a non-nullable column: `a.x != b.y`.
+public func != <A,B,F>(left: TableColumn<A, F?>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "!=", right) }
+/// A column differs from a nullable column: `a.x != b.y`.
+public func != <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F?>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "!=", right) }
+
+/// A column is less than another: `a.x < b.y`.
+public func < <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "<", right) }
+/// A nullable column is less than a non-nullable column: `a.x < b.y`.
+public func < <A,B,F>(left: TableColumn<A, F?>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "<", right) }
+/// A column is less than a nullable column: `a.x < b.y`.
+public func < <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F?>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "<", right) }
+
+/// A column is less than or equal to another: `a.x <= b.y`.
+public func <= <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "<=", right) }
+/// A nullable column is less than or equal to a non-nullable column: `a.x <= b.y`.
+public func <= <A,B,F>(left: TableColumn<A, F?>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "<=", right) }
+/// A column is less than or equal to a nullable column: `a.x <= b.y`.
+public func <= <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F?>) -> JOINPredicate<A,B,F> { JOINPredicate(left, "<=", right) }
+
+/// A column is greater than another: `a.x > b.y`.
+public func > <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, ">", right) }
+/// A nullable column is greater than a non-nullable column: `a.x > b.y`.
+public func > <A,B,F>(left: TableColumn<A, F?>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, ">", right) }
+/// A column is greater than a nullable column: `a.x > b.y`.
+public func > <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F?>) -> JOINPredicate<A,B,F> { JOINPredicate(left, ">", right) }
+
+/// A column is greater than or equal to another: `a.x >= b.y`.
+public func >= <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, ">=", right) }
+/// A nullable column is greater than or equal to a non-nullable column: `a.x >= b.y`.
+public func >= <A,B,F>(left: TableColumn<A, F?>, right: TableColumn<B, F>) -> JOINPredicate<A,B,F> { JOINPredicate(left, ">=", right) }
+/// A column is greater than or equal to a nullable column: `a.x >= b.y`.
+public func >= <A,B,F>(left: TableColumn<A, F>, right: TableColumn<B, F?>) -> JOINPredicate<A,B,F> { JOINPredicate(left, ">=", right) }
