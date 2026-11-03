@@ -58,11 +58,8 @@ public extension TSQL {
     /// // SELECT posts.author_id, COUNT(*), max(likes) FROM posts
     /// ```
     static func SELECT<each Z: SelectField>(_ fields: repeat each Z) -> SelectSQLQuery {
-        var fieldNames = [String]()
-        for field in repeat each fields {
-            fieldNames.append(field.toString())
-        }
-        return SelectSQLQuery(query: "SELECT \(fieldNames.joined(separator: ", "))", parameters: [])
+        let (sql, parameters) = renderSelectFields(repeat each fields, parameterOffset: 0)
+        return SelectSQLQuery(query: "SELECT \(sql)", parameters: parameters)
     }
     
     /// Selects columns of `T`, given as key paths.
@@ -140,11 +137,8 @@ public extension SQL {
     /// // SELECT posts.author_id, COUNT(*), max(likes) FROM posts
     /// ```
     static func SELECT<each Z: SelectField>(_ fields: repeat each Z) -> SelectSQLQuery {
-        var fieldNames = [String]()
-        for field in repeat each fields {
-            fieldNames.append(field.toString())
-        }
-        return SelectSQLQuery(query: "SELECT \(fieldNames.joined(separator: ", "))", parameters: [])
+        let (sql, parameters) = renderSelectFields(repeat each fields, parameterOffset: 0)
+        return SelectSQLQuery(query: "SELECT \(sql)", parameters: parameters)
     }
  
     /// Selects columns, given as key paths.
@@ -209,7 +203,7 @@ public extension SQL {
 
 /// An expression that can appear in a `SELECT` or `RETURNING` list.
 ///
-/// Table-qualified columns (`users.name`), the aggregates ``COUNT``, ``SUM``, ``AVG``, ``MIN`` and ``MAX``, and ``RawSQL`` all conform.
+/// Table-qualified columns (`users.name`), the aggregates ``COUNT``, ``SUM``, ``AVG``, ``MIN`` and ``MAX``, ``SUBQUERY`` and ``RawSQL`` all conform.
 public protocol SelectField {
     /// The expression's SQL text.
     func toString() -> String

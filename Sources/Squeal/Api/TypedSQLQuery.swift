@@ -42,13 +42,10 @@ public struct TypedSQLQuery<T: Table, Row>: TableSQLQuery {
 
 // MARK: - RETURNING expressions
 
-/// ` RETURNING a, b, …` for fields that may mix table columns (`table.column`) and `RawSQL` expressions.
-func returningClause<each F: SelectField>(_ fields: repeat each F) -> String {
-    var names = [String]()
-    for field in repeat each fields {
-        names.append(field.toString())
-    }
-    return " RETURNING \(names.joined(separator: ", "))"
+/// The query extended with ` RETURNING a, b, …`, for fields that may mix table columns (`table.column`), expressions and subqueries.
+func appendingReturning<each F: SelectField>(_ fields: repeat each F, to fragment: some SQLFragment) -> (query: String, parameters: [(any Encodable)?]) {
+    let (sql, parameters) = renderSelectFields(repeat each fields, parameterOffset: fragment.parameterNumber())
+    return (fragment.query + " RETURNING \(sql)", fragment.parameters + parameters)
 }
 
 // MARK: - RETURNING support (e.g. after INSERT ... ON CONFLICT ... DO ... RETURNING)
