@@ -16,11 +16,32 @@ import Foundation
 /// .WHERE(\.age >= 18)   // WHERE age >= $1
 /// ```
 ///
-/// The value must have the column's type, and it's bound as a parameter.
+/// The value must have the column's type, and it's bound as a parameter. A date column can
+/// also be compared with ``NOW``: `\.published_at <= NOW()`.
 public struct SQLPredicate<T: Table, Y: Encodable> {
     let left: KeyPath<T, TableColumn<T, Y>>
     let sign: String
-    let right: Y
+    /// The right-hand side, with `?` for each bound value: `?` for a value, `now()` for ``NOW``.
+    let right: SQLExpr
+
+    init(left: KeyPath<T, TableColumn<T, Y>>, sign: String, right: Y) {
+        self.left = left
+        self.sign = sign
+        self.right = SQLExpr(sql: "?", parameters: [right])
+    }
+
+    init(left: KeyPath<T, TableColumn<T, Y>>, sign: String, timestamp: some DatabaseTimestamp) {
+        self.left = left
+        self.sign = sign
+        self.right = timestamp.timestampExpression
+    }
+
+    /// The condition's SQL and parameters when appended to `fragment`, with the column named
+    /// as in a query on `T`: `column <op> $n`.
+    func rendered(after fragment: some SQLFragment) -> (sql: String, parameters: [(any Encodable)?]) {
+        let (fragments, parameters) = renderSQLValues([right], parameterOffset: fragment.parameterNumber())
+        return ("\(T()[keyPath: left].name) \(sign) \(fragments[0])", parameters)
+    }
 }
 
 /// A condition that the column is equal to the value: `column = $n`.

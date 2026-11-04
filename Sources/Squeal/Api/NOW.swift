@@ -132,60 +132,49 @@ public protocol NOWComparable {}
 extension Date: NOWComparable {}
 extension Optional: NOWComparable where Wrapped == Date {}
 
-/// A comparison between a date column and the database's current time, such as
-/// `\.published_at < NOW()` or `\.published_at >= NOW() - INTERVAL(30, .DAY)`.
+/// A comparison between a table-qualified date column and the database's current time, such as
+/// `posts.published_at < NOW()` or `posts.published_at >= NOW() - INTERVAL(30, .DAY)`.
 ///
 /// Pass it to `WHERE`, `AND` or `OR`:
 ///
 /// ```swift
-/// SQL.SELECT(\.id).FROM(posts).WHERE(\.published_at <= NOW())
-/// // SELECT id FROM posts WHERE published_at <= now()
+/// SQL.SELECT(posts.id).FROM(posts).WHERE(posts.published_at <= NOW())
+/// // SELECT posts.id FROM posts WHERE posts.published_at <= now()
 /// ```
 ///
-/// It only compiles with `Date` and `Date?` columns.
+/// Comparing a key path with ``NOW`` (`\.published_at <= NOW()`) gives a ``SQLPredicate``
+/// instead. Both only compile with `Date` and `Date?` columns.
 public struct NOWPredicate<T: Table> {
     let column: String
     let tableName: String
-    let isKeyPath: Bool
     let sign: String
     let timestamp: SQLExpr
-
-    init<V>(_ keyPath: KeyPath<T, TableColumn<T, V>>, _ sign: String, _ timestamp: some DatabaseTimestamp) {
-        self.column = T()[keyPath: keyPath].name
-        self.tableName = T.schema
-        self.isKeyPath = true
-        self.sign = sign
-        self.timestamp = timestamp.timestampExpression
-    }
 
     init<V>(_ column: TableColumn<T, V>, _ sign: String, _ timestamp: some DatabaseTimestamp) {
         self.column = column.name
         self.tableName = column.tableName
-        self.isKeyPath = false
         self.sign = sign
         self.timestamp = timestamp.timestampExpression
     }
 
-    /// The condition in a query on `Q`, with `?` placeholders for its values: key paths on `Q`
-    /// render unqualified, everything else renders as `table.column`.
-    func expression<Q: Table>(in query: Q.Type) -> SQLExpr {
-        let name = isKeyPath && T.self == Q.self ? column : "\(tableName).\(column)"
-        return SQLExpr(sql: "\(name) \(sign) \(timestamp.sql)", parameters: timestamp.parameters)
+    /// The condition, with `?` placeholders for its values.
+    var expression: SQLExpr {
+        return SQLExpr(sql: "\(tableName).\(column) \(sign) \(timestamp.sql)", parameters: timestamp.parameters)
     }
 }
 
 /// A condition that the date column is before the timestamp: `column < now()`.
-public func < <T, V: NOWComparable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "<", right) }
+public func < <T, V: NOWComparable & Encodable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> SQLPredicate<T, V> { SQLPredicate(left: left, sign: "<", timestamp: right) }
 /// A condition that the date column is at or before the timestamp: `column <= now()`.
-public func <= <T, V: NOWComparable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "<=", right) }
+public func <= <T, V: NOWComparable & Encodable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> SQLPredicate<T, V> { SQLPredicate(left: left, sign: "<=", timestamp: right) }
 /// A condition that the date column is after the timestamp: `column > now()`.
-public func > <T, V: NOWComparable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> NOWPredicate<T> { NOWPredicate(left, ">", right) }
+public func > <T, V: NOWComparable & Encodable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> SQLPredicate<T, V> { SQLPredicate(left: left, sign: ">", timestamp: right) }
 /// A condition that the date column is at or after the timestamp: `column >= now()`.
-public func >= <T, V: NOWComparable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> NOWPredicate<T> { NOWPredicate(left, ">=", right) }
+public func >= <T, V: NOWComparable & Encodable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> SQLPredicate<T, V> { SQLPredicate(left: left, sign: ">=", timestamp: right) }
 /// A condition that the date column equals the timestamp: `column = now()`.
-public func == <T, V: NOWComparable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "=", right) }
+public func == <T, V: NOWComparable & Encodable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> SQLPredicate<T, V> { SQLPredicate(left: left, sign: "=", timestamp: right) }
 /// A condition that the date column doesn't equal the timestamp: `column != now()`.
-public func != <T, V: NOWComparable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "!=", right) }
+public func != <T, V: NOWComparable & Encodable, R: DatabaseTimestamp>(left: KeyPath<T, TableColumn<T, V>>, right: R) -> SQLPredicate<T, V> { SQLPredicate(left: left, sign: "!=", timestamp: right) }
 
 /// A condition that the date column is before the timestamp: `table.column < now()`.
 public func < <T, V: NOWComparable, R: DatabaseTimestamp>(left: TableColumn<T, V>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "<", right) }
@@ -199,66 +188,3 @@ public func >= <T, V: NOWComparable, R: DatabaseTimestamp>(left: TableColumn<T, 
 public func == <T, V: NOWComparable, R: DatabaseTimestamp>(left: TableColumn<T, V>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "=", right) }
 /// A condition that the date column doesn't equal the timestamp: `table.column != now()`.
 public func != <T, V: NOWComparable, R: DatabaseTimestamp>(left: TableColumn<T, V>, right: R) -> NOWPredicate<T> { NOWPredicate(left, "!=", right) }
-
-extension SQLFragment {
-    /// `keyword` followed by the predicate's SQL, with its placeholders numbered after this query's.
-    func appending<U: Table, Q: Table>(_ keyword: String, _ predicate: NOWPredicate<U>, in query: Q.Type) -> (query: String, parameters: [(any Encodable)?]) {
-        let (fragments, newParameters) = renderSQLValues([predicate.expression(in: query)], parameterOffset: parameterNumber())
-        return (self.query + " \(keyword) \(fragments[0])", parameters + newParameters)
-    }
-}
-
-public extension WHEREableQuery {
-    /// Filters rows by comparing a date column with the database's current time.
-    ///
-    /// ```swift
-    /// .WHERE(\.published_at <= NOW())                       // WHERE published_at <= now()
-    /// .WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))   // WHERE published_at >= now() - $1::interval
-    /// ```
-    func WHERE(_ predicate: NOWPredicate<T>) -> TypedWhereSQLQuery<T, Row> {
-        let (q, p) = appending("WHERE", predicate, in: T.self)
-        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
-    }
-
-    /// Filters rows by comparing a date column of any table in the query with the database's
-    /// current time.
-    ///
-    /// ```swift
-    /// .WHERE(posts.published_at <= NOW())   // WHERE posts.published_at <= now()
-    /// ```
-    func WHERE<U>(_ predicate: NOWPredicate<U>) -> TypedWhereSQLQuery<T, Row> {
-        let (q, p) = appending("WHERE", predicate, in: T.self)
-        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
-    }
-}
-
-public extension ANDableQuery {
-    /// Adds a condition comparing a date column with the database's current time: `AND column < now()`.
-    func AND(_ predicate: NOWPredicate<T>) -> TypedWhereSQLQuery<T, Row> {
-        let (q, p) = appending("AND", predicate, in: T.self)
-        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
-    }
-
-    /// Adds a condition comparing a date column of any table in the query with the database's
-    /// current time: `AND table.column < now()`.
-    func AND<U>(_ predicate: NOWPredicate<U>) -> TypedWhereSQLQuery<T, Row> {
-        let (q, p) = appending("AND", predicate, in: T.self)
-        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
-    }
-}
-
-public extension ORableQuery {
-    /// Adds an alternative condition comparing a date column with the database's current time:
-    /// `OR column < now()`.
-    func OR(_ predicate: NOWPredicate<T>) -> TypedWhereSQLQuery<T, Row> {
-        let (q, p) = appending("OR", predicate, in: T.self)
-        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
-    }
-
-    /// Adds an alternative condition comparing a date column of any table in the query with the
-    /// database's current time: `OR table.column < now()`.
-    func OR<U>(_ predicate: NOWPredicate<U>) -> TypedWhereSQLQuery<T, Row> {
-        let (q, p) = appending("OR", predicate, in: T.self)
-        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
-    }
-}
