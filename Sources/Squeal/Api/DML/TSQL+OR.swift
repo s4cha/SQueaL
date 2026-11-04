@@ -31,8 +31,8 @@ public extension ORableQuery {
     ///
     /// Conditions aren't parenthesized, so `AND` binds tighter than `OR`.
     func OR<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row> {
-        let q = query + " OR \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
+        let (sql, newParameters) = predicate.rendered(after: self)
+        return TypedWhereSQLQuery(for: table, query: query + " OR \(sql)", parameters: parameters + newParameters)
     }
 
     /// Adds an alternative condition that the column is in a list of values: `OR column IN ($1, …)`.
@@ -50,31 +50,16 @@ public extension ORableQuery {
         return TypedWhereSQLQuery(for: table, query: query + " OR \(table[keyPath: kp].name) LIKE \(nextDollarSign())", parameters: parameters + [value])
     }
 
-    /// Adds an alternative condition written as a SQL expression whose `?` placeholders are
-    /// bound as parameters.
+    /// Adds an alternative condition that isn't tied to the main table: a comparison of a table-qualified
+    /// column, two columns, ``EXISTS`` or ``NOT_EXISTS``, a date compared with ``NOW``, or a ``SQLExpr``.
     ///
     /// ```swift
-    /// .WHERE(\.name == "admin")
-    /// .OR(SQLExpr("(age >= ? AND bio IS NOT NULL)", 18))
-    /// // WHERE name = $1 OR (age >= $2 AND bio IS NOT NULL)
+    /// .OR(users.name != "admin")                           // OR users.name != $n
+    /// .OR(posts.author_id == users.id)                     // OR posts.author_id = users.id
+    /// .OR(SQLExpr("(name != ? OR bio IS NULL)", "admin"))  // OR (name != $n OR bio IS NULL)
     /// ```
-    func OR(_ expression: SQLExpr) -> TypedWhereSQLQuery<T, Row> {
-        let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
-        return TypedWhereSQLQuery(for: table, query: query + " OR \(fragments[0])", parameters: parameters + newParameters)
-    }
-
-    /// Adds an alternative comparison of two table-qualified columns: `OR a.x = b.y`.
-    func OR<A: Table, B: Table, F>(_ predicate: JOINPredicate<A, B, F>) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " OR \(predicate.sql)", parameters: parameters)
-    }
-
-    /// Adds an alternative condition that a subquery returns any row: `OR EXISTS (SELECT …)`.
-    func OR(_ condition: EXISTS) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " OR \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
-    }
-
-    /// Adds an alternative condition that a subquery returns no row: `OR NOT EXISTS (SELECT …)`.
-    func OR(_ condition: NOT_EXISTS) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " OR \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    func OR(_ condition: some SQLCondition) -> TypedWhereSQLQuery<T, Row> {
+        let (q, p) = appending("OR", condition, mainTable: T.self)
+        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
     }
 }

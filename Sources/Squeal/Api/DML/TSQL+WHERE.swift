@@ -131,24 +131,8 @@ public protocol WHEREableQuery: TableSQLFragment {
     /// .WHERE(\.age >= 18)   // WHERE age >= $1
     /// ```
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row>
-    /// Filters rows with a comparison on a nullable column of the main table.
-    ///
-    /// To match `NULL`, use `.WHERE(\.column).IS_NULL` instead.
-    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T, Row>
     /// Starts a `NULL` test on a column. Follow it with `IS_NULL` or `IS_NOT_NULL`.
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T,U>>) -> PartialTypedWhereSQLQuery<T, U, Row>
-    /// Filters rows with a comparison on a table-qualified column, which can belong to any table in the query.
-    ///
-    /// ```swift
-    /// .WHERE(users.age >= 18)   // WHERE users.age >= $1
-    /// ```
-    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row>
-    /// Filters rows with a comparison on a column of another table, given as a fully typed key path.
-    ///
-    /// ```swift
-    /// .WHERE(\UsersDepartmentsTable.user_id == id)   // WHERE users_departments.user_id = $1
-    /// ```
-    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row>
 }
 
 
@@ -233,18 +217,8 @@ public extension WHEREableQuery {
     /// .WHERE(\.age >= 18)   // WHERE age >= $1
     /// ```
     func WHERE<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row> {
-        let q = query + " WHERE \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table,
-                                  query: q,
-                                  parameters: parameters + [predicate.right])
-    }
-    
-    /// Filters rows with a comparison on a nullable column of the main table.
-    ///
-    /// To match `NULL`, use `.WHERE(\.column).IS_NULL` instead.
-    func WHERE<Y>(_ predicate: SQLPredicate<T, Y?>) -> TypedWhereSQLQuery<T, Row> {
-        let q = query + " WHERE \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters:  parameters + [predicate.right!])
+        let (sql, newParameters) = predicate.rendered(after: self)
+        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(sql)", parameters: parameters + newParameters)
     }
     
     /// Starts a `NULL` test on a column. Follow it with `IS_NULL` or `IS_NOT_NULL`.
@@ -255,66 +229,23 @@ public extension WHEREableQuery {
     func WHERE<U>(_ kp: KeyPath<T, TableColumn<T, U>>) -> PartialTypedWhereSQLQuery<T, U, Row> {
         return PartialTypedWhereSQLQuery(for: table, query: query, parameters: parameters, keypath: kp)
     }
-    
-    /// Filters rows with a comparison on a table-qualified column, which can belong to any table in the query.
-    ///
-    /// ```swift
-    /// .WHERE(users.age >= 18)   // WHERE users.age >= $1
-    /// ```
-    func WHERE<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row> {
-        let q = query + " WHERE \(predicate.column.tableName).\(predicate.column.name) \(predicate.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
-    }
-    
-    /// Filters rows with a comparison on a column of another table, given as a fully typed key path.
-    ///
-    /// ```swift
-    /// .WHERE(\UsersDepartmentsTable.user_id == id)   // WHERE users_departments.user_id = $1
-    /// ```
-    func WHERE<U: Table, Y>(_ predicate: SQLPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row> {
-        let otherTable = U()
-        let column = otherTable[keyPath: predicate.left]
-        let q = query + " WHERE \(column.tableName).\(column.name) \(predicate.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
-    }
-    
-    /// Filters rows with a SQL expression whose `?` placeholders are bound as parameters.
-    ///
-    /// Use it for conditions the typed comparisons can't express, such as grouped conditions:
-    ///
-    /// ```swift
-    /// .WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))
-    /// // WHERE (age >= $1 OR bio IS NULL)
-    /// ```
-    func WHERE(_ expression: SQLExpr) -> TypedWhereSQLQuery<T, Row> {
-        let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(fragments[0])", parameters: parameters + newParameters)
-    }
 
-    /// Filters rows by comparing two table-qualified columns: `WHERE a.x = b.y`.
-    ///
-    /// In a subquery, it can refer to a column of the outer query:
-    ///
-    /// ```swift
-    /// SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)
-    /// // SELECT id FROM posts WHERE posts.author_id = users.id
-    /// ```
-    func WHERE<A: Table, B: Table, F>(_ predicate: JOINPredicate<A, B, F>) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(predicate.sql)", parameters: parameters)
-    }
-
-    /// Filters rows on whether a subquery returns any row: `WHERE EXISTS (SELECT …)`.
+    /// Filters rows with a condition that isn't tied to the main table: a comparison of a
+    /// table-qualified column, two columns, ``EXISTS`` or ``NOT_EXISTS``, a date compared with
+    /// ``NOW``, or a ``SQLExpr``.
     ///
     /// ```swift
+    /// .WHERE(users.age >= 18)                            // WHERE users.age >= $1
+    /// .WHERE(posts.author_id == users.id)                // WHERE posts.author_id = users.id
     /// .WHERE(EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
     /// // WHERE EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)
+    /// .WHERE(posts.published_at <= NOW())               // WHERE posts.published_at <= now()
+    /// .WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))   // WHERE (age >= $1 OR bio IS NULL)
     /// ```
-    func WHERE(_ condition: EXISTS) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
-    }
-
-    /// Filters rows on whether a subquery returns no row: `WHERE NOT EXISTS (SELECT …)`.
-    func WHERE(_ condition: NOT_EXISTS) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " WHERE \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    ///
+    /// Use ``SQLExpr`` for conditions the typed comparisons can't express, such as grouped conditions.
+    func WHERE(_ condition: some SQLCondition) -> TypedWhereSQLQuery<T, Row> {
+        let (q, p) = appending("WHERE", condition, mainTable: T.self)
+        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
     }
 }

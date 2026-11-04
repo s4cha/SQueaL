@@ -81,6 +81,7 @@ doesn't catch yet.
 ### Predicates
 
 - ``SQLPredicate``
+- ``SQLCondition``
 - ``TableColumnPredicate``
 - ``JOINPredicate``
 - ``AggregatePredicate``

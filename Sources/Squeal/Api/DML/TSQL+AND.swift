@@ -35,8 +35,8 @@ public extension ANDableQuery {
     /// .WHERE(\.age >= 18).AND(\.name == "Ada")
     /// ```
     func AND<Y>(_ predicate: SQLPredicate<T, Y>) -> TypedWhereSQLQuery<T, Row> {
-        let q = query + " AND \(table[keyPath: predicate.left].name) \(predicate.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
+        let (sql, newParameters) = predicate.rendered(after: self)
+        return TypedWhereSQLQuery(for: table, query: query + " AND \(sql)", parameters: parameters + newParameters)
     }
 
     /// Adds a condition that the column is in a list of values: `AND column IN ($1, …)`.
@@ -61,43 +61,21 @@ public extension ANDableQuery {
         return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: kp].name) IN (\(embedded(subquery)))", parameters: parameters + subquery.parameters)
     }
 
-    /// AND on a column of any table (e.g. a JOINed one), qualified as `table.column`.
-    func AND<U: Table, Y: Encodable>(_ predicate: TableColumnPredicate<U, Y>) -> TypedWhereSQLQuery<T, Row> {
-        let q = query + " AND \(predicate.column.toString()) \(predicate.sign) \(nextDollarSign())"
-        return TypedWhereSQLQuery(for: table, query: q, parameters: parameters + [predicate.right])
-    }
-    
     /// Adds a condition that the column matches a pattern: `AND column LIKE $n`.
     func AND<U>(_ kp: KeyPath<T, TableColumn<T,U>>, LIKE value: String) -> TypedWhereSQLQuery<T, Row> {
         return TypedWhereSQLQuery(for: table, query: query + " AND \(table[keyPath: kp].name) LIKE \(nextDollarSign())", parameters: parameters + [value])
     }
 
-    /// Adds a condition written as a SQL expression whose `?` placeholders are bound as parameters.
-    ///
-    /// Use it to group conditions with parentheses:
+    /// Adds a condition that isn't tied to the main table: a comparison of a table-qualified
+    /// column, two columns, ``EXISTS`` or ``NOT_EXISTS``, a date compared with ``NOW``, or a ``SQLExpr``.
     ///
     /// ```swift
-    /// .WHERE(\.age >= 18)
-    /// .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))
-    /// // WHERE age >= $1 AND (name != $2 OR bio IS NULL)
+    /// .AND(users.name != "admin")                           // AND users.name != $n
+    /// .AND(posts.author_id == users.id)                     // AND posts.author_id = users.id
+    /// .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))  // AND (name != $n OR bio IS NULL)
     /// ```
-    func AND(_ expression: SQLExpr) -> TypedWhereSQLQuery<T, Row> {
-        let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
-        return TypedWhereSQLQuery(for: table, query: query + " AND \(fragments[0])", parameters: parameters + newParameters)
-    }
-
-    /// Adds a comparison of two table-qualified columns: `AND a.x = b.y`.
-    func AND<A: Table, B: Table, F>(_ predicate: JOINPredicate<A, B, F>) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " AND \(predicate.sql)", parameters: parameters)
-    }
-
-    /// Adds a condition that a subquery returns any row: `AND EXISTS (SELECT …)`.
-    func AND(_ condition: EXISTS) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " AND \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
-    }
-
-    /// Adds a condition that a subquery returns no row: `AND NOT EXISTS (SELECT …)`.
-    func AND(_ condition: NOT_EXISTS) -> TypedWhereSQLQuery<T, Row> {
-        return TypedWhereSQLQuery(for: table, query: query + " AND \(condition.sql(after: self))", parameters: parameters + condition.subquery.parameters)
+    func AND(_ condition: some SQLCondition) -> TypedWhereSQLQuery<T, Row> {
+        let (q, p) = appending("AND", condition, mainTable: T.self)
+        return TypedWhereSQLQuery(for: table, query: q, parameters: p)
     }
 }
