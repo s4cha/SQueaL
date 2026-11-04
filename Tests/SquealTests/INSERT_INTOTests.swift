@@ -245,7 +245,7 @@ struct INSERT_INTOTests {
     func INSERT_withSQLExpr_and_RETURNING() {
         let lng = 2.2945
         let lat = 48.8584
-        let now = Date()
+        let uuid = UUID()
         
         let query = SQL
             .INSERT(INTO: users,
@@ -253,7 +253,7 @@ struct INSERT_INTOTests {
                     VALUES: 42,
                             SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat),
                             99,
-                            now)
+                            uuid)
             .RETURNING(\.id)
         
         #expect(query.query == "INSERT INTO users (id, name, age, uuid) VALUES ($1, ST_SetSRID(ST_MakePoint($2, $3), 4326)::geography, $4, $5) RETURNING id")
@@ -262,16 +262,16 @@ struct INSERT_INTOTests {
         #expect(query.parameters[1] as? Double == lng)
         #expect(query.parameters[2] as? Double == lat)
         #expect(query.parameters[3] as? Int == 99)
-        #expect(query.parameters[4] as? Date == now)
+        #expect(query.parameters[4] as? UUID == uuid)
     }
     
     @Test
-    func INSERT_withRawSQL_and_SQLExpr() {
+    func INSERT_withParameterlessSQLExpr() {
         let query = SQL
             .INSERT(INTO: users,
                     columns: \.id, \.name,
                     VALUES: 1,
-                            RawSQL("NOW()"))
+                            SQLExpr("NOW()"))
         
         #expect(query.query == "INSERT INTO users (id, name) VALUES ($1, NOW())")
         #expect(query.parameters.count == 1)

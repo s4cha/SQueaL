@@ -73,13 +73,14 @@ The conflict target can be:
 
 ### Using SQL expressions as values
 
-To let the database compute a value, mix ``NOW``, ``RawSQL`` and ``SQLExpr`` in with plain
-values. `SQLExpr` binds its arguments through `?` placeholders:
+To let the database compute a value, mix ``NOW`` and ``SQLExpr`` in with plain values.
+`SQLExpr` binds its arguments through `?` placeholders. Each value is checked against its
+column: an `SQLExpr` takes its column's type, and ``NOW`` only fills date columns.
 
 ```swift
 SQL.INSERT(INTO: posts,
            columns: \.id, \.title, \.published_at,
-           VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
+           VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
 // INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())
 ```
 
@@ -90,6 +91,37 @@ SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude)
 ```
 
 Values can also come from a subquery. See <doc:Subqueries>.
+
+In a row with an expression, every value and column type must be an ``SQLValue``. Common
+Swift types are. Conform your own types with one line, such as `extension PostStatus: SQLValue {}`,
+and write an enum value with its type (`PostStatus.draft`).
+
+### Inserting from a query
+
+`SELECT:` instead of `VALUES:` inserts what a `SELECT` returns. Pass values to insert one
+row only when a condition holds, written with `WHERE`, such as linking two rows only when
+the user owns both:
+
+```swift
+SQL.INSERT(INTO: memberships, columns: \.team_id, \.user_id,
+           SELECT: teamId, userId)
+    .WHERE(EXISTS(SQL.SELECT(\.id).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
+    .ON_CONFLICT(DO: .NOTHING)
+// INSERT INTO memberships (team_id, user_id) SELECT $1, $2
+//     WHERE EXISTS (SELECT id FROM teams WHERE teams.id = $3 AND teams.owner_id = $4)
+//     ON CONFLICT DO NOTHING
+```
+
+It's one statement, so the check and the insert can't be separated by another write. Each
+value must have its column's type.
+
+Pass a query to insert every row it returns. It must select the columns' types, in order:
+
+```swift
+SQL.INSERT(INTO: archived_posts, columns: \.id, \.title,
+           SELECT: SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
+// INSERT INTO archived_posts (id, title) SELECT id, title FROM posts WHERE likes < $1
+```
 
 ### Returning values
 
@@ -108,5 +140,8 @@ Values can also come from a subquery. See <doc:Subqueries>.
 
 - ``TypedInsertSQLQuery``
 - ``TypedLoneInsertSQLQuery``
+- ``TypedInsertSelectSQLQuery``
+- ``TypedInsertSelectWhereSQLQuery``
+- ``InsertSelectQuery``
 - ``OnConflictInsertQuery``
 - ``ConflictAction``

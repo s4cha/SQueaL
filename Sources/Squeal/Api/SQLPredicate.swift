@@ -22,12 +22,12 @@ public struct SQLPredicate<T: Table, Y: Encodable> {
     let left: KeyPath<T, TableColumn<T, Y>>
     let sign: String
     /// The right-hand side, with `?` for each bound value: `?` for a value, `now()` for ``NOW``.
-    let right: SQLExpr
+    let right: any SQLExpressionText
 
     init(left: KeyPath<T, TableColumn<T, Y>>, sign: String, right: Y) {
         self.left = left
         self.sign = sign
-        self.right = SQLExpr(sql: "?", parameters: [right])
+        self.right = SQLExpr<Y>(sql: "?", parameters: [right])
     }
 
     init(left: KeyPath<T, TableColumn<T, Y>>, sign: String, timestamp: some DatabaseTimestamp) {

@@ -37,6 +37,20 @@ SQL.SELECT(users.id).FROM(users).WHERE(users.age >= "18")
 //        'TableColumn<UserTable, Int>' and 'String'
 ```
 
+**A value of the wrong type in `INSERT` or `UPDATE`.** Each value must fit its column,
+including ``SQLExpr``, ``NOW``, ``COALESCE`` and subqueries, whose type comes from the column
+they fill:
+
+```swift
+SQL.INSERT(INTO: users, columns: \.age, VALUES: "eighteen")
+SQL.UPDATE(users, SET: (\.age, "eighteen")).WHERE(\.id == id)
+// warning: 'UPDATE(_:SET:)' is deprecated: These values aren't checked against their columns. …
+```
+
+> Note: For now this is a deprecation warning, so existing code keeps compiling while you
+> fix it. A future release turns it into an error. Rows whose values don't match their
+> columns in number get the same warning.
+
 **A `DELETE` or `UPDATE` without `WHERE`.** Until you add a `WHERE`, a `DELETE` or an
 `UPDATE` isn't a query you can run, so it can't remove or change every row by accident:
 
@@ -101,8 +115,8 @@ When it changes, the compiler finds the queries you need to update:
 - **Renaming a column:** Rename the property, and every query that uses the old name stops
   compiling. With a hand-written table, change the column's `name:` in one place, and every
   query uses the new name.
-- **Changing a column's type:** Comparisons, joins and `IN` subqueries that use the old type
-  stop compiling.
+- **Changing a column's type:** Comparisons, joins, `IN` subqueries and `INSERT`/`UPDATE`
+  values that use the old type stop compiling, or warn for now in `INSERT` and `UPDATE`.
 - **Dropping a column:** Every query that refers to it stops compiling.
 - **Renaming a table:** Change `@Table(schema:)` once.
 - **Finding where a column is used:** Columns are Swift properties, so Xcode's Find and
@@ -121,18 +135,12 @@ When it changes, the compiler finds the queries you need to update:
 
 ### What Squeal doesn't check yet
 
-> Important: The values in `INSERT … VALUES` and `UPDATE … SET` aren't type-checked
-> against their columns yet. These compile, and fail when Postgres runs them:
->
-> ```swift
-> SQL.INSERT(INTO: users, columns: \.id, \.name, VALUES: UUID())   // 2 columns, 1 value
-> SQL.INSERT(INTO: users, columns: \.age, VALUES: "eighteen")       // String into an Int column
-> SQL.UPDATE(users, SET: (\.age, "eighteen")).WHERE(\.id == id)      // same
-> ```
->
-> The overloads that accept ``SQLExpr``, ``RawSQL`` and subqueries take untyped values, and
-> a mismatched value silently falls through to them. This also means a subquery used as a
-> value isn't checked against the column it fills.
+- **Nullability of `INSERT` and `UPDATE` values.** A `String?` fits a `String` column, so
+  inserting `nil` into a `NOT NULL` column fails when Postgres runs the query.
+- **``RawSQL`` as a value.** It has no type, so it only goes through the deprecated, unchecked
+  overloads. Use ``SQLExpr``, which takes its column's type.
+- **A subquery of a nullable column as a value.** It only fits a column of its exact optional
+  type. Otherwise it goes through the deprecated, unchecked overloads.
 
 ### What Squeal leaves to you
 

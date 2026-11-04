@@ -12,10 +12,7 @@ public extension SQL {
     
     /// Inserts one row.
     ///
-    /// Each value is bound as a parameter.
-    ///
-    /// > Warning: Value types and counts aren't checked against the columns yet: mismatches
-    /// > compile and fail when Postgres runs the query.
+    /// Each value is bound as a parameter, and must have its column's type.
     ///
     /// ```swift
     /// SQL.INSERT(INTO: users, columns: \.name, \.age, VALUES: "Ada", 36)
@@ -108,18 +105,43 @@ public extension SQL {
         return TypedLoneInsertSQLQuery(for: table, query: q, parameters: []) // TODO
     }
     
-    /// Inserts one row whose values can mix plain values, SQL expressions and subqueries.
+    /// Inserts one row whose values can mix plain values, SQL expressions and subqueries, each
+    /// checked against its column's type.
     ///
     /// - Plain values are bound as parameters.
-    /// - ``SQLExpr`` values bind their arguments through `?` placeholders.
-    /// - ``RawSQL`` values are inserted verbatim.
-    /// - Queries are inserted as parenthesized subqueries, with their parameters renumbered.
+    /// - ``SQLExpr`` values bind their arguments through `?` placeholders. Their type is the column's.
+    /// - ``NOW``, ``COALESCE`` and subqueries render as SQL. A subquery's placeholders are renumbered.
     ///
     /// ```swift
     /// SQL.INSERT(INTO: posts, columns: \.id, \.title, \.published_at,
-    ///            VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
+    ///            VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
     /// // INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())
     /// ```
+    ///
+    /// Every value, and every column's type, must be an ``SQLValue``. Write an enum value with its
+    /// type (`TradeType.buy`) in such a row: `.buy` alone has no type to look it up in.
+    @_disfavoredOverload
+    static func INSERT<T, each C: SQLValue, each V: SQLValue>(
+        INTO table: T,
+        columns: repeat KeyPath<T, TableColumn<T, each C>>,
+        VALUES values: repeat each V
+    ) -> TypedInsertSQLQuery<T> where repeat (each V).SQLType == (each C).SQLType {
+        var columnNames = [String]()
+        for column in repeat each columns {
+            columnNames.append(table[keyPath: column].name)
+        }
+        var valueList = [Any]()
+        for value in repeat each values {
+            valueList.append(value)
+        }
+        let (valueFragments, allParams) = renderSQLValues(valueList, parameterOffset: 0)
+        let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) VALUES (\(valueFragments.joined(separator: ", ")))"
+        return TypedInsertSQLQuery(for: table, query: q, parameters: allParams)
+    }
+
+    /// Inserts one row of values that aren't checked against their columns.
+    @_disfavoredOverload
+    @available(*, deprecated, message: "These values aren't checked against their columns. Use values of the columns' types. In a row with an expression, conform custom types to SQLValue (extension MyType: SQLValue {}), write raw SQL as SQLExpr instead of RawSQL, and give an SQLExpr stored in a variable its column's type (SQLExpr<MyType>(…)).")
     static func INSERT<T, each C>(
         INTO table: T,
         columns: repeat KeyPath<T, TableColumn<T, each C>>,
@@ -169,8 +191,25 @@ public extension TypedLoneInsertSQLQuery {
         return TypedLoneInsertSQLQuery(for: table, query: query + q, parameters: parameters + queryParams)
     }
     
-    /// Adds a row whose values can mix plain values, ``SQLExpr``, ``RawSQL`` and subqueries.
+    /// Adds a row whose values can mix plain values, ``SQLExpr``, ``NOW``, ``COALESCE`` and
+    /// subqueries, each checked against its column's type.
+    @_disfavoredOverload
+    func VALUES<each X: SQLValue>(_ values: repeat each X) -> TypedLoneInsertSQLQuery where repeat each V: SQLValue, repeat (each X).SQLType == (each V).SQLType {
+        var valueList = [Any]()
+        for value in repeat each values {
+            valueList.append(value)
+        }
+        return VALUES(untyped: valueList)
+    }
+
+    /// Adds a row of values that aren't checked against their columns.
+    @_disfavoredOverload
+    @available(*, deprecated, message: "These values aren't checked against their columns. Use values of the columns' types. In a row with an expression, conform custom types to SQLValue (extension MyType: SQLValue {}), write raw SQL as SQLExpr instead of RawSQL, and give an SQLExpr stored in a variable its column's type (SQLExpr<MyType>(…)).")
     func VALUES(_ values: Any...) -> TypedLoneInsertSQLQuery {
+        return VALUES(untyped: values)
+    }
+
+    private func VALUES(untyped values: [Any]) -> TypedLoneInsertSQLQuery {
         var q = ""
         if query.contains("VALUES (") {
             q += ", "
@@ -216,8 +255,25 @@ public extension TypedLoneInsertSQLQuery {
         parameters += normalizedParameters(queryParams)
     }
     
-    /// Adds a row in place. Its values can mix plain values, ``SQLExpr``, ``RawSQL`` and subqueries.
+    /// Adds a row in place. Its values can mix plain values, ``SQLExpr``, ``NOW``, ``COALESCE``
+    /// and subqueries, each checked against its column's type.
+    @_disfavoredOverload
+    mutating func ADDVALUES<each X: SQLValue>(_ values: repeat each X) where repeat each V: SQLValue, repeat (each X).SQLType == (each V).SQLType {
+        var valueList = [Any]()
+        for value in repeat each values {
+            valueList.append(value)
+        }
+        ADDVALUES(untyped: valueList)
+    }
+
+    /// Adds a row in place, with values that aren't checked against their columns.
+    @_disfavoredOverload
+    @available(*, deprecated, message: "These values aren't checked against their columns. Use values of the columns' types. In a row with an expression, conform custom types to SQLValue (extension MyType: SQLValue {}), write raw SQL as SQLExpr instead of RawSQL, and give an SQLExpr stored in a variable its column's type (SQLExpr<MyType>(…)).")
     mutating func ADDVALUES(_ values: Any...) {
+        ADDVALUES(untyped: values)
+    }
+
+    private mutating func ADDVALUES(untyped values: [Any]) {
         var q = ""
         if query.contains("VALUES (") {
             q += ", "

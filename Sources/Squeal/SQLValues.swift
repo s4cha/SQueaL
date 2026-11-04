@@ -24,6 +24,14 @@ private func unwrappedEncodable(_ value: any Encodable) -> (any Encodable)? {
     return unwrappedEncodable(wrapped)
 }
 
+/// An ``SQLExpr`` of any value type: its SQL with `?` placeholders, and their values.
+protocol SQLExpressionText {
+    var sql: String { get }
+    var parameters: [(any Encodable)?] { get }
+}
+
+extension SQLExpr: SQLExpressionText {}
+
 /// Renders a list of values for a VALUES row or a SET clause, binding parameters as `$n`
 /// numbered after the `parameterOffset` parameters already in the query.
 /// - `SQLExpr`: its SQL, with each `?` replaced by the next `$n` and its arguments bound.
@@ -43,7 +51,7 @@ func renderSQLValues(_ values: [Any], parameterOffset: Int) -> (fragments: [Stri
     }
 
     for v in values {
-        if let expr = (v as? SQLExpr) ?? (v as? DatabaseTimestamp)?.timestampExpression ?? (v as? SQLValueExpression)?.valueExpression {
+        if let expr = (v as? any SQLExpressionText) ?? (v as? DatabaseTimestamp)?.timestampExpression ?? (v as? SQLValueExpression)?.valueExpression {
             var frag = expr.sql
             for arg in expr.parameters {
                 let ph = nextPlaceholder()

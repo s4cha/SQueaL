@@ -36,6 +36,26 @@ struct EditedPost {
     let editor_id: UUID?
 }
 
+/// Tables of the `INSERT … SELECT` examples in the Inserting Data and Selecting Data articles.
+@Table(schema: "teams")
+struct Team {
+    let id: UUID
+    let owner_id: UUID
+}
+
+@Table(schema: "memberships")
+struct Membership {
+    let id: UUID
+    let team_id: UUID
+    let user_id: UUID
+}
+
+@Table(schema: "archived_posts")
+struct ArchivedPost {
+    let id: UUID
+    let title: String
+}
+
 private let usersTable = UserTable()
 private let postsTable = PostTable()
 
@@ -468,7 +488,7 @@ struct DocumentationExamplesTests {
         let posts = postsTable
         let query = SQL.INSERT(INTO: posts,
                                columns: \.id, \.title, \.published_at,
-                               VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", "  Hello  "), NOW())
+                               VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", "  Hello  "), NOW())
         #expect(query.query == "INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())")
         #expect(query.parameters.count == 1)
     }
@@ -553,5 +573,34 @@ struct DocumentationExamplesTests {
             .WHERE(\.id == userId)
             .RETURNING(users.id, RawSQL("length(name)"))
         #expect(query.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING users.id, length(name)")
+    }
+
+    // MARK: - INSERT … SELECT
+
+    @Test
+    func insertSelectValuesWhereExists() {
+        let teams = TeamTable(), memberships = MembershipTable()
+        let teamId = UUID(), userId = UUID(), ownerId = UUID()
+        let query = SQL.INSERT(INTO: memberships, columns: \.team_id, \.user_id,
+                               SELECT: teamId, userId)
+            .WHERE(EXISTS(SQL.SELECT(\.id).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
+            .ON_CONFLICT(DO: .NOTHING)
+        #expect(query.query == "INSERT INTO memberships (team_id, user_id) SELECT $1, $2 WHERE EXISTS (SELECT id FROM teams WHERE teams.id = $3 AND teams.owner_id = $4) ON CONFLICT DO NOTHING")
+    }
+
+    @Test
+    func insertSelectQuery() {
+        let posts = postsTable, archivedPosts = ArchivedPostTable()
+        let query = SQL.INSERT(INTO: archivedPosts, columns: \.id, \.title,
+                               SELECT: SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
+        #expect(query.query == "INSERT INTO archived_posts (id, title) SELECT id, title FROM posts WHERE likes < $1")
+    }
+
+    @Test
+    func selectValuesWhereNotExists() {
+        let memberships = MembershipTable()
+        let teamId = UUID(), userId = UUID()
+        let query = SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(memberships).WHERE(memberships.user_id == userId)))
+        #expect(query.query == "SELECT $1, $2 WHERE NOT EXISTS (SELECT id FROM memberships WHERE memberships.user_id = $3)")
     }
 }

@@ -53,7 +53,7 @@ public extension HavingableQuery {
     /// .HAVING(SQLExpr("COUNT(*) >= ? AND SUM(likes) > ?", 5, 100))
     /// // HAVING COUNT(*) >= $1 AND SUM(likes) > $2
     /// ```
-    func HAVING(_ expression: SQLExpr) -> TypedHavingSQLQuery<T, Row> {
+    func HAVING<V>(_ expression: SQLExpr<V>) -> TypedHavingSQLQuery<T, Row> {
         let (fragments, newParameters) = renderSQLValues([expression], parameterOffset: parameterNumber())
         return TypedHavingSQLQuery(for: table, query: query + " HAVING \(fragments[0])", parameters: parameters + newParameters)
     }

@@ -107,6 +107,7 @@ doesn't catch yet.
 - ``SQLAggregate``
 - ``RawSQL``
 - ``SQLExpr``
+- ``SQLValue``
 
 ### Ordering and Conflicts
 
@@ -132,6 +133,11 @@ doesn't catch yet.
 - ``TypedOffsetSQLQuery``
 - ``TypedInsertSQLQuery``
 - ``TypedLoneInsertSQLQuery``
+- ``TypedInsertSelectSQLQuery``
+- ``TypedInsertSelectWhereSQLQuery``
+- ``InsertSelectQuery``
+- ``TypedValuesSelectSQLQuery``
+- ``NoTable``
 - ``OnConflictInsertQuery``
 - ``TypedUpdateSQLQuery``
 - ``DeleteSQLQuery``

@@ -40,10 +40,7 @@ public extension SQL {
     
     /// Starts an `UPDATE` that sets columns to values.
     ///
-    /// Each value is bound as a parameter.
-    ///
-    /// > Warning: Value types aren't checked against the columns yet: a mismatch compiles and
-    /// > fails when Postgres runs the query.
+    /// Each value is bound as a parameter, and must have its column's type.
     ///
     /// The result isn't a query you can run until you add `WHERE`, so an `UPDATE` can't
     /// accidentally change every row. See ``TypedUpdateSQLQuery``.
@@ -69,8 +66,30 @@ public extension SQL {
         return TypedUpdateSQLQuery(for: table, query: q, parameters: parameters)
     }
 
-    /// UPDATE whose SET values mix plain values (bound as parameters) with `SQLExpr` / `RawSQL` expressions,
-    /// e.g. `(\.name, SQLExpr("COALESCE(?, name)", name))` or `(\.updated_at, NOW())`.
+    /// Starts an `UPDATE` whose values can mix plain values, ``SQLExpr``, ``NOW``, ``COALESCE``
+    /// and subqueries, each checked against its column's type.
+    ///
+    /// ```swift
+    /// SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.updated_at, NOW())).WHERE(\.id == id)
+    /// // UPDATE posts SET likes = likes + $1, updated_at = now() WHERE id = $2
+    /// ```
+    ///
+    /// Every value, and every column's type, must be an ``SQLValue``. Write an enum value with its
+    /// type (`TradeType.buy`) in such a row: `.buy` alone has no type to look it up in.
+    @_disfavoredOverload
+    static func UPDATE<T, each U: SQLValue, each V: SQLValue>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, each V)) -> TypedUpdateSQLQuery<T, Void> where repeat (each V).SQLType == (each U).SQLType {
+        var columnNames = [String]()
+        var values = [Any]()
+        for pair in repeat each pairs {
+            columnNames.append(table[keyPath: pair.0].name)
+            values.append(pair.1)
+        }
+        return update(table, columnNames: columnNames, values: values)
+    }
+
+    /// Starts an `UPDATE` with values that aren't checked against their columns.
+    @_disfavoredOverload
+    @available(*, deprecated, message: "These values aren't checked against their columns. Use values of the columns' types. In a row with an expression, conform custom types to SQLValue (extension MyType: SQLValue {}), write raw SQL as SQLExpr instead of RawSQL, and give an SQLExpr stored in a variable its column's type (SQLExpr<MyType>(…)).")
     static func UPDATE<T, each U>(_ table: T, SET pairs: repeat (KeyPath<T, TableColumn<T, each U>>, Any)) -> TypedUpdateSQLQuery<T, Void> {
         var columnNames = [String]()
         var values = [Any]()
@@ -78,23 +97,12 @@ public extension SQL {
             columnNames.append(table[keyPath: pair.0].name)
             values.append(pair.1)
         }
+        return update(table, columnNames: columnNames, values: values)
+    }
+
+    private static func update<T: Table>(_ table: T, columnNames: [String], values: [Any]) -> TypedUpdateSQLQuery<T, Void> {
         let (fragments, parameters) = renderSQLValues(values, parameterOffset: 0)
         let setValues = zip(columnNames, fragments).map { "\($0) = \($1)" }
         return TypedUpdateSQLQuery(for: table, query: "UPDATE \(T.schema) SET \(setValues.joined(separator: ", "))", parameters: parameters)
-    }
-
-    /// `UPDATE table SET column = (subquery)` — the subquery must return a single row & column.
-    static func UPDATE<T, U, Q: TableSQLQuery>(_ table: T, SET pair: (KeyPath<T, TableColumn<T, U>>, Q)) -> TypedUpdateSQLQuery<T, Void> where Q.Row == U {
-        return update(table, column: table[keyPath: pair.0].name, subquery: pair.1)
-    }
-
-    /// `UPDATE table SET column = (subquery)` on a nullable column.
-    static func UPDATE<T, U, Q: TableSQLQuery>(_ table: T, SET pair: (KeyPath<T, TableColumn<T, U?>>, Q)) -> TypedUpdateSQLQuery<T, Void> where Q.Row == U {
-        return update(table, column: table[keyPath: pair.0].name, subquery: pair.1)
-    }
-
-    private static func update<T: Table>(_ table: T, column: String, subquery: some SQLQuery) -> TypedUpdateSQLQuery<T, Void> {
-        // Nothing precedes the subquery, so its $n placeholders need no renumbering.
-        return TypedUpdateSQLQuery(for: table, query: "UPDATE \(T.schema) SET \(column) = (\(subquery.query))", parameters: subquery.parameters)
     }
 }

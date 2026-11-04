@@ -275,7 +275,8 @@ public struct RawSQL: SelectField {
     }
 }
 
-/// A SQL expression with bound parameters, used as a value in `INSERT … VALUES` or `UPDATE … SET`.
+/// A SQL expression with bound parameters: a value in `INSERT … VALUES` or `UPDATE … SET`, or a
+/// condition in `WHERE`, `AND`, `OR` and `HAVING`.
 ///
 /// Write `?` where each value goes. When the query is built, each `?` becomes the next
 /// numbered placeholder (`$n`) and its value is bound as a parameter:
@@ -284,9 +285,15 @@ public struct RawSQL: SelectField {
 /// SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
 /// // UPDATE posts SET likes = likes + $1
 ///
-/// SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat)
+/// SQL.INSERT(INTO: positions, columns: \.collar_id, \.location,
+///            VALUES: collarId, SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat))
 /// ```
-public struct SQLExpr {
+///
+/// `Value` is the type the expression produces. In `VALUES` and `SET`, Squeal infers it from
+/// the column, so the expression must fill a column of that type. Elsewhere, such as in a
+/// condition or a variable, it's `Any`. To check an expression stored in a variable against
+/// its column, write its type: `let point = SQLExpr<Geography>("ST_MakePoint(?, ?)", lng, lat)`.
+public struct SQLExpr<Value> {
     /// The SQL text, with a `?` where each parameter goes.
     public let sql: String
     /// The values bound to the `?` placeholders, in order.
@@ -299,6 +306,14 @@ public struct SQLExpr {
     }
 
     init(sql: String, parameters: [(any Encodable)?]) {
+        self.sql = sql
+        self.parameters = normalizedParameters(parameters)
+    }
+}
+
+extension SQLExpr where Value == Any {
+    /// Creates an expression whose type nothing determines, such as a condition or a variable.
+    public init(_ sql: String, _ parameters: (any Encodable)?...) {
         self.sql = sql
         self.parameters = normalizedParameters(parameters)
     }
