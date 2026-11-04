@@ -10,15 +10,14 @@ These tools let you write that piece in SQL and keep the rest typed.
 
 ### RawSQL
 
-``RawSQL`` inserts a SQL expression verbatim. Use it in `SELECT`, in `RETURNING`, and as a
-value in `INSERT` or `UPDATE`:
+``RawSQL`` inserts a SQL expression verbatim. Use it in `SELECT` and `RETURNING`:
 
 ```swift
 SQL.SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
 // SELECT users.id, upper(name) AS shout FROM users
-
-SQL.UPDATE(posts, SET: (\.title, RawSQL("initcap(title)"))).WHERE(\.id == postId)
 ```
+
+For a value in `INSERT` or `UPDATE`, use ``SQLExpr`` instead, which is checked against its column.
 
 ### SQLExpr
 
@@ -30,7 +29,19 @@ SQLExpr("left(?, 140)", bio)
 SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude)
 ```
 
-`SQLExpr` works anywhere a value does in `INSERT … VALUES` and `UPDATE … SET`.
+`SQLExpr` works anywhere a value does in `INSERT … VALUES` and `UPDATE … SET`. Its type is the
+column's, so it can only fill a column of the type it produces:
+
+```swift
+SQL.UPDATE(posts, SET: (\.title, SQLExpr("initcap(title)"))).WHERE(\.id == postId)
+SQL.INSERT(INTO: places, columns: \.id, \.location,
+           VALUES: id, SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude))
+```
+
+In a row with an expression, every value and column type must be an ``SQLValue``. Common
+Swift types are. Conform your own column types, such as enums, with one line:
+`extension PostStatus: SQLValue {}`. Write an enum value with its type in such a row
+(`PostStatus.draft`): `.draft` alone has no type to look it up in.
 
 ### Conditions in SQL
 

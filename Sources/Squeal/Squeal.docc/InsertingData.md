@@ -73,13 +73,14 @@ The conflict target can be:
 
 ### Using SQL expressions as values
 
-To let the database compute a value, mix ``NOW``, ``RawSQL`` and ``SQLExpr`` in with plain
-values. `SQLExpr` binds its arguments through `?` placeholders:
+To let the database compute a value, mix ``NOW`` and ``SQLExpr`` in with plain values.
+`SQLExpr` binds its arguments through `?` placeholders. Each value is checked against its
+column: an `SQLExpr` takes its column's type, and ``NOW`` only fills date columns.
 
 ```swift
 SQL.INSERT(INTO: posts,
            columns: \.id, \.title, \.published_at,
-           VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
+           VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
 // INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())
 ```
 
@@ -90,6 +91,10 @@ SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude)
 ```
 
 Values can also come from a subquery. See <doc:Subqueries>.
+
+In a row with an expression, every value and column type must be an ``SQLValue``. Common
+Swift types are. Conform your own types with one line, such as `extension PostStatus: SQLValue {}`,
+and write an enum value with its type (`PostStatus.draft`).
 
 ### Returning values
 

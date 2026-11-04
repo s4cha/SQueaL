@@ -36,7 +36,7 @@ public struct NOW: SelectField, DatabaseTimestamp {
         return "now()"
     }
 
-    public var timestampExpression: SQLExpr {
+    public var timestampExpression: SQLExpr<Date> {
         return SQLExpr(sql: "now()", parameters: [])
     }
 }
@@ -92,7 +92,7 @@ public struct INTERVAL: Sendable, Equatable {
 public struct ShiftedNOW: DatabaseTimestamp {
     let shifts: [(sign: String, interval: INTERVAL)]
 
-    public var timestampExpression: SQLExpr {
+    public var timestampExpression: SQLExpr<Date> {
         let sql = shifts.map { " \($0.sign) ?::interval" }.joined()
         return SQLExpr(sql: "now()" + sql, parameters: shifts.map { $0.interval.text })
     }
@@ -121,7 +121,7 @@ public func + (left: ShiftedNOW, right: INTERVAL) -> ShiftedNOW {
 /// A timestamp computed by the database: ``NOW`` or ``ShiftedNOW``.
 public protocol DatabaseTimestamp {
     /// The timestamp's SQL, with its values bound through `?` placeholders.
-    var timestampExpression: SQLExpr { get }
+    var timestampExpression: SQLExpr<Date> { get }
 }
 
 // MARK: - Comparing columns with NOW()
@@ -148,7 +148,7 @@ public struct NOWPredicate<T: Table> {
     let column: String
     let tableName: String
     let sign: String
-    let timestamp: SQLExpr
+    let timestamp: SQLExpr<Date>
 
     init<V>(_ column: TableColumn<T, V>, _ sign: String, _ timestamp: some DatabaseTimestamp) {
         self.column = column.name
@@ -158,7 +158,7 @@ public struct NOWPredicate<T: Table> {
     }
 
     /// The condition, with `?` placeholders for its values.
-    var expression: SQLExpr {
+    var expression: SQLExpr<Any> {
         return SQLExpr(sql: "\(tableName).\(column) \(sign) \(timestamp.sql)", parameters: timestamp.parameters)
     }
 }

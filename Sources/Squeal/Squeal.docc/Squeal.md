@@ -107,6 +107,7 @@ doesn't catch yet.
 - ``SQLAggregate``
 - ``RawSQL``
 - ``SQLExpr``
+- ``SQLValue``
 
 ### Ordering and Conflicts
 

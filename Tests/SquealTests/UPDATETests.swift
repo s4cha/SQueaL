@@ -109,7 +109,7 @@ struct UPDATE_ExpressionsTests {
         let query = SQL
             .UPDATE(users, SET: (\.name, SQLExpr("COALESCE(?, name)", name)),
                                 (\.age, 42),
-                                (\.uuid, RawSQL("gen_random_uuid()")))
+                                (\.uuid, SQLExpr("gen_random_uuid()")))
             .WHERE(\.id == 7)
         #expect(query.query == "UPDATE users SET name = COALESCE($1, name), age = $2, uuid = gen_random_uuid() WHERE id = $3")
         #expect(query.parameters.count == 3)

@@ -25,23 +25,23 @@
 /// > Note: `COALESCE` reads the column's current value, so it only makes sense in
 /// > `UPDATE … SET`. In `INSERT … VALUES` the row doesn't exist yet, and Postgres rejects the
 /// > column reference.
-public struct COALESCE: SQLValueExpression {
+public struct COALESCE<Value>: SQLValueExpression {
     let value: (any Encodable)?
     let column: String
 
     /// The value, or the column's current value when `value` is `nil`.
-    public init<T: Table, V: Encodable>(_ value: V?, _ column: TableColumn<T, V>) {
+    public init<T: Table>(_ value: Value?, _ column: TableColumn<T, Value>) where Value: Encodable {
         self.value = value
         self.column = column.toString()
     }
 
-    var valueExpression: SQLExpr {
-        return SQLExpr(sql: "COALESCE(?, \(column))", parameters: [value])
+    var valueExpression: any SQLExpressionText {
+        return SQLExpr<Any>(sql: "COALESCE(?, \(column))", parameters: [value])
     }
 }
 
 /// A value that renders as SQL with bound parameters in `INSERT … VALUES` and `UPDATE … SET`,
 /// such as ``COALESCE``.
 protocol SQLValueExpression {
-    var valueExpression: SQLExpr { get }
+    var valueExpression: any SQLExpressionText { get }
 }

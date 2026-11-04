@@ -22,6 +22,7 @@ struct ParameterNormalizationTests {
     let posts = PostTable()
     let users = UserTable()
 
+    @available(*, deprecated, message: "Exercises the deprecated untyped overloads on purpose.")
     @Test
     func UPDATE_SET_untypedOverload_unwrapsOptionalValues() {
         let likes: Int? = 3
@@ -50,6 +51,7 @@ struct ParameterNormalizationTests {
         #expect(second.parameters[0] == nil)
     }
 
+    @available(*, deprecated, message: "Exercises the deprecated untyped overloads on purpose.")
     @Test
     func INSERT_withOptionalValues() {
         let bio: String? = "Hello"
@@ -83,6 +85,7 @@ struct ParameterNormalizationTests {
         #expect(query.parameters[2] == nil)
     }
 
+    @available(*, deprecated, message: "Exercises the deprecated untyped overloads on purpose.")
     @Test
     func descriptionShowsPlainValues() {
         let likes: Int? = 3

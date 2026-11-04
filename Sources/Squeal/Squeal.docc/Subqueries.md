@@ -126,5 +126,6 @@ SQL.INSERT(INTO: posts,
 > Note: A subquery used as a value must return at most one row. That's a Postgres rule, so
 > add `LIMIT(1)` or filter on a unique column.
 
-> Warning: Squeal doesn't check a subquery's type against the column it fills in
-> `INSERT` or `UPDATE` yet. See <doc:WhatSquealChecks>.
+The subquery's column type must match the column it fills, so selecting names into an ID
+column doesn't compile. A subquery of a nullable column only fits a column of the same
+optional type. See <doc:WhatSquealChecks>.

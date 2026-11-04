@@ -468,7 +468,7 @@ struct DocumentationExamplesTests {
         let posts = postsTable
         let query = SQL.INSERT(INTO: posts,
                                columns: \.id, \.title, \.published_at,
-                               VALUES: RawSQL("gen_random_uuid()"), SQLExpr("trim(?)", "  Hello  "), NOW())
+                               VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", "  Hello  "), NOW())
         #expect(query.query == "INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())")
         #expect(query.parameters.count == 1)
     }
