@@ -67,6 +67,15 @@ SQL.SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username"))
 Key paths render as bare column names. Columns accessed on a table value (`users.name`)
 render qualified with their table, which you need in joins. See <doc:DefiningTables>.
 
+Values select without a table. They're bound as parameters, and a `WHERE` can follow
+directly, which is useful in `EXISTS` checks and in `INSERT … SELECT` (see
+<doc:InsertingData>):
+
+```swift
+SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(memberships).WHERE(memberships.user_id == userId)))
+// SELECT $1, $2 WHERE NOT EXISTS (SELECT id FROM memberships WHERE memberships.user_id = $3)
+```
+
 ### Filtering with WHERE, AND and OR
 
 Comparisons use Swift operators on columns. The right-hand side must have the column's
