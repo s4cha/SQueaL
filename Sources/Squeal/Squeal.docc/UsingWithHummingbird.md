@@ -90,8 +90,7 @@ struct PostgresBlogRepository: BlogRepository {
     let logger: Logger
 
     func feed(limit: Int, offset: Int) async throws -> [Post] {
-        let query = SQL
-            .SELECT(posts.id, posts.title, users.name, posts.likes, posts.created_at)
+        let query = SELECT(posts.id, posts.title, users.name, posts.likes, posts.created_at)
             .FROM(posts)
             .JOIN(users, ON: posts.author_id == users.id)
             .ORDER_BY(posts.created_at, .DESC)
@@ -109,8 +108,7 @@ missing row or a conflict:
 ```swift
 /// Returns the new like count, or `nil` if the post doesn't exist.
 func like(postId: UUID) async throws -> Int? {
-    let query = SQL
-        .UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
+    let query = UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
         .WHERE(\.id == postId)
         .RETURNING(\.likes)
     return try await client.firstRow(query, as: Int.self, logger: logger)

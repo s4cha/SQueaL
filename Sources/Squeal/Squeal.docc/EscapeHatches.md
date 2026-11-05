@@ -13,7 +13,7 @@ These tools let you write that piece in SQL and keep the rest typed.
 ``RawSQL`` inserts a SQL expression verbatim. Use it in `SELECT` and `RETURNING`:
 
 ```swift
-SQL.SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
+SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
 // SELECT users.id, upper(name) AS shout FROM users
 ```
 
@@ -33,9 +33,9 @@ SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude)
 column's, so it can only fill a column of the type it produces:
 
 ```swift
-SQL.UPDATE(posts, SET: (\.title, SQLExpr("initcap(title)"))).WHERE(\.id == postId)
-SQL.INSERT(INTO: places, columns: \.id, \.location,
-           VALUES: id, SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude))
+UPDATE(posts, SET: (\.title, SQLExpr("initcap(title)"))).WHERE(\.id == postId)
+INSERT(INTO: places, columns: \.id, \.location,
+       VALUES: id, SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", longitude, latitude))
 ```
 
 In a row with an expression, every value and column type must be an ``SQLValue``. Common
@@ -49,7 +49,7 @@ Swift types are. Conform your own column types, such as enums, with one line:
 comparisons can't express. The most common case is grouping conditions with parentheses:
 
 ```swift
-SQL.SELECT(\.id)
+SELECT(\.id)
     .FROM(users)
     .WHERE(\.age >= 18)
     .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))

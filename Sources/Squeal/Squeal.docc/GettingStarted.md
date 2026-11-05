@@ -59,18 +59,21 @@ See <doc:DefiningTables> for what the macro generates and how to write a table b
 
 ### Build a query
 
-Start from ``SQL`` and chain clauses in the same order you'd write them in SQL. Columns are
-key paths, so the compiler rejects a misspelled column or a value of the wrong type:
+Start with `SELECT`, `INSERT`, `UPDATE` or `DELETE_FROM` and chain clauses in the same order
+you'd write them in SQL. Columns are key paths, so the compiler rejects a misspelled column or
+a value of the wrong type:
 
 ```swift
-let query = SQL
-    .SELECT(\.id, \.name, \.email)
+let query = SELECT(\.id, \.name, \.email)
     .FROM(users)
     .WHERE(\.age >= 18)
     .AND(\.name == "Ada")
     .ORDER_BY(\.name, .ASC)
     .LIMIT(10)
 ```
+
+Each statement is also available as a static method of ``SQL``, such as `SQL.SELECT(…)`,
+if you prefer to mark where a query starts. Both spellings build the same query.
 
 The query holds the SQL text and its parameters separately:
 

@@ -1,11 +1,9 @@
 import Squeal
 
-let allUsers = SQL
-    .SELECT(*)
+let allUsers = SELECT(*)
     .FROM(users)
 // SELECT * FROM users
 
-let userList = SQL
-    .SELECT(\.id, \.name, \.email)
+let userList = SELECT(\.id, \.name, \.email)
     .FROM(users)
 // SELECT id, name, email FROM users

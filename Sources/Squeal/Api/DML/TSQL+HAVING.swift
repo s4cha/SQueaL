@@ -32,7 +32,7 @@ public extension HavingableQuery {
     /// Filters groups by comparing an aggregate to a value, which is bound as a parameter.
     ///
     /// ```swift
-    /// SQL.SELECT(posts.author_id, COUNT(*))
+    /// SELECT(posts.author_id, COUNT(*))
     ///     .FROM(posts)
     ///     .GROUP_BY(\.author_id)
     ///     .HAVING(COUNT(*) >= minimumPosts)

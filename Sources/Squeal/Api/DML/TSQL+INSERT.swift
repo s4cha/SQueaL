@@ -15,7 +15,7 @@ public extension SQL {
     /// Each value is bound as a parameter, and must have its column's type.
     ///
     /// ```swift
-    /// SQL.INSERT(INTO: users, columns: \.name, \.age, VALUES: "Ada", 36)
+    /// INSERT(INTO: users, columns: \.name, \.age, VALUES: "Ada", 36)
     /// // INSERT INTO users (name, age) VALUES ($1, $2)
     /// ```
     static func INSERT<T, each U:Encodable>(INTO table: T,
@@ -41,8 +41,8 @@ public extension SQL {
     /// Inserts one row per element of a sequence.
     ///
     /// ```swift
-    /// SQL.INSERT(INTO: users, columns: \.name, \.age,
-    ///            addValuesFrom: newUsers, mapValues: { ($0.name, $0.age) })
+    /// INSERT(INTO: users, columns: \.name, \.age,
+    ///        addValuesFrom: newUsers, mapValues: { ($0.name, $0.age) })
     /// // INSERT INTO users (name, age) VALUES ($1, $2), ($3, $4), …
     /// ```
     ///
@@ -87,7 +87,7 @@ public extension SQL {
     /// or ``TypedLoneInsertSQLQuery/ADDVALUES(_:)-(V)``.
     ///
     /// ```swift
-    /// SQL.INSERT(INTO: users, columns: \.name, \.age)
+    /// INSERT(INTO: users, columns: \.name, \.age)
     ///     .VALUES("Ada", 36)
     ///     .VALUES("Grace", 45)
     /// // INSERT INTO users (name, age) VALUES ($1, $2), ($3, $4)
@@ -113,8 +113,8 @@ public extension SQL {
     /// - ``NOW``, ``COALESCE`` and subqueries render as SQL. A subquery's placeholders are renumbered.
     ///
     /// ```swift
-    /// SQL.INSERT(INTO: posts, columns: \.id, \.title, \.published_at,
-    ///            VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
+    /// INSERT(INTO: posts, columns: \.id, \.title, \.published_at,
+    ///        VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
     /// // INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())
     /// ```
     ///
@@ -147,17 +147,19 @@ public extension SQL {
         columns: repeat KeyPath<T, TableColumn<T, each C>>,
         VALUES values: Any...
     ) -> TypedInsertSQLQuery<T> {
-        
         var columnNames = [String]()
         for column in repeat each columns {
             columnNames.append(table[keyPath: column].name)
         }
-        
-        let (valueFragments, allParams) = renderSQLValues(values, parameterOffset: 0)
-        
-        let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) VALUES (\(valueFragments.joined(separator: ", ")))"
-        return TypedInsertSQLQuery(for: table, query: q, parameters: allParams)
+        return insertUntyped(INTO: table, columnNames: columnNames, values: values)
     }
+}
+
+/// `INSERT INTO table (columns) VALUES (…)` with values that aren't checked against their columns.
+func insertUntyped<T: Table>(INTO table: T, columnNames: [String], values: [Any]) -> TypedInsertSQLQuery<T> {
+    let (valueFragments, allParams) = renderSQLValues(values, parameterOffset: 0)
+    let q = "INSERT INTO \(T.schema) (\(columnNames.joined(separator: ", "))) VALUES (\(valueFragments.joined(separator: ", ")))"
+    return TypedInsertSQLQuery(for: table, query: q, parameters: allParams)
 }
 
 @available(macOS 14.0.0, *)
@@ -166,7 +168,7 @@ public extension TypedLoneInsertSQLQuery {
     /// Adds a row of values. Chain several calls to insert several rows.
     ///
     /// ```swift
-    /// SQL.INSERT(INTO: users, columns: \.name, \.age)
+    /// INSERT(INTO: users, columns: \.name, \.age)
     ///     .VALUES("Ada", 36)
     ///     .VALUES("Grace", 45)
     /// // INSERT INTO users (name, age) VALUES ($1, $2), ($3, $4)
@@ -227,7 +229,7 @@ public extension TypedLoneInsertSQLQuery {
     /// Adds a row of values in place, which is convenient in a loop.
     ///
     /// ```swift
-    /// var insert = SQL.INSERT(INTO: users, columns: \.name, \.age)
+    /// var insert = INSERT(INTO: users, columns: \.name, \.age)
     /// for user in newUsers {
     ///     insert.ADDVALUES(user.name, user.age)
     /// }

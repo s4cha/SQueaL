@@ -16,7 +16,7 @@
 /// }
 ///
 /// let users = UserTable()
-/// SQL.SELECT(\.id, \.name).FROM(users)
+/// SELECT(\.id, \.name).FROM(users)
 /// ```
 ///
 /// The macro adds a peer struct named after the annotated struct with a `Table` suffix.
@@ -41,7 +41,7 @@ public macro Table(schema: String) = #externalMacro(module: "SquealMacros", type
 ///     @ColumnName("created_at") let createdAt: Date
 /// }
 ///
-/// SQL.SELECT(\.id, \.email).FROM(users)
+/// SELECT(\.id, \.email).FROM(users)
 /// // SELECT id, email_address FROM users
 /// ```
 ///

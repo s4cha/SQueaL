@@ -27,8 +27,7 @@ let query = """
 ```
 Using Squeal
 ```swift
-let query = SQL
-    .SELECT(\.id, \.name, \.email)
+let query = SELECT(\.id, \.name, \.email)
     .FROM(users)
     .WHERE(\.id == 1)
     .AND(\.name == "jack")
@@ -105,21 +104,18 @@ let users = UsersTable()
 ```
 
 ```swift
-let query = SQL
-  .SELECT(*)
+let query = SELECT(*)
   .FROM(users)
   .LIMIT(10)
 ```
 
 ```swift
- let query = SQL
-    .SELECT(COUNT(*))
+ let query = SELECT(COUNT(*))
     .FROM(users)
 ```
 
 ```swift
- let query = SQL
-    .SELECT(COUNT(*))
+ let query = SELECT(COUNT(*))
     .FROM(users)
 ```
 
@@ -135,8 +131,7 @@ let query = TSQL
 ### WHERE / AND / OR
 
 ```swift
-let query = SQL
-  .SELECT(\.id)
+let query = SELECT(\.id)
   .FROM(users)
   .WHERE(\.id < 65)
   .AND(\.name == "Jack")
@@ -145,8 +140,7 @@ let query = SQL
 
 ### INSERT
 ```swift
-let query = SQL
-  .INSERT(INTO: studies,
+let query = INSERT(INTO: studies,
     columns: \.name, \.starting_cash, \.partitioning, \.prolific_study_id, \.completion_link, \.shows_results, \.allows_fractional_investing,
     VALUES: study.name, study.startingCash, study.partitioning, study.prolificStudyId, study.completionLink, study.showsResults, study.allowsFractionalInvesting)
   .RETURNING(\.id)
@@ -154,8 +148,7 @@ let query = SQL
 
 ### UPDATE
 ```swift
-let query = SQL
-  .UPDATE(stocks,
+let query = UPDATE(stocks,
     SET:
       (\.volatility, stock.volatility),
       (\.expectedReturn, stock.expectedReturn),
@@ -169,14 +162,13 @@ use `.WHERE(SQLExpr("true"))`.
 
 ### DELETE
 ```swift
-let query = SQL
-  .DELETE_FROM(users)
+let query = DELETE_FROM(users)
    .WHERE(\.id == 243)
 ```
 
 A `DELETE` without `WHERE` doesn't compile, so you can't wipe a table by accident:
 ```swift
-try await client.query(SQL.DELETE_FROM(users))
+try await client.query(DELETE_FROM(users))
 // error: Add a WHERE clause: this DELETE would remove every row.
 ```
 To delete every row on purpose, say so: `.WHERE(SQLExpr("true"))`.

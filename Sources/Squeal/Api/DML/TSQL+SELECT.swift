@@ -42,7 +42,7 @@ public extension TSQL {
     /// Selects every column: `SELECT *`.
     ///
     /// ```swift
-    /// SQL.SELECT(*).FROM(users)   // SELECT * FROM users
+    /// SELECT(*).FROM(users)   // SELECT * FROM users
     /// ```
     ///
     /// - Parameter function: Pass `*`.
@@ -54,7 +54,7 @@ public extension TSQL {
     /// Selects table-qualified columns, aggregates or raw expressions.
     ///
     /// ```swift
-    /// SQL.SELECT(posts.author_id, COUNT(*), RawSQL("max(likes)")).FROM(posts)
+    /// SELECT(posts.author_id, COUNT(*), RawSQL("max(likes)")).FROM(posts)
     /// // SELECT posts.author_id, COUNT(*), max(likes) FROM posts
     /// ```
     static func SELECT<each Z: SelectField>(_ fields: repeat each Z) -> SelectSQLQuery {
@@ -122,7 +122,7 @@ public extension SQL {
     /// Selects every column: `SELECT *`.
     ///
     /// ```swift
-    /// SQL.SELECT(*).FROM(users)   // SELECT * FROM users
+    /// SELECT(*).FROM(users)   // SELECT * FROM users
     /// ```
     ///
     /// - Parameter function: Pass `*`.
@@ -133,7 +133,7 @@ public extension SQL {
     /// Selects table-qualified columns, aggregates or raw expressions.
     ///
     /// ```swift
-    /// SQL.SELECT(posts.author_id, COUNT(*), RawSQL("max(likes)")).FROM(posts)
+    /// SELECT(posts.author_id, COUNT(*), RawSQL("max(likes)")).FROM(posts)
     /// // SELECT posts.author_id, COUNT(*), max(likes) FROM posts
     /// ```
     static func SELECT<each Z: SelectField>(_ fields: repeat each Z) -> SelectSQLQuery {
@@ -146,7 +146,7 @@ public extension SQL {
     /// The selected columns' types become the query's `Row` type, so the query can serve as a typed subquery.
     ///
     /// ```swift
-    /// SQL.SELECT(\.id, \.name).FROM(users)   // SELECT id, name FROM users
+    /// SELECT(\.id, \.name).FROM(users)   // SELECT id, name FROM users
     /// ```
     static func SELECT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
@@ -160,7 +160,7 @@ public extension SQL {
     /// Selects the distinct values of columns: `SELECT DISTINCT …`.
     ///
     /// ```swift
-    /// SQL.SELECT_DISTINCT(\.age).FROM(users)   // SELECT DISTINCT age FROM users
+    /// SELECT_DISTINCT(\.age).FROM(users)   // SELECT DISTINCT age FROM users
     /// ```
     static func SELECT_DISTINCT<T, each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSelectSQLQuery<T, (repeat each U)> {
         let table = T()
@@ -176,7 +176,7 @@ public extension SQL {
     /// Spell out the table type in the first key path so the compiler can resolve it:
     ///
     /// ```swift
-    /// SQL.SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username")).FROM(users)
+    /// SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username")).FROM(users)
     /// // SELECT id AS user_id, name AS username FROM users
     /// ```
     static func SELECT<T, each U>(_ aliases: repeat (KeyPath<T, TableColumn<T, each U>>, AS: String)) -> SelectSQLQuery {
@@ -258,7 +258,7 @@ extension COUNT: SelectField {
 /// Use it in `SELECT` and `RETURNING` lists, as a value in `INSERT` and `UPDATE`, or as the `WHERE` clause of a partial-index conflict target:
 ///
 /// ```swift
-/// SQL.SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
+/// SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
 /// // SELECT users.id, upper(name) AS shout FROM users
 /// ```
 ///
@@ -282,11 +282,11 @@ public struct RawSQL: SelectField {
 /// numbered placeholder (`$n`) and its value is bound as a parameter:
 ///
 /// ```swift
-/// SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
+/// UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
 /// // UPDATE posts SET likes = likes + $1
 ///
-/// SQL.INSERT(INTO: positions, columns: \.collar_id, \.location,
-///            VALUES: collarId, SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat))
+/// INSERT(INTO: positions, columns: \.collar_id, \.location,
+///        VALUES: collarId, SQLExpr("ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography", lng, lat))
 /// ```
 ///
 /// `Value` is the type the expression produces. In `VALUES` and `SET`, Squeal infers it from

@@ -3,8 +3,7 @@ import Squeal
 
 let adaId = UUID()
 
-let newUser = SQL
-    .INSERT(INTO: users,
+let newUser = INSERT(INTO: users,
             columns: \.id, \.email, \.name, \.age,
             VALUES: adaId, "ada@example.com", "Ada", 36)
     .ON_CONFLICT(\.email, DO: .NOTHING)

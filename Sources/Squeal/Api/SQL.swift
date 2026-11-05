@@ -7,21 +7,21 @@
 
 import Foundation
 
-/// The entry point for building queries.
+/// The statements that start a query, as static methods.
 ///
-/// Start every query from one of `SQL`'s static methods (`SELECT`, `INSERT`, `UPDATE` or
-/// `DELETE`), then chain clauses in the same order you'd write them in SQL:
+/// Start a query with `SELECT`, `INSERT`, `UPDATE` or `DELETE_FROM`, then chain clauses in the
+/// same order you'd write them in SQL:
 ///
 /// ```swift
-/// let query = SQL
-///     .SELECT(\.id, \.name)
+/// let query = SELECT(\.id, \.name)
 ///     .FROM(users)
 ///     .WHERE(\.age >= 18)
 ///     .LIMIT(10)
 /// // SELECT id, name FROM users WHERE age >= $1 LIMIT $2
 /// ```
 ///
-/// `SQL` is a namespace and is never instantiated.
+/// Each statement is a global function, and also a static method of `SQL`: `SQL.SELECT(…)`
+/// builds the same query as `SELECT(…)`. `SQL` is a namespace and is never instantiated.
 public class SQL {
     
 }

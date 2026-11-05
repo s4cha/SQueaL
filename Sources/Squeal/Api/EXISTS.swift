@@ -9,11 +9,11 @@
 /// with a column comparison:
 ///
 /// ```swift
-/// SQL.SELECT(\.id, \.name)
+/// SELECT(\.id, \.name)
 ///     .FROM(users)
-///     .WHERE(EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id).AND(\.likes > 1000)))
+///     .WHERE(EXISTS(SELECT(1).FROM(posts).WHERE(posts.author_id == users.id).AND(\.likes > 1000)))
 /// // SELECT id, name FROM users
-/// //     WHERE EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id AND likes > $1)
+/// //     WHERE EXISTS (SELECT 1 FROM posts WHERE posts.author_id = users.id AND likes > $1)
 /// ```
 ///
 /// The subquery's placeholders are renumbered to follow the outer query's placeholders.
@@ -33,10 +33,10 @@ public struct EXISTS {
 /// A condition that a subquery returns no row: `NOT EXISTS (SELECT …)`.
 ///
 /// ```swift
-/// SQL.SELECT(\.id, \.name)
+/// SELECT(\.id, \.name)
 ///     .FROM(users)
-///     .WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
-/// // SELECT id, name FROM users WHERE NOT EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)
+///     .WHERE(NOT_EXISTS(SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
+/// // SELECT id, name FROM users WHERE NOT EXISTS (SELECT 1 FROM posts WHERE posts.author_id = users.id)
 /// ```
 public struct NOT_EXISTS {
     let subquery: any TableSQLQuery

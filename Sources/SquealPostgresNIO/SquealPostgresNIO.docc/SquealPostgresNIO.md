@@ -15,7 +15,7 @@ import SquealPostgresNIO
 let users = UserTable()
 
 let adults = try await client.rows(
-    SQL.SELECT(\.id, \.name)
+    SELECT(\.id, \.name)
         .FROM(users)
         .WHERE(\.age >= 18)
         .LIMIT(20)
@@ -32,8 +32,8 @@ For a `SELECT` of key paths, the query knows its row type, so `rows(_:)` and `fi
 decode into it. Decoding can't go out of sync with the `SELECT`: a wrong type doesn't compile.
 
 ```swift
-let names: [String] = try await client.rows(SQL.SELECT(\.name).FROM(users))
-let user = try await client.firstRow(SQL.SELECT(\.id, \.name).FROM(users).WHERE(\.email == email))
+let names: [String] = try await client.rows(SELECT(\.name).FROM(users))
+let user = try await client.firstRow(SELECT(\.id, \.name).FROM(users).WHERE(\.email == email))
 // (UUID, String)?, nil when no row matches
 ```
 
@@ -42,11 +42,11 @@ Pass the column types instead:
 
 ```swift
 let feed = try await client.rows(
-    SQL.SELECT(posts.title, users.name).FROM(posts).JOIN(users, ON: posts.author_id == users.id),
+    SELECT(posts.title, users.name).FROM(posts).JOIN(users, ON: posts.author_id == users.id),
     as: (String, String).self
 )
 let likes = try await client.firstRow(
-    SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1))).WHERE(\.id == postId).RETURNING(\.likes),
+    UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1))).WHERE(\.id == postId).RETURNING(\.likes),
     as: Int.self
 )
 ```

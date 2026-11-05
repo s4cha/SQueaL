@@ -49,7 +49,7 @@
 
     @Section(title: "Select rows") {
         @ContentAndMedia {
-            Queries start from `SQL` and chain clauses in the order you'd write them in SQL.
+            Queries start with `SELECT` and chain clauses in the order you'd write them in SQL.
             If you know SQL, you already know most of Squeal.
         }
 
@@ -155,7 +155,7 @@
 
     @Assessments {
         @MultipleChoice {
-            What does `SQL.SELECT(\.id).FROM(users).WHERE(\.name == name)` send to the
+            What does `SELECT(\.id).FROM(users).WHERE(\.name == name)` send to the
             database?
 
             @Choice(isCorrect: false) {
@@ -189,7 +189,7 @@
             Which line doesn't compile?
 
             @Choice(isCorrect: false) {
-                `SQL.SELECT(\.id).FROM(users).WHERE(\.age >= 18).LIMIT(10)`
+                `SELECT(\.id).FROM(users).WHERE(\.age >= 18).LIMIT(10)`
 
                 @Justification(reaction: "This one compiles.") {
                     `WHERE` followed by `LIMIT` is valid SQL.
@@ -197,7 +197,7 @@
             }
 
             @Choice(isCorrect: true) {
-                `SQL.SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)`
+                `SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)`
 
                 @Justification(reaction: "Correct!") {
                     `WHERE` can't follow `LIMIT` in SQL, so the type returned by `LIMIT`
@@ -206,7 +206,7 @@
             }
 
             @Choice(isCorrect: false) {
-                `SQL.SELECT(users.id, users.name).FROM(users)`
+                `SELECT(users.id, users.name).FROM(users)`
 
                 @Justification(reaction: "This one compiles.") {
                     Qualified columns are valid in `SELECT`, and they render as `users.id`

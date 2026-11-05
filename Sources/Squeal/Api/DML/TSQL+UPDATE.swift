@@ -13,11 +13,11 @@ import Foundation
 /// until you add a `WHERE`. An `UPDATE` that would change every row doesn't compile:
 ///
 /// ```swift
-/// try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")))
+/// try await client.query(UPDATE(users, SET: (\.name, "Ada")))
 /// // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
 /// //        this UPDATE would change every row. …
 ///
-/// try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")).WHERE(\.id == id))   // OK
+/// try await client.query(UPDATE(users, SET: (\.name, "Ada")).WHERE(\.id == id))   // OK
 /// ```
 ///
 /// To update every row on purpose, say so with a condition that's always true:
@@ -46,7 +46,7 @@ public extension SQL {
     /// accidentally change every row. See ``TypedUpdateSQLQuery``.
     ///
     /// ```swift
-    /// SQL.UPDATE(users, SET: (\.name, "Ada"), (\.age, 37)).WHERE(\.id == id)
+    /// UPDATE(users, SET: (\.name, "Ada"), (\.age, 37)).WHERE(\.id == id)
     /// // UPDATE users SET name = $1, age = $2 WHERE id = $3
     /// ```
     ///
@@ -70,7 +70,7 @@ public extension SQL {
     /// and subqueries, each checked against its column's type.
     ///
     /// ```swift
-    /// SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.updated_at, NOW())).WHERE(\.id == id)
+    /// UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.updated_at, NOW())).WHERE(\.id == id)
     /// // UPDATE posts SET likes = likes + $1, updated_at = now() WHERE id = $2
     /// ```
     ///

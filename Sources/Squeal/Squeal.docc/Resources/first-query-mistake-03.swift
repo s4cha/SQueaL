@@ -1,5 +1,4 @@
-let wrongOrder = SQL
-    .SELECT(\.id)
+let wrongOrder = SELECT(\.id)
     .FROM(users)
     .LIMIT(10)
     .WHERE(\.age >= 18)

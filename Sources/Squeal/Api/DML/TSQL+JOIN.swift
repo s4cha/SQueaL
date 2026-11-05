@@ -95,7 +95,7 @@ public extension JoinableQuery {
     /// written in either order.
     ///
     /// ```swift
-    /// SQL.SELECT(users.name, posts.title, comments.body)
+    /// SELECT(users.name, posts.title, comments.body)
     ///     .FROM(users)
     ///     .JOIN(posts, ON: posts.author_id == users.id)
     ///     .JOIN(comments, ON: comments.post_id == posts.id)

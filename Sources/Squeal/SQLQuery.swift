@@ -11,7 +11,7 @@ import Foundation
 /// SQL text plus the values bound to its placeholders, complete or still being built.
 ///
 /// Every step of a query conforms. Only the steps that form a complete statement also conform
-/// to ``SQLQuery``, which is what you can run. For example, `SQL.DELETE(FROM: posts)` is a
+/// to ``SQLQuery``, which is what you can run. For example, `DELETE(FROM: posts)` is a
 /// fragment: it becomes a query once you add `WHERE`.
 public protocol SQLFragment: CustomStringConvertible {
     /// The SQL text, with `$1`, `$2`, … placeholders where values go.

@@ -39,7 +39,7 @@ public struct TypedWhereSQLQuery<T: Table, Row>: WHEREClause {
     /// Returns columns of the affected rows: `RETURNING a, b, …`.
     ///
     /// ```swift
-    /// SQL.UPDATE(users, SET: (\.name, "Ada")).WHERE(\.id == id).RETURNING(\.id, \.name)
+    /// UPDATE(users, SET: (\.name, "Ada")).WHERE(\.id == id).RETURNING(\.id, \.name)
     /// // UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name
     /// ```
     public func RETURNING<each U>(_ columns: repeat KeyPath<T, TableColumn<T, each U>>) -> TypedSQLQuery<T, Void> {
@@ -157,7 +157,7 @@ public extension WHEREableQuery {
     /// The subquery must select a single column of the same type. Its placeholders are renumbered to follow this query's placeholders.
     ///
     /// ```swift
-    /// .WHERE(\.id, IN: SQL.SELECT(\.author_id).FROM(posts).WHERE(\.likes > 1000))
+    /// .WHERE(\.id, IN: SELECT(\.author_id).FROM(posts).WHERE(\.likes > 1000))
     /// // WHERE id IN (SELECT author_id FROM posts WHERE likes > $1)
     /// ```
     func WHERE<U, Q: TableSQLQuery>(_ kp: KeyPath<T, TableColumn<T, U>>, IN subquery: Q) -> TypedWhereSQLQuery<T, Row> where Q.Row == U {
@@ -237,8 +237,8 @@ public extension WHEREableQuery {
     /// ```swift
     /// .WHERE(users.age >= 18)                            // WHERE users.age >= $1
     /// .WHERE(posts.author_id == users.id)                // WHERE posts.author_id = users.id
-    /// .WHERE(EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
-    /// // WHERE EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)
+    /// .WHERE(EXISTS(SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
+    /// // WHERE EXISTS (SELECT 1 FROM posts WHERE posts.author_id = users.id)
     /// .WHERE(posts.published_at <= NOW())               // WHERE posts.published_at <= now()
     /// .WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))   // WHERE (age >= $1 OR bio IS NULL)
     /// ```

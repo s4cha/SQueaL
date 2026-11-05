@@ -16,7 +16,7 @@ extension PostgresClient {
     /// The row type comes from the query, so decoding can't go out of sync with the `SELECT`:
     ///
     /// ```swift
-    /// let users = try await client.rows(SQL.SELECT(\.id, \.name).FROM(users).WHERE(\.age >= 18))
+    /// let users = try await client.rows(SELECT(\.id, \.name).FROM(users).WHERE(\.age >= 18))
     /// // [(UUID, String)]
     /// ```
     ///
@@ -35,7 +35,7 @@ extension PostgresClient {
     /// returns `nil` when there's no row.
     ///
     /// ```swift
-    /// let user = try await client.firstRow(SQL.SELECT(\.id, \.name).FROM(users).WHERE(\.email == email))
+    /// let user = try await client.firstRow(SELECT(\.id, \.name).FROM(users).WHERE(\.email == email))
     /// // (UUID, String)?
     /// ```
     public func firstRow<Q: TableSQLQuery, First: PostgresDecodable & Sendable, each Rest: PostgresDecodable & Sendable>(
@@ -78,7 +78,7 @@ extension PostgresClient {
     ///
     /// ```swift
     /// let rows = try await client.rows(
-    ///     SQL.SELECT(posts.title, users.name).FROM(posts).JOIN(users, ON: posts.author_id == users.id),
+    ///     SELECT(posts.title, users.name).FROM(posts).JOIN(users, ON: posts.author_id == users.id),
     ///     as: (String, String).self
     /// )
     /// ```
@@ -101,7 +101,7 @@ extension PostgresClient {
     ///
     /// ```swift
     /// let id = try await client.firstRow(
-    ///     SQL.INSERT(INTO: users, columns: \.email, VALUES: email).RETURNING(\.id),
+    ///     INSERT(INTO: users, columns: \.email, VALUES: email).RETURNING(\.id),
     ///     as: UUID.self
     /// )
     /// ```
@@ -123,7 +123,7 @@ extension PostgresClient {
     /// Runs a query whose rows you don't need, such as an `INSERT`, `UPDATE` or `DELETE`.
     ///
     /// ```swift
-    /// try await client.execute(SQL.DELETE(FROM: sessions).WHERE(\.expires_at < NOW()))
+    /// try await client.execute(DELETE(FROM: sessions).WHERE(\.expires_at < NOW()))
     /// ```
     public func execute(
         _ query: SQLQuery,
