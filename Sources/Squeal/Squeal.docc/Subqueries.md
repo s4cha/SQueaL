@@ -77,8 +77,8 @@ SQL.SELECT(\.name)
 ```swift
 SQL.SELECT(\.name)
     .FROM(users)
-    .WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
-// SELECT name FROM users WHERE NOT EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)
+    .WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
+// SELECT name FROM users WHERE NOT EXISTS (SELECT 1 FROM posts WHERE posts.author_id = users.id)
 ```
 
 Both work in `WHERE`, `AND` and `OR`, including in `UPDATE` and `DELETE`.

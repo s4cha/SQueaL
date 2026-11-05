@@ -137,6 +137,7 @@ doesn't catch yet.
 - ``TypedInsertSelectWhereSQLQuery``
 - ``InsertSelectQuery``
 - ``TypedValuesSelectSQLQuery``
+- ``TypedSelectNumberSQLQuery``
 - ``NoTable``
 - ``OnConflictInsertQuery``
 - ``TypedUpdateSQLQuery``

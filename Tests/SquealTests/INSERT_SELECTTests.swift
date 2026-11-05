@@ -76,4 +76,40 @@ struct INSERT_SELECTTests {
         #expect(query.query == "SELECT name FROM departments WHERE id IN (SELECT $1)")
         #expect(query.parameters[0] as? UUID == departmentId)
     }
+
+    @Test
+    func SELECT_1_isWrittenAsText() {
+        let query = SQL.SELECT(1)
+        #expect(query.query == "SELECT 1")
+        #expect(query.parameters.isEmpty)
+    }
+
+    @Test
+    func SELECT_1_FROM_WHERE() {
+        let query = SQL.SELECT(1).FROM(users_departments).WHERE(\.user_id == userId)
+        #expect(query.query == "SELECT 1 FROM users_departments WHERE user_id = $1")
+        #expect(query.parameters.count == 1)
+        #expect(query.parameters[0] as? UUID == userId)
+    }
+
+    @Test
+    func EXISTS_SELECT_1() {
+        let query = SQL.SELECT(\.name).FROM(departments)
+            .WHERE(\.name == "R&D")
+            .AND(EXISTS(SQL.SELECT(1).FROM(users_departments).WHERE(users_departments.department_id == departments.id).AND(\.user_id == userId)))
+        #expect(query.query == "SELECT name FROM departments WHERE name = $1 AND EXISTS (SELECT 1 FROM users_departments WHERE users_departments.department_id = departments.id AND user_id = $2)")
+        #expect(query.parameters.count == 2)
+    }
+
+    @Test
+    func SELECT_integersAsText_otherValuesBound() {
+        let noCount: Int? = nil
+        let x = "x", minus42 = -42, seven = Int8(7)
+        let query = SQL.SELECT(1, x, minus42, seven, noCount, departmentId)
+        #expect(query.query == "SELECT 1, $1, -42, 7, $2, $3")
+        #expect(query.parameters.count == 3)
+        #expect(query.parameters[0] as? String == "x")
+        #expect(query.parameters[1] == nil)
+        #expect(query.parameters[2] as? UUID == departmentId)
+    }
 }

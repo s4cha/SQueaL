@@ -322,8 +322,8 @@ struct DocumentationExamplesTests {
         let query = SQL
             .SELECT(\.name)
             .FROM(users)
-            .WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(posts).WHERE(posts.author_id == users.id)))
-        #expect(query.query == "SELECT name FROM users WHERE NOT EXISTS (SELECT id FROM posts WHERE posts.author_id = users.id)")
+            .WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
+        #expect(query.query == "SELECT name FROM users WHERE NOT EXISTS (SELECT 1 FROM posts WHERE posts.author_id = users.id)")
     }
 
     @Test
@@ -600,7 +600,15 @@ struct DocumentationExamplesTests {
     func selectValuesWhereNotExists() {
         let memberships = MembershipTable()
         let teamId = UUID(), userId = UUID()
-        let query = SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(memberships).WHERE(memberships.user_id == userId)))
-        #expect(query.query == "SELECT $1, $2 WHERE NOT EXISTS (SELECT id FROM memberships WHERE memberships.user_id = $3)")
+        let query = SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+        #expect(query.query == "SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $3)")
+    }
+
+    @Test
+    func existsSelectOne() {
+        let memberships = MembershipTable()
+        let userId = UUID()
+        let query = SQL.SELECT(\.id).FROM(usersTable).WHERE(EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+        #expect(query.query == "SELECT id FROM users WHERE EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $1)")
     }
 }
