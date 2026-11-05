@@ -67,13 +67,20 @@ SQL.SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username"))
 Key paths render as bare column names. Columns accessed on a table value (`users.name`)
 render qualified with their table, which you need in joins. See <doc:DefiningTables>.
 
-Values select without a table. They're bound as parameters, and a `WHERE` can follow
-directly, which is useful in `EXISTS` checks and in `INSERT … SELECT` (see
-<doc:InsertingData>):
+`SELECT 1` is the usual way to write an `EXISTS` check, where only whether a row exists
+matters. The number is written as text, since an integer can't carry SQL:
 
 ```swift
-SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(memberships).WHERE(memberships.user_id == userId)))
-// SELECT $1, $2 WHERE NOT EXISTS (SELECT id FROM memberships WHERE memberships.user_id = $3)
+EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId))
+// EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $1)
+```
+
+Values select without a table. They're bound as parameters, except integers, and a `WHERE`
+can follow directly, which is useful in `INSERT … SELECT` (see <doc:InsertingData>):
+
+```swift
+SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+// SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $3)
 ```
 
 ### Filtering with WHERE, AND and OR

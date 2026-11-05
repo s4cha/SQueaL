@@ -63,5 +63,7 @@ A few APIs take SQL text as is, as escape hatches. Never build their text from u
 - The SQL text of an ``SQLExpr``. Its values are bound, so put every value behind a `?`.
 - The constraint name in `ON_CONFLICT(ON_CONSTRAINT:)`.
 - Table and column names, which come from your ``Table`` definitions.
+- Integers in a `SELECT` of values, such as `SQL.SELECT(1)`, which renders `SELECT 1`. An
+  integer can't carry SQL, so this is safe with any value.
 
 See <doc:EscapeHatches> for how to use these safely.

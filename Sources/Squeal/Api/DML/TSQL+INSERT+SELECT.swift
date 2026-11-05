@@ -164,22 +164,41 @@ public struct NoTable: Table {
 }
 
 public extension SQL {
-    /// Selects values, without a table: `SELECT $1, $2`.
+    /// Selects a number, as in the common `EXISTS (SELECT 1 FROM …)`: `SELECT 1`.
     ///
-    /// The values are bound as parameters, and their types become the query's `Row`. Add a
-    /// condition with `WHERE`:
+    /// The number is written as text: an integer can't carry SQL. Follow it with `FROM`, or with
+    /// `WHERE` to select without a table:
     ///
     /// ```swift
-    /// SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(\.id).FROM(memberships).WHERE(memberships.user_id == userId)))
-    /// // SELECT $1, $2 WHERE NOT EXISTS (SELECT id FROM memberships WHERE memberships.user_id = $3)
+    /// EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId))
+    /// // EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $1)
+    /// ```
+    static func SELECT(_ number: Int) -> TypedSelectNumberSQLQuery {
+        return TypedSelectNumberSQLQuery(query: "SELECT \(number)", parameters: [])
+    }
+
+    /// Selects values without a table: `SELECT $1, $2`.
+    ///
+    /// Values are bound as parameters, except integers, which are written as text. The values'
+    /// types become the query's `Row`. Add a condition with `WHERE`:
+    ///
+    /// ```swift
+    /// SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+    /// // SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $3)
     /// ```
     static func SELECT<each V: Encodable>(_ values: repeat each V) -> TypedValuesSelectSQLQuery<(repeat each V)> {
+        var fields = [String]()
         var parameters = [(any Encodable)?]()
         for value in repeat each values {
-            parameters.append(value)
+            // An integer can't carry SQL, so it's safe to write as text.
+            if let integer = value as? any BinaryInteger {
+                fields.append("\(integer)")
+            } else {
+                parameters.append(value)
+                fields.append("$\(parameters.count)")
+            }
         }
-        let placeholders = parameters.indices.map { "$\($0 + 1)" }.joined(separator: ", ")
-        return TypedValuesSelectSQLQuery(query: "SELECT \(placeholders)", parameters: parameters)
+        return TypedValuesSelectSQLQuery(query: "SELECT \(fields.joined(separator: ", "))", parameters: parameters)
     }
 }
 
@@ -193,5 +212,29 @@ public struct TypedValuesSelectSQLQuery<Row>: TableSQLQuery, WHEREableQuery {
     init(query: String, parameters: [(any Encodable)?]) {
         self.query = query
         self.parameters = normalizedParameters(parameters)
+    }
+}
+
+/// A `SELECT` of a number, such as `SELECT 1`. Next, you can add `FROM`, or `WHERE` to select
+/// without a table.
+public struct TypedSelectNumberSQLQuery: TableSQLQuery, WHEREableQuery {
+    public typealias T = NoTable
+    public typealias Row = Int
+    public let table = NoTable()
+    public var query: String
+    public var parameters: [(any Encodable)?]
+
+    init(query: String, parameters: [(any Encodable)?]) {
+        self.query = query
+        self.parameters = parameters
+    }
+
+    /// Adds the `FROM` clause. Key paths in later clauses resolve against `table`.
+    ///
+    /// ```swift
+    /// SQL.SELECT(1).FROM(posts).WHERE(\.likes > 1000)   // SELECT 1 FROM posts WHERE likes > $1
+    /// ```
+    public func FROM<U: Table>(_ table: U) -> TypedFromSQLQuery<U, Int> {
+        return TypedFromSQLQuery(for: table, query: query + " FROM \(U.schema)", parameters: parameters)
     }
 }
