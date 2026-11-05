@@ -29,7 +29,7 @@ public protocol GroupByableQuery: TableSQLQuery {
     /// Groups rows by several columns: `GROUP BY a, b, …`.
     ///
     /// ```swift
-    /// SQL.SELECT(posts.author_id, COUNT(*)).FROM(posts).GROUP_BY(\.author_id)
+    /// SELECT(posts.author_id, COUNT(*)).FROM(posts).GROUP_BY(\.author_id)
     /// ```
     func GROUP_BY<each X>(_ keypaths: repeat KeyPath<T, TableColumn<T, each X>>) -> TypedGroupBySQLQuery<T, Row>
 }
@@ -44,7 +44,7 @@ public extension GroupByableQuery {
     /// Groups rows by several columns: `GROUP BY a, b, …`.
     ///
     /// ```swift
-    /// SQL.SELECT(posts.author_id, COUNT(*)).FROM(posts).GROUP_BY(\.author_id)
+    /// SELECT(posts.author_id, COUNT(*)).FROM(posts).GROUP_BY(\.author_id)
     /// ```
     func GROUP_BY<each X>(_ keypaths: repeat KeyPath<T, TableColumn<T, each X>>) -> TypedGroupBySQLQuery<T, Row> {
         var columnNames = [String]()

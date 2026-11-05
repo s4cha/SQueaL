@@ -8,7 +8,7 @@
 /// Use it in `UPDATE … SET` for partial updates, where `nil` means "keep what's there":
 ///
 /// ```swift
-/// SQL.UPDATE(studies, SET:
+/// UPDATE(studies, SET:
 ///         (\.name, COALESCE(update.name, studies.name)),
 ///         (\.starting_cash, COALESCE(update.startingCash, studies.starting_cash)))
 ///     .WHERE(\.id == id)

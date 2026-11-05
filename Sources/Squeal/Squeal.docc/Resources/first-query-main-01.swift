@@ -1,6 +1,5 @@
 import Squeal
 
-let allUsers = SQL
-    .SELECT(*)
+let allUsers = SELECT(*)
     .FROM(users)
 // SELECT * FROM users

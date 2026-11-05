@@ -80,7 +80,7 @@
 
     @Assessments {
         @MultipleChoice {
-            `SQL.SELECT(\.title).FROM(posts)` returns titles, which are `String`s. What
+            `SELECT(\.title).FROM(posts)` returns titles, which are `String`s. What
             happens if you use it in `.WHERE(\.id, IN: …)` on `users`?
 
             @Choice(isCorrect: false) {

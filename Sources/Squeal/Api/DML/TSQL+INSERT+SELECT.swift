@@ -13,12 +13,12 @@ public extension SQL {
     /// parameter. Use it to insert only when related rows exist, or don't:
     ///
     /// ```swift
-    /// SQL.INSERT(INTO: memberships, columns: \.team_id, \.user_id,
-    ///            SELECT: teamId, userId)
-    ///     .WHERE(EXISTS(SQL.SELECT(\.id).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
+    /// INSERT(INTO: memberships, columns: \.team_id, \.user_id,
+    ///        SELECT: teamId, userId)
+    ///     .WHERE(EXISTS(SELECT(1).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
     ///     .ON_CONFLICT(DO: .NOTHING)
     /// // INSERT INTO memberships (team_id, user_id) SELECT $1, $2
-    /// //     WHERE EXISTS (SELECT id FROM teams WHERE teams.id = $3 AND teams.owner_id = $4)
+    /// //     WHERE EXISTS (SELECT 1 FROM teams WHERE teams.id = $3 AND teams.owner_id = $4)
     /// //     ON CONFLICT DO NOTHING
     /// ```
     ///
@@ -45,8 +45,8 @@ public extension SQL {
     /// The query must select the columns' types, in order:
     ///
     /// ```swift
-    /// SQL.INSERT(INTO: archived_posts, columns: \.id, \.title,
-    ///            SELECT: SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
+    /// INSERT(INTO: archived_posts, columns: \.id, \.title,
+    ///        SELECT: SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
     /// // INSERT INTO archived_posts (id, title) SELECT id, title FROM posts WHERE likes < $1
     /// ```
     static func INSERT<T, each U, Q: TableSQLQuery>(INTO table: T,
@@ -170,7 +170,7 @@ public extension SQL {
     /// `WHERE` to select without a table:
     ///
     /// ```swift
-    /// EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId))
+    /// EXISTS(SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId))
     /// // EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $1)
     /// ```
     static func SELECT(_ number: Int) -> TypedSelectNumberSQLQuery {
@@ -183,7 +183,7 @@ public extension SQL {
     /// types become the query's `Row`. Add a condition with `WHERE`:
     ///
     /// ```swift
-    /// SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+    /// SELECT(teamId, userId).WHERE(NOT_EXISTS(SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
     /// // SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $3)
     /// ```
     static func SELECT<each V: Encodable>(_ values: repeat each V) -> TypedValuesSelectSQLQuery<(repeat each V)> {
@@ -232,7 +232,7 @@ public struct TypedSelectNumberSQLQuery: TableSQLQuery, WHEREableQuery {
     /// Adds the `FROM` clause. Key paths in later clauses resolve against `table`.
     ///
     /// ```swift
-    /// SQL.SELECT(1).FROM(posts).WHERE(\.likes > 1000)   // SELECT 1 FROM posts WHERE likes > $1
+    /// SELECT(1).FROM(posts).WHERE(\.likes > 1000)   // SELECT 1 FROM posts WHERE likes > $1
     /// ```
     public func FROM<U: Table>(_ table: U) -> TypedFromSQLQuery<U, Int> {
         return TypedFromSQLQuery(for: table, query: query + " FROM \(U.schema)", parameters: parameters)

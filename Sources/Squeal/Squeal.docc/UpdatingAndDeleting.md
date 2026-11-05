@@ -9,7 +9,7 @@ Change and remove rows, and get back the rows you changed.
 Pass `(column, value)` pairs to `SET`. Each value is bound as a parameter:
 
 ```swift
-SQL.UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
+UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
     .WHERE(\.id == id)
     .RETURNING(\.id, \.name)
 // UPDATE users SET name = $1, age = $2 WHERE id = $3 RETURNING id, name
@@ -21,11 +21,11 @@ SQL.UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
 > Warning: Squeal doesn't yet reject a `SET` value of the wrong type. Postgres reports it when
 > the query runs. See <doc:WhatSquealChecks>.
 
-An `UPDATE` must have a `WHERE`. Until you add one, `SQL.UPDATE(…, SET: …)` isn't a query
+An `UPDATE` must have a `WHERE`. Until you add one, `UPDATE(…, SET: …)` isn't a query
 you can run, so an `UPDATE` that would change every row doesn't compile:
 
 ```swift
-try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")))
+try await client.query(UPDATE(users, SET: (\.name, "Ada")))
 // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
 //        this UPDATE would change every row. …
 ```
@@ -38,7 +38,7 @@ To set a column from its current value or from a database function, use ``SQLExp
 `?` placeholders for bound values), ``NOW`` for the current time, or ``RawSQL``:
 
 ```swift
-SQL.UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.published_at, NOW()))
+UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.published_at, NOW()))
     .WHERE(\.id == postId)
 // UPDATE posts SET likes = likes + $1, published_at = now() WHERE id = $2
 ```
@@ -49,7 +49,7 @@ A common pattern is a partial update, where `nil` means "keep the current value"
 ``COALESCE``, with the new value and the column to fall back to:
 
 ```swift
-SQL.UPDATE(users, SET:
+UPDATE(users, SET:
         (\.name, COALESCE(newName, users.name)),
         (\.bio, COALESCE(newBio, users.bio)))
     .WHERE(\.id == id)
@@ -68,19 +68,19 @@ You can also set a column from a subquery. See <doc:Subqueries>.
 ### DELETE
 
 ```swift
-SQL.DELETE(FROM: posts)
+DELETE(FROM: posts)
     .WHERE(\.likes < 1)
     .RETURNING(\.id)
 // DELETE FROM posts WHERE likes < $1 RETURNING id
 ```
 
-`SQL.DELETE_FROM(posts)` is equivalent if you prefer a single word.
+`DELETE_FROM(posts)` is equivalent if you prefer a single word.
 
-A `DELETE` must have a `WHERE`. Until you add one, `SQL.DELETE(FROM: posts)` isn't a query
+A `DELETE` must have a `WHERE`. Until you add one, `DELETE(FROM: posts)` isn't a query
 you can run, so a `DELETE` that would remove every row doesn't compile:
 
 ```swift
-try await client.query(SQL.DELETE(FROM: posts))
+try await client.query(DELETE(FROM: posts))
 // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
 //        this DELETE would remove every row. …
 ```
@@ -88,7 +88,7 @@ try await client.query(SQL.DELETE(FROM: posts))
 To delete every row on purpose, say so with a condition that's always true:
 
 ```swift
-SQL.DELETE(FROM: posts).WHERE(SQLExpr("true"))
+DELETE(FROM: posts).WHERE(SQLExpr("true"))
 // DELETE FROM posts WHERE true
 ```
 
@@ -98,7 +98,7 @@ After a `WHERE`, `UPDATE` and `DELETE` both accept `RETURNING`, the same way `IN
 key paths, `*`, or table columns mixed with ``RawSQL``:
 
 ```swift
-SQL.UPDATE(users, SET: (\.name, "Ada"))
+UPDATE(users, SET: (\.name, "Ada"))
     .WHERE(\.id == id)
     .RETURNING(users.id, RawSQL("length(name)"))
 // UPDATE users SET name = $1 WHERE id = $2 RETURNING users.id, length(name)

@@ -10,14 +10,13 @@
 /// each user's latest post title:
 ///
 /// ```swift
-/// let latestTitle = SQL
-///     .SELECT(\.title)
+/// let latestTitle = SELECT(\.title)
 ///     .FROM(posts)
 ///     .WHERE(posts.author_id == users.id)
 ///     .ORDER_BY(\.published_at, .DESC)
 ///     .LIMIT(1)
 ///
-/// SQL.SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
+/// SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
 /// // SELECT users.name, (SELECT title FROM posts WHERE posts.author_id = users.id
 /// //     ORDER BY published_at DESC LIMIT $1) FROM users
 /// ```

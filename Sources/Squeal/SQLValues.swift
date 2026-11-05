@@ -38,7 +38,7 @@ extension SQLExpr: SQLExpressionText {}
 /// - `RawSQL`: inlined as is.
 /// - `NOW` and `ShiftedNOW`: rendered like an `SQLExpr` (`now()`, `now() - $n::interval`).
 /// - `COALESCE`: rendered like an `SQLExpr` (`COALESCE($n, table.column)`).
-/// - a query (e.g. `SQL.SELECT(…)…LIMIT(1)`): inlined as a parenthesized subquery, its `$n` renumbered.
+/// - a query (e.g. `SELECT(…)…LIMIT(1)`): inlined as a parenthesized subquery, its `$n` renumbered.
 /// - any other `Encodable` (including nil optionals): bound as the next `$n`.
 func renderSQLValues(_ values: [Any], parameterOffset: Int) -> (fragments: [String], parameters: [(any Encodable)?]) {
     var parameters: [(any Encodable)?] = []

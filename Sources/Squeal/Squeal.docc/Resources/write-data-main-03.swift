@@ -3,8 +3,7 @@ import Squeal
 
 let adaId = UUID()
 
-let newUser = SQL
-    .INSERT(INTO: users,
+let newUser = INSERT(INTO: users,
             columns: \.id, \.email, \.name, \.age,
             VALUES: adaId, "ada@example.com", "Ada", 36)
     .ON_CONFLICT(\.email, DO: .NOTHING)
@@ -14,8 +13,7 @@ let newUser = SQL
 
 let titles = ["Hello, world", "Why I like SQL", "Type-safe queries"]
 
-let newPosts = SQL
-    .INSERT(INTO: posts,
+let newPosts = INSERT(INTO: posts,
             columns: \.id, \.author_id, \.title, \.likes,
             addValuesFrom: titles,
             mapValues: { title in (UUID(), adaId, title, 0) })

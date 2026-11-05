@@ -18,8 +18,7 @@ try await withThrowingDiscardingTaskGroup { group in
     group.addTask { await client.run() }
 
     let rows = try await client.rows(
-        SQL
-            .SELECT(\.id, \.name, \.email)
+        SELECT(\.id, \.name, \.email)
             .FROM(users)
             .ORDER_BY(\.name, .ASC)
             .LIMIT(20)

@@ -8,9 +8,9 @@ Insert one or many rows, handle conflicts and return generated values.
 is bound as a parameter.
 
 ```swift
-SQL.INSERT(INTO: users,
-           columns: \.id, \.email, \.name, \.age,
-           VALUES: id, "ada@example.com", "Ada", 36)
+INSERT(INTO: users,
+       columns: \.id, \.email, \.name, \.age,
+       VALUES: id, "ada@example.com", "Ada", 36)
     .RETURNING(\.id)
 // INSERT INTO users (id, email, name, age) VALUES ($1, $2, $3, $4) RETURNING id
 ```
@@ -23,7 +23,7 @@ SQL.INSERT(INTO: users,
 Leave out `VALUES:`, then chain one `VALUES` per row:
 
 ```swift
-SQL.INSERT(INTO: users, columns: \.name, \.age)
+INSERT(INTO: users, columns: \.name, \.age)
     .VALUES("Ada", 36)
     .VALUES("Grace", 45)
 // INSERT INTO users (name, age) VALUES ($1, $2), ($3, $4)
@@ -32,7 +32,7 @@ SQL.INSERT(INTO: users, columns: \.name, \.age)
 To add rows in a loop, use the mutating `ADDVALUES`:
 
 ```swift
-var insert = SQL.INSERT(INTO: users, columns: \.name, \.age)
+var insert = INSERT(INTO: users, columns: \.name, \.age)
 for user in newUsers {
     insert.ADDVALUES(user.name, user.age)
 }
@@ -42,10 +42,10 @@ To build the rows from a sequence, pass the sequence and a closure that maps eac
 to a row:
 
 ```swift
-SQL.INSERT(INTO: users,
-           columns: \.name, \.age,
-           addValuesFrom: newUsers,
-           mapValues: { ($0.name, $0.age) })
+INSERT(INTO: users,
+       columns: \.name, \.age,
+       addValuesFrom: newUsers,
+       mapValues: { ($0.name, $0.age) })
 // INSERT INTO users (name, age) VALUES ($1, $2), ($3, $4)
 ```
 
@@ -55,7 +55,7 @@ SQL.INSERT(INTO: users,
 idempotent inserts:
 
 ```swift
-SQL.INSERT(INTO: users, columns: \.id, \.email, VALUES: id, "ada@example.com")
+INSERT(INTO: users, columns: \.id, \.email, VALUES: id, "ada@example.com")
     .ON_CONFLICT(\.email, DO: .NOTHING)
     .RETURNING(\.id)
 // INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (email) DO NOTHING RETURNING id
@@ -78,9 +78,9 @@ To let the database compute a value, mix ``NOW`` and ``SQLExpr`` in with plain v
 column: an `SQLExpr` takes its column's type, and ``NOW`` only fills date columns.
 
 ```swift
-SQL.INSERT(INTO: posts,
-           columns: \.id, \.title, \.published_at,
-           VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
+INSERT(INTO: posts,
+       columns: \.id, \.title, \.published_at,
+       VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", title), NOW())
 // INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())
 ```
 
@@ -103,12 +103,12 @@ row only when a condition holds, written with `WHERE`, such as linking two rows 
 the user owns both:
 
 ```swift
-SQL.INSERT(INTO: memberships, columns: \.team_id, \.user_id,
-           SELECT: teamId, userId)
-    .WHERE(EXISTS(SQL.SELECT(\.id).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
+INSERT(INTO: memberships, columns: \.team_id, \.user_id,
+       SELECT: teamId, userId)
+    .WHERE(EXISTS(SELECT(1).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
     .ON_CONFLICT(DO: .NOTHING)
 // INSERT INTO memberships (team_id, user_id) SELECT $1, $2
-//     WHERE EXISTS (SELECT id FROM teams WHERE teams.id = $3 AND teams.owner_id = $4)
+//     WHERE EXISTS (SELECT 1 FROM teams WHERE teams.id = $3 AND teams.owner_id = $4)
 //     ON CONFLICT DO NOTHING
 ```
 
@@ -118,8 +118,8 @@ value must have its column's type.
 Pass a query to insert every row it returns. It must select the columns' types, in order:
 
 ```swift
-SQL.INSERT(INTO: archived_posts, columns: \.id, \.title,
-           SELECT: SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
+INSERT(INTO: archived_posts, columns: \.id, \.title,
+       SELECT: SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
 // INSERT INTO archived_posts (id, title) SELECT id, title FROM posts WHERE likes < $1
 ```
 

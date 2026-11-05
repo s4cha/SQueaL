@@ -10,8 +10,7 @@ your clause order. You also get autocompletion that only offers clauses that are
 that point in the query.
 
 ```swift
-let query = SQL
-    .SELECT(\.id, \.name, \.email)
+let query = SELECT(\.id, \.name, \.email)
     .FROM(users)
     .WHERE(\.age >= 18)
     .AND(\.name == "Ada")

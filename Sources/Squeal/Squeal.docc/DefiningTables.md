@@ -61,7 +61,7 @@ struct User {
     @ColumnName("created_at") let createdAt: Date
 }
 
-SQL.SELECT(\.id, \.email).FROM(users).ORDER_BY(\.createdAt, .DESC)
+SELECT(\.id, \.email).FROM(users).ORDER_BY(\.createdAt, .DESC)
 // SELECT id, email_address FROM users ORDER BY created_at DESC
 ```
 
@@ -80,7 +80,7 @@ struct UsersTable: Table {
     @Column<String>(name: "email_address") var email
 }
 
-SQL.SELECT(\.id, \.email).FROM(UsersTable())
+SELECT(\.id, \.email).FROM(UsersTable())
 // SELECT id, email_address FROM users
 ```
 
@@ -95,7 +95,7 @@ There are two ways to refer to a column, and you can mix them in the same query.
 `FROM`, `UPDATE`, `INSERT INTO` or `DELETE FROM`. They render unqualified (`name`):
 
 ```swift
-SQL.SELECT(\.id).FROM(users).WHERE(\.name == "Ada")
+SELECT(\.id).FROM(users).WHERE(\.name == "Ada")
 // SELECT id FROM users WHERE name = $1
 ```
 
@@ -104,7 +104,7 @@ Use them for columns from other tables in a join, and anywhere the column could 
 ambiguous:
 
 ```swift
-SQL.SELECT(posts.title, users.name)
+SELECT(posts.title, users.name)
     .FROM(posts)
     .JOIN(users, ON: posts.author_id == users.id)
 // SELECT posts.title, users.name FROM posts JOIN users ON posts.author_id = users.id

@@ -11,13 +11,13 @@ import Foundation
 /// a date column with it in `WHERE`, `AND` and `OR`:
 ///
 /// ```swift
-/// SQL.UPDATE(posts, SET: (\.published_at, NOW()))
+/// UPDATE(posts, SET: (\.published_at, NOW()))
 /// // UPDATE posts SET published_at = now()
 ///
-/// SQL.SELECT(posts.id, NOW()).FROM(posts)
+/// SELECT(posts.id, NOW()).FROM(posts)
 /// // SELECT posts.id, now() FROM posts
 ///
-/// SQL.SELECT(\.id).FROM(posts).WHERE(\.published_at <= NOW())
+/// SELECT(\.id).FROM(posts).WHERE(\.published_at <= NOW())
 /// // SELECT id FROM posts WHERE published_at <= now()
 /// ```
 ///
@@ -48,7 +48,7 @@ public struct NOW: SelectField, DatabaseTimestamp {
 /// It reads like SQL's `INTERVAL 30 DAY`:
 ///
 /// ```swift
-/// SQL.SELECT(\.id).FROM(posts).WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
+/// SELECT(\.id).FROM(posts).WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
 /// // SELECT id FROM posts WHERE published_at >= now() - $1::interval
 /// // parameters: ["30 days"]
 /// ```
@@ -138,7 +138,7 @@ extension Optional: NOWComparable where Wrapped == Date {}
 /// Pass it to `WHERE`, `AND` or `OR`:
 ///
 /// ```swift
-/// SQL.SELECT(posts.id).FROM(posts).WHERE(posts.published_at <= NOW())
+/// SELECT(posts.id).FROM(posts).WHERE(posts.published_at <= NOW())
 /// // SELECT posts.id FROM posts WHERE posts.published_at <= now()
 /// ```
 ///

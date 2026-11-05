@@ -28,7 +28,7 @@ public protocol FROMableQuery: TableSQLQuery {
     /// Adds the `FROM` clause.
     ///
     /// ```swift
-    /// SQL.SELECT(\.id).FROM(users)   // SELECT id FROM users
+    /// SELECT(\.id).FROM(users)   // SELECT id FROM users
     /// ```
     func FROM(_ table: T) -> TypedFromSQLQuery<T, Row>
 }
@@ -38,7 +38,7 @@ public extension FROMableQuery {
     /// Adds the `FROM` clause.
     ///
     /// ```swift
-    /// SQL.SELECT(\.id).FROM(users)   // SELECT id FROM users
+    /// SELECT(\.id).FROM(users)   // SELECT id FROM users
     /// ```
     func FROM(_ table: T) -> TypedFromSQLQuery<T, Row> {
         return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: parameters)
@@ -51,7 +51,7 @@ public protocol FROMableSQLQuery: SQLQuery {
     /// Adds the `FROM` clause. Key paths in later clauses resolve against `table`.
     ///
     /// ```swift
-    /// SQL.SELECT(users.id).FROM(users)   // SELECT users.id FROM users
+    /// SELECT(users.id).FROM(users)   // SELECT users.id FROM users
     /// ```
     func FROM<T>(_ table: T) -> TypedFromSQLQuery<T, Void>
 }
@@ -62,7 +62,7 @@ public extension FROMableSQLQuery {
     /// Adds the `FROM` clause. Key paths in later clauses resolve against `table`.
     ///
     /// ```swift
-    /// SQL.SELECT(users.id).FROM(users)   // SELECT users.id FROM users
+    /// SELECT(users.id).FROM(users)   // SELECT users.id FROM users
     /// ```
     func FROM<T>(_ table: T) -> TypedFromSQLQuery<T, Void> {
         return TypedFromSQLQuery(for: table, query: query + " FROM \(T.schema)", parameters: parameters)

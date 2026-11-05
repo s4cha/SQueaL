@@ -18,8 +18,7 @@ try await withThrowingDiscardingTaskGroup { group in
     group.addTask { await client.run() }
 
     let rows = try await client.rows(
-        SQL
-            .SELECT(\.id, \.name, \.email)
+        SELECT(\.id, \.name, \.email)
             .FROM(users)
             .ORDER_BY(\.name, .ASC)
             .LIMIT(20)
@@ -29,8 +28,7 @@ try await withThrowingDiscardingTaskGroup { group in
     }
 
     let insertedId = try await client.firstRow(
-        SQL
-            .INSERT(INTO: users,
+        INSERT(INTO: users,
                     columns: \.id, \.email, \.name, \.age,
                     VALUES: UUID(), "ada@example.com", "Ada", 36)
             .ON_CONFLICT(\.email, DO: .NOTHING)

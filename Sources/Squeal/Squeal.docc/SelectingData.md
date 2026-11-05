@@ -4,7 +4,7 @@ Read rows with `SELECT`, filter them, then sort, paginate and aggregate.
 
 ## Overview
 
-A `SELECT` query is built the same way you'd write it in SQL: `SQL.SELECT`
+A `SELECT` query is built the same way you'd write it in SQL: `SELECT`
 first, then `FROM`, then optional clauses in SQL order. Each step returns a type that only
 offers the clauses allowed next. Once you've written `LIMIT`, autocompletion won't suggest
 `WHERE`.
@@ -41,16 +41,16 @@ let posts = PostTable()
 ### Choosing columns
 
 ```swift
-SQL.SELECT(*).FROM(users)
+SELECT(*).FROM(users)
 // SELECT * FROM users
 
-SQL.SELECT(\.id, \.name).FROM(users)
+SELECT(\.id, \.name).FROM(users)
 // SELECT id, name FROM users
 
-SQL.SELECT(users.id, users.name).FROM(users)
+SELECT(users.id, users.name).FROM(users)
 // SELECT users.id, users.name FROM users
 
-SQL.SELECT_DISTINCT(\.age).FROM(users)
+SELECT_DISTINCT(\.age).FROM(users)
 // SELECT DISTINCT age FROM users
 ```
 
@@ -59,7 +59,7 @@ in the key path, because nothing earlier in the expression tells the compiler wh
 you mean:
 
 ```swift
-SQL.SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username"))
+SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username"))
     .FROM(users)
 // SELECT id AS user_id, name AS username FROM users
 ```
@@ -71,7 +71,7 @@ render qualified with their table, which you need in joins. See <doc:DefiningTab
 matters. The number is written as text, since an integer can't carry SQL:
 
 ```swift
-EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId))
+EXISTS(SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId))
 // EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $1)
 ```
 
@@ -79,7 +79,7 @@ Values select without a table. They're bound as parameters, except integers, and
 can follow directly, which is useful in `INSERT … SELECT` (see <doc:InsertingData>):
 
 ```swift
-SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+SELECT(teamId, userId).WHERE(NOT_EXISTS(SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
 // SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $3)
 ```
 
@@ -89,7 +89,7 @@ Comparisons use Swift operators on columns. The right-hand side must have the co
 type, and it's always bound as a parameter:
 
 ```swift
-SQL.SELECT(\.id)
+SELECT(\.id)
     .FROM(users)
     .WHERE(\.age > 17)
     .AND(\.name != "admin")
@@ -117,7 +117,7 @@ To compare a date column with the database's current time, use ``NOW``. It only 
 with `Date` and `Date?` columns:
 
 ```swift
-SQL.SELECT(\.id, \.title)
+SELECT(\.id, \.title)
     .FROM(posts)
     .WHERE(\.published_at <= NOW())
 // SELECT id, title FROM posts WHERE published_at <= now()
@@ -127,7 +127,7 @@ To compare with a time relative to now, add or subtract an ``INTERVAL``. It read
 SQL's `INTERVAL 30 DAY`, and it's bound as a parameter:
 
 ```swift
-SQL.SELECT(\.id, \.title)
+SELECT(\.id, \.title)
     .FROM(posts)
     .WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
 // SELECT id, title FROM posts WHERE published_at >= now() - $1::interval
@@ -137,7 +137,7 @@ SQL.SELECT(\.id, \.title)
 The units are `.YEAR`, `.MONTH`, `.WEEK`, `.DAY`, `.HOUR`, `.MINUTE` and `.SECOND`. Chain intervals
 for combined lengths, such as `NOW() - INTERVAL(2, .HOUR) - INTERVAL(30, .MINUTE)`. The same
 expressions work as values in `INSERT` and `UPDATE`, such as
-`SQL.UPDATE(posts, SET: (\.published_at, NOW() + INTERVAL(1, .DAY))).WHERE(\.id == postId)`.
+`UPDATE(posts, SET: (\.published_at, NOW() + INTERVAL(1, .DAY))).WHERE(\.id == postId)`.
 
 Comparing with `Date()` instead binds your server's current time as a parameter.
 
@@ -152,7 +152,7 @@ Every step is a value, so you can add conditions conditionally. Start with a `WH
 reassign as you go:
 
 ```swift
-var query = SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.title, LIKE: "%swift%")
+var query = SELECT(\.id, \.title).FROM(posts).WHERE(\.title, LIKE: "%swift%")
 if let minLikes { query = query.AND(\.likes >= minLikes) }
 if let authorId { query = query.AND(\.author_id == authorId) }
 // SELECT id, title FROM posts WHERE title like $1 AND likes >= $2   (when only minLikes is set)
@@ -161,7 +161,7 @@ if let authorId { query = query.AND(\.author_id == authorId) }
 ### Sorting and paginating
 
 ```swift
-SQL.SELECT(\.id, \.title)
+SELECT(\.id, \.title)
     .FROM(posts)
     .ORDER_BY((\.likes, .DESC), (\.title, .ASC))
     .LIMIT(20)
@@ -179,7 +179,7 @@ Use ``COUNT``, ``SUM``, ``AVG``, ``MIN`` and ``MAX`` in `SELECT`, together with
 `GROUP_BY` and `HAVING`:
 
 ```swift
-SQL.SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
+SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
     .FROM(posts)
     .GROUP_BY(\.author_id)
     .HAVING(COUNT(*) > 5)

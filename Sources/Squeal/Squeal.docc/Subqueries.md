@@ -5,7 +5,7 @@ you filter.
 
 ## Overview
 
-A `SELECT` of a single key path, such as `SQL.SELECT(\.author_id).FROM(posts)`, records the
+A `SELECT` of a single key path, such as `SELECT(\.author_id).FROM(posts)`, records the
 column's type (here `UUID`). When you filter with `IN`, Squeal checks that type against the
 filtered column, so a subquery that returns names can't filter a column of IDs.
 
@@ -15,12 +15,11 @@ the outer query's placeholders, so you can build a subquery once and reuse it an
 ### IN (subquery)
 
 ```swift
-let popularAuthors = SQL
-    .SELECT(\.author_id)
+let popularAuthors = SELECT(\.author_id)
     .FROM(posts)
     .WHERE(\.likes > 1000)
 
-SQL.SELECT(\.name)
+SELECT(\.name)
     .FROM(users)
     .WHERE(\.age >= 18)
     .AND(\.id, IN: popularAuthors)
@@ -37,13 +36,12 @@ aggregates. For example, this query lists posts by authors who have written at l
 posts. To filter on a column of a joined table, pass the column itself:
 
 ```swift
-let prolificAuthors = SQL
-    .SELECT(\.author_id)
+let prolificAuthors = SELECT(\.author_id)
     .FROM(posts)
     .GROUP_BY(\.author_id)
     .HAVING(COUNT(*) >= 5)
 
-SQL.SELECT(posts.title, users.name)
+SELECT(posts.title, users.name)
     .FROM(posts)
     .JOIN(users, ON: posts.author_id == users.id)
     .WHERE(users.id, IN: prolificAuthors)
@@ -58,13 +56,12 @@ returns none. The subquery usually refers to the outer query's table with a colu
 comparison, so it runs once per outer row:
 
 ```swift
-let popularPosts = SQL
-    .SELECT(\.id)
+let popularPosts = SELECT(\.id)
     .FROM(posts)
     .WHERE(posts.author_id == users.id)
     .AND(\.likes > 1000)
 
-SQL.SELECT(\.name)
+SELECT(\.name)
     .FROM(users)
     .WHERE(\.age >= 18)
     .AND(EXISTS(popularPosts))
@@ -75,9 +72,9 @@ SQL.SELECT(\.name)
 `NOT_EXISTS` finds rows with nothing related, such as users who haven't posted:
 
 ```swift
-SQL.SELECT(\.name)
+SELECT(\.name)
     .FROM(users)
-    .WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
+    .WHERE(NOT_EXISTS(SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
 // SELECT name FROM users WHERE NOT EXISTS (SELECT 1 FROM posts WHERE posts.author_id = users.id)
 ```
 
@@ -89,14 +86,13 @@ Wrap a subquery in ``SUBQUERY`` to select its value as a column. It's usually co
 with the outer row through a column comparison, for example each user's latest post title:
 
 ```swift
-let latestTitle = SQL
-    .SELECT(\.title)
+let latestTitle = SELECT(\.title)
     .FROM(posts)
     .WHERE(posts.author_id == users.id)
     .ORDER_BY(\.published_at, .DESC)
     .LIMIT(1)
 
-SQL.SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
+SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
 // SELECT users.name, (SELECT title FROM posts WHERE posts.author_id = users.id
 //     ORDER BY published_at DESC LIMIT $1) FROM users
 ```
@@ -109,7 +105,7 @@ returns no row, so decode it as an optional. ``SUBQUERY`` also works in `RETURNI
 A subquery can provide the value of a column in `UPDATE … SET`:
 
 ```swift
-SQL.UPDATE(posts, SET: (\.author_id, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1)))
+UPDATE(posts, SET: (\.author_id, SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1)))
     .WHERE(\.id == postId)
 // UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT $2) WHERE id = $3
 ```
@@ -117,9 +113,9 @@ SQL.UPDATE(posts, SET: (\.author_id, SQL.SELECT(\.id).FROM(users).WHERE(\.email 
 It can also appear in `INSERT … VALUES`, next to plain values:
 
 ```swift
-SQL.INSERT(INTO: posts,
-           columns: \.id, \.author_id, \.title,
-           VALUES: postId, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1), "Hello")
+INSERT(INTO: posts,
+       columns: \.id, \.author_id, \.title,
+       VALUES: postId, SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1), "Hello")
 // INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT $3), $4)
 ```
 

@@ -12,8 +12,7 @@ struct PostgresBlogRepository: BlogRepository {
 
     /// Returns `nil` if the email is already taken.
     func createUser(email: String, name: String) async throws -> User? {
-        let query = SQL
-            .INSERT(INTO: users,
+        let query = INSERT(INTO: users,
                     columns: \.id, \.email, \.name,
                     VALUES: UUID(), email, name)
             .ON_CONFLICT(\.email, DO: .NOTHING)
@@ -24,16 +23,15 @@ struct PostgresBlogRepository: BlogRepository {
 
     func createPost(authorId: UUID, title: String) async throws -> UUID {
         let id = UUID()
-        let query = SQL.INSERT(INTO: posts,
-                               columns: \.id, \.author_id, \.title,
-                               VALUES: id, authorId, title)
+        let query = INSERT(INTO: posts,
+                           columns: \.id, \.author_id, \.title,
+                           VALUES: id, authorId, title)
         try await client.execute(query, logger: logger)
         return id
     }
 
     func feed(limit: Int, offset: Int) async throws -> [Post] {
-        let query = SQL
-            .SELECT(posts.id, posts.title, users.name, posts.likes, posts.created_at)
+        let query = SELECT(posts.id, posts.title, users.name, posts.likes, posts.created_at)
             .FROM(posts)
             .JOIN(users, ON: posts.author_id == users.id)
             .ORDER_BY(posts.created_at, .DESC)
@@ -45,16 +43,14 @@ struct PostgresBlogRepository: BlogRepository {
 
     /// Returns the new like count, or `nil` if the post doesn't exist.
     func like(postId: UUID) async throws -> Int? {
-        let query = SQL
-            .UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
+        let query = UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)))
             .WHERE(\.id == postId)
             .RETURNING(\.likes)
         return try await client.firstRow(query, as: Int.self, logger: logger)
     }
 
     func deletePost(id: UUID) async throws -> Bool {
-        let query = SQL
-            .DELETE(FROM: posts)
+        let query = DELETE(FROM: posts)
             .WHERE(\.id == id)
             .RETURNING(\.id)
         return try await client.firstRow(query, as: UUID.self, logger: logger) != nil

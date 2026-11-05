@@ -17,7 +17,7 @@ This page lists what Squeal checks today, and what it doesn't.
 column:
 
 ```swift
-SQL.SELECT(users.id, users.nmae).FROM(users)
+SELECT(users.id, users.nmae).FROM(users)
 // error: value of type 'UserTable' has no member 'nmae'
 ```
 
@@ -25,14 +25,14 @@ SQL.SELECT(users.id, users.nmae).FROM(users)
 has a `title` column but `users` doesn't, so this doesn't compile:
 
 ```swift
-SQL.SELECT(*).FROM(users).WHERE(\.title == "Hello")
+SELECT(*).FROM(users).WHERE(\.title == "Hello")
 ```
 
 **A value of the wrong type.** Each column carries its Swift type, so comparing `age` to a
 `String` doesn't compile:
 
 ```swift
-SQL.SELECT(users.id).FROM(users).WHERE(users.age >= "18")
+SELECT(users.id).FROM(users).WHERE(users.age >= "18")
 // error: binary operator '>=' cannot be applied to operands of type
 //        'TableColumn<UserTable, Int>' and 'String'
 ```
@@ -42,8 +42,8 @@ including ``SQLExpr``, ``NOW``, ``COALESCE`` and subqueries, whose type comes fr
 they fill:
 
 ```swift
-SQL.INSERT(INTO: users, columns: \.age, VALUES: "eighteen")
-SQL.UPDATE(users, SET: (\.age, "eighteen")).WHERE(\.id == id)
+INSERT(INTO: users, columns: \.age, VALUES: "eighteen")
+UPDATE(users, SET: (\.age, "eighteen")).WHERE(\.id == id)
 // warning: 'UPDATE(_:SET:)' is deprecated: These values aren't checked against their columns. …
 ```
 
@@ -55,11 +55,11 @@ SQL.UPDATE(users, SET: (\.age, "eighteen")).WHERE(\.id == id)
 `UPDATE` isn't a query you can run, so it can't remove or change every row by accident:
 
 ```swift
-try await client.query(SQL.DELETE(FROM: posts))
+try await client.query(DELETE(FROM: posts))
 // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
 //        this DELETE would remove every row. …
 
-try await client.query(SQL.UPDATE(users, SET: (\.name, "Ada")))
+try await client.query(UPDATE(users, SET: (\.name, "Ada")))
 // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
 //        this UPDATE would change every row. …
 ```
@@ -70,7 +70,7 @@ To affect every row on purpose, say so with `.WHERE(SQLExpr("true"))`.
 allows next, so autocompletion never suggests an invalid one:
 
 ```swift
-SQL.SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)
+SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)
 // error: value of type 'TypedLimitSQLQuery<UserTable, UUID>' has no member 'WHERE'
 ```
 
@@ -78,7 +78,7 @@ SQL.SELECT(\.id).FROM(users).LIMIT(10).WHERE(\.age >= 18)
 ``INTERVAL``, only compare with `Date` and `Date?` columns:
 
 ```swift
-SQL.SELECT(\.id).FROM(posts).WHERE(\.title < NOW())
+SELECT(\.id).FROM(posts).WHERE(\.title < NOW())
 // error: cannot convert value of type 'NOW' to expected argument type 'String'
 ```
 
@@ -87,14 +87,14 @@ a column comparison in `WHERE`, must have the same type (a nullable column match
 non-optional type), so joining a `String` to a `UUID` doesn't compile:
 
 ```swift
-SQL.SELECT(posts.title).FROM(posts).JOIN(users, ON: posts.title == users.id)
+SELECT(posts.title).FROM(posts).JOIN(users, ON: posts.title == users.id)
 ```
 
 **A subquery of the wrong type in `IN`.** A subquery that selects one key path remembers its
 column's type, and `IN` requires it to match the filtered column:
 
 ```swift
-SQL.SELECT(\.id).FROM(users).WHERE(\.id, IN: SQL.SELECT(\.title).FROM(posts))
+SELECT(\.id).FROM(users).WHERE(\.id, IN: SELECT(\.title).FROM(posts))
 // doesn't compile: the subquery returns String, but users.id is a UUID
 ```
 
@@ -103,7 +103,7 @@ Squeal gives you ``PartialTypedWhereSQLQuery/IS_NULL`` and
 ``PartialTypedWhereSQLQuery/IS_NOT_NULL`` instead:
 
 ```swift
-SQL.SELECT(\.id).FROM(users).WHERE(\.bio).IS_NULL
+SELECT(\.id).FROM(users).WHERE(\.bio).IS_NULL
 // SELECT id FROM users WHERE bio IS NULL
 ```
 

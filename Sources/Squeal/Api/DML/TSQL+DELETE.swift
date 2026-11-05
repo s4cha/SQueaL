@@ -11,7 +11,7 @@ public extension SQL {
     /// Starts a `DELETE` from a table. Equivalent to ``DELETE(FROM:)``.
     ///
     /// ```swift
-    /// SQL.DELETE_FROM(posts).WHERE(\.id == id)   // DELETE FROM posts WHERE id = $1
+    /// DELETE_FROM(posts).WHERE(\.id == id)   // DELETE FROM posts WHERE id = $1
     /// ```
     static func DELETE_FROM<T>(_ table: T) -> TypedDeleteSQLQuery<T> {
         return TypedDeleteSQLQuery(for: table)
@@ -20,7 +20,7 @@ public extension SQL {
     /// Starts a `DELETE` from a table.
     ///
     /// ```swift
-    /// SQL.DELETE(FROM: posts).WHERE(\.likes < 1).RETURNING(\.id)
+    /// DELETE(FROM: posts).WHERE(\.likes < 1).RETURNING(\.id)
     /// // DELETE FROM posts WHERE likes < $1 RETURNING id
     /// ```
     ///
@@ -60,11 +60,11 @@ public struct DeleteSQLQuery: SQLFragment {
 /// until you add a `WHERE`. A `DELETE` that would remove every row doesn't compile:
 ///
 /// ```swift
-/// try await client.query(SQL.DELETE(FROM: posts))
+/// try await client.query(DELETE(FROM: posts))
 /// // error: 'query(_:logger:file:line:)' is unavailable: Add a WHERE clause:
 /// //        this DELETE would remove every row. …
 ///
-/// try await client.query(SQL.DELETE(FROM: posts).WHERE(\.likes < 1))   // OK
+/// try await client.query(DELETE(FROM: posts).WHERE(\.likes < 1))   // OK
 /// ```
 ///
 /// To delete every row on purpose, say so with a condition that's always true:

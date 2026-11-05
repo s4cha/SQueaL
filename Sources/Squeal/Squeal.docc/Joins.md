@@ -8,7 +8,7 @@ Join conditions compare two columns with `==`. Both columns must have the same S
 so joining a `UUID` foreign key to an `Int` primary key won't compile.
 
 ```swift
-SQL.SELECT(posts.title, users.name)
+SELECT(posts.title, users.name)
     .FROM(posts)
     .JOIN(users, ON: posts.author_id == users.id)
     .WHERE(users.age >= 18)
@@ -33,7 +33,7 @@ table and are never ambiguous.
 Every join kind accepts the condition's columns in either order:
 
 ```swift
-SQL.SELECT(users.name, COUNT(posts.id))
+SELECT(users.name, COUNT(posts.id))
     .FROM(users)
     .LEFT_JOIN(posts, ON: posts.author_id == users.id)
     .GROUP_BY(\.name)
@@ -46,7 +46,7 @@ Joins chain, and each condition can refer to the `FROM` table or to any table jo
 it. For example, you can follow a many-to-many relationship through a link table:
 
 ```swift
-SQL.SELECT(users.name, departments.name)
+SELECT(users.name, departments.name)
     .FROM(users)
     .JOIN(users_departments, ON: users_departments.user_id == users.id)
     .JOIN(departments, ON: departments.id == users_departments.department_id)
@@ -61,7 +61,7 @@ wrapped type, so a nullable foreign key joins on the key it references. With a
 `posts.editor_id` column of type `UUID?`:
 
 ```swift
-SQL.SELECT(posts.title, users.name)
+SELECT(posts.title, users.name)
     .FROM(posts)
     .LEFT_JOIN(users, ON: posts.editor_id == users.id)
 // SELECT posts.title, users.name FROM posts LEFT JOIN users ON posts.editor_id = users.id

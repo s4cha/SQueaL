@@ -15,7 +15,7 @@ SQL injection impossible, rather than just unlikely:
 ```swift
 let name = "Robert'); DROP TABLE users;--"
 
-let query = SQL.SELECT(\.id).FROM(users).WHERE(\.name == name)
+let query = SELECT(\.id).FROM(users).WHERE(\.name == name)
 
 query.query       // SELECT id FROM users WHERE name = $1
 query.parameters  // ["Robert'); DROP TABLE users;--"]
@@ -31,9 +31,9 @@ renumbers its placeholders so that they follow the outer query's placeholders. Y
 build subqueries separately, reuse them, and never count `$n` by hand:
 
 ```swift
-let popularAuthors = SQL.SELECT(\.author_id).FROM(posts).WHERE(\.likes > 1000)
+let popularAuthors = SELECT(\.author_id).FROM(posts).WHERE(\.likes > 1000)
 
-SQL.SELECT(\.name)
+SELECT(\.name)
     .FROM(users)
     .WHERE(\.age >= 18)
     .AND(\.id, IN: popularAuthors)
@@ -63,7 +63,7 @@ A few APIs take SQL text as is, as escape hatches. Never build their text from u
 - The SQL text of an ``SQLExpr``. Its values are bound, so put every value behind a `?`.
 - The constraint name in `ON_CONFLICT(ON_CONSTRAINT:)`.
 - Table and column names, which come from your ``Table`` definitions.
-- Integers in a `SELECT` of values, such as `SQL.SELECT(1)`, which renders `SELECT 1`. An
+- Integers in a `SELECT` of values, such as `SELECT(1)`, which renders `SELECT 1`. An
   integer can't carry SQL, so this is safe with any value.
 
 See <doc:EscapeHatches> for how to use these safely.

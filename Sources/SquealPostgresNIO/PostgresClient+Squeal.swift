@@ -6,7 +6,7 @@ extension PostgresClient {
     /// Runs a Squeal query, binding its parameters.
     ///
     /// ```swift
-    /// let rows = try await client.query(SQL.SELECT(\.id, \.name).FROM(users).WHERE(\.age >= 18))
+    /// let rows = try await client.query(SELECT(\.id, \.name).FROM(users).WHERE(\.age >= 18))
     /// for try await (id, name) in rows.decode((UUID, String).self) { … }
     /// ```
     ///

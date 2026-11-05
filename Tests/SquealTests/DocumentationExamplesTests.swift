@@ -69,8 +69,7 @@ struct DocumentationExamplesTests {
     @Test
     func gettingStarted() {
         let users = usersTable
-        let query = SQL
-            .SELECT(\.id, \.name, \.email)
+        let query = SELECT(\.id, \.name, \.email)
             .FROM(users)
             .WHERE(\.age >= 18)
             .AND(\.name == "Ada")
@@ -92,7 +91,7 @@ struct DocumentationExamplesTests {
             @Column<UUID>(name: "id") var id
             @Column<String>(name: "email_address") var email
         }
-        let query = SQL.SELECT(\.id, \.email).FROM(UsersTable())
+        let query = SELECT(\.id, \.email).FROM(UsersTable())
         #expect(query.query == "SELECT id, email_address FROM users")
     }
 
@@ -101,21 +100,20 @@ struct DocumentationExamplesTests {
     @Test
     func selectStar() {
         let users = usersTable
-        #expect(SQL.SELECT(*).FROM(users).query == "SELECT * FROM users")
+        #expect(SELECT(*).FROM(users).query == "SELECT * FROM users")
     }
 
     @Test
     func selectQualifiedColumns() {
         let users = usersTable
-        let query = SQL.SELECT(users.id, users.name).FROM(users)
+        let query = SELECT(users.id, users.name).FROM(users)
         #expect(query.query == "SELECT users.id, users.name FROM users")
     }
 
     @Test
     func selectAliases() {
         let users = usersTable
-        let query = SQL
-            .SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username"))
+        let query = SELECT((\UserTable.id, AS: "user_id"), (\UserTable.name, AS: "username"))
             .FROM(users)
         #expect(query.query == "SELECT id AS user_id, name AS username FROM users")
     }
@@ -123,14 +121,13 @@ struct DocumentationExamplesTests {
     @Test
     func selectDistinct() {
         let users = usersTable
-        #expect(SQL.SELECT_DISTINCT(\.age).FROM(users).query == "SELECT DISTINCT age FROM users")
+        #expect(SELECT_DISTINCT(\.age).FROM(users).query == "SELECT DISTINCT age FROM users")
     }
 
     @Test
     func whereOperators() {
         let users = usersTable
-        let query = SQL
-            .SELECT(\.id)
+        let query = SELECT(\.id)
             .FROM(users)
             .WHERE(\.age > 17)
             .AND(\.name != "admin")
@@ -141,20 +138,20 @@ struct DocumentationExamplesTests {
     @Test
     func whereInLikeBetweenNull() {
         let users = usersTable
-        #expect(SQL.SELECT(*).FROM(users).WHERE(\.name, IN: ["Ada", "Grace"]).query
+        #expect(SELECT(*).FROM(users).WHERE(\.name, IN: ["Ada", "Grace"]).query
                 == "SELECT * FROM users WHERE name IN ($1, $2)")
-        #expect(SQL.SELECT(*).FROM(users).WHERE(\.email, LIKE: "%@example.com").query
+        #expect(SELECT(*).FROM(users).WHERE(\.email, LIKE: "%@example.com").query
                 == "SELECT * FROM users WHERE email like $1")
-        #expect(SQL.SELECT(*).FROM(users).WHERE(\.age, BETWEEN: 18, AND: 65).query
+        #expect(SELECT(*).FROM(users).WHERE(\.age, BETWEEN: 18, AND: 65).query
                 == "SELECT * FROM users WHERE age BETWEEN $1 AND $2")
-        #expect(SQL.SELECT(*).FROM(users).WHERE(\.bio).IS_NULL.query
+        #expect(SELECT(*).FROM(users).WHERE(\.bio).IS_NULL.query
                 == "SELECT * FROM users WHERE bio IS NULL")
     }
 
     @Test
     func whereComparedWithNOW() {
         let posts = postsTable
-        let query = SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.published_at <= NOW())
+        let query = SELECT(\.id, \.title).FROM(posts).WHERE(\.published_at <= NOW())
         #expect(query.query == "SELECT id, title FROM posts WHERE published_at <= now()")
         #expect(query.parameters.isEmpty)
     }
@@ -162,7 +159,7 @@ struct DocumentationExamplesTests {
     @Test
     func whereComparedWithAnInterval() {
         let posts = postsTable
-        let query = SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
+        let query = SELECT(\.id, \.title).FROM(posts).WHERE(\.published_at >= NOW() - INTERVAL(30, .DAY))
         #expect(query.query == "SELECT id, title FROM posts WHERE published_at >= now() - $1::interval")
         #expect(query.parameters[0] as? String == "30 days")
     }
@@ -170,7 +167,7 @@ struct DocumentationExamplesTests {
     @Test
     func whereLabelledConditions() {
         let users = usersTable
-        let base = SQL.SELECT(\.id).FROM(users)
+        let base = SELECT(\.id).FROM(users)
         #expect(base.WHERE(\.name, NOT_IN: ["root"]).query == "SELECT id FROM users WHERE name NOT IN ($1)")
         #expect(base.WHERE(\.email, NOT_LIKE: "%@test.com").query == "SELECT id FROM users WHERE email NOT LIKE $1")
         #expect(base.WHERE(\.bio).IS_NOT_NULL.query == "SELECT id FROM users WHERE bio IS NOT NULL")
@@ -182,8 +179,7 @@ struct DocumentationExamplesTests {
     @Test
     func orderLimitOffset() {
         let posts = postsTable
-        let query = SQL
-            .SELECT(\.id, \.title)
+        let query = SELECT(\.id, \.title)
             .FROM(posts)
             .ORDER_BY((\.likes, .DESC), (\.title, .ASC))
             .LIMIT(20)
@@ -194,14 +190,13 @@ struct DocumentationExamplesTests {
     @Test
     func aggregates() {
         let posts = postsTable
-        let query = SQL
-            .SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
+        let query = SELECT(posts.author_id, COUNT(*), SUM(posts.likes))
             .FROM(posts)
             .GROUP_BY(\.author_id)
             .HAVING(COUNT(*) > 5)
         #expect(query.query == "SELECT posts.author_id, COUNT(*), SUM(posts.likes) FROM posts GROUP BY author_id HAVING COUNT(*) > $1")
         #expect(query.parameters[0] as? Int == 5)
-        let compound = SQL.SELECT(posts.author_id).FROM(posts).GROUP_BY(\.author_id)
+        let compound = SELECT(posts.author_id).FROM(posts).GROUP_BY(\.author_id)
             .HAVING(SQLExpr("COUNT(*) >= ? AND SUM(likes) > ?", 5, 100))
         #expect(compound.query.hasSuffix("HAVING COUNT(*) >= $1 AND SUM(likes) > $2"))
     }
@@ -211,7 +206,7 @@ struct DocumentationExamplesTests {
         let posts = postsTable
         let minLikes: Int? = 10
         let authorId: UUID? = nil
-        var query = SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.title, LIKE: "%swift%")
+        var query = SELECT(\.id, \.title).FROM(posts).WHERE(\.title, LIKE: "%swift%")
         if let minLikes { query = query.AND(\.likes >= minLikes) }
         if let authorId { query = query.AND(\.author_id == authorId) }
         #expect(query.query == "SELECT id, title FROM posts WHERE title like $1 AND likes >= $2")
@@ -223,8 +218,7 @@ struct DocumentationExamplesTests {
     func join() {
         let users = usersTable
         let posts = postsTable
-        let query = SQL
-            .SELECT(posts.title, users.name)
+        let query = SELECT(posts.title, users.name)
             .FROM(posts)
             .JOIN(users, ON: posts.author_id == users.id)
             .WHERE(users.age >= 18)
@@ -236,8 +230,7 @@ struct DocumentationExamplesTests {
     func leftJoin() {
         let users = usersTable
         let posts = postsTable
-        let query = SQL
-            .SELECT(users.name, COUNT(posts.id))
+        let query = SELECT(users.name, COUNT(posts.id))
             .FROM(users)
             .LEFT_JOIN(posts, ON: posts.author_id == users.id)
             .GROUP_BY(\.name)
@@ -248,8 +241,7 @@ struct DocumentationExamplesTests {
     func joinedTableFilters() {
         let users = usersTable
         let posts = postsTable
-        let query = SQL
-            .SELECT(posts.title)
+        let query = SELECT(posts.title)
             .FROM(posts)
             .JOIN(users, ON: users.id == posts.author_id)
             .WHERE(users.age >= 18)
@@ -260,8 +252,7 @@ struct DocumentationExamplesTests {
 
     @Test
     func manyToManyJoin() {
-        let query = SQL
-            .SELECT(users.name, departments.name)
+        let query = SELECT(users.name, departments.name)
             .FROM(users)
             .JOIN(users_departments, ON: users_departments.user_id == users.uuid)
             .JOIN(departments, ON: departments.id == users_departments.department_id)
@@ -272,8 +263,7 @@ struct DocumentationExamplesTests {
     func joinOnNullableForeignKey() {
         let users = usersTable
         let posts = EditedPostTable()
-        let query = SQL
-            .SELECT(posts.title, users.name)
+        let query = SELECT(posts.title, users.name)
             .FROM(posts)
             .LEFT_JOIN(users, ON: posts.editor_id == users.id)
         #expect(query.query == "SELECT posts.title, users.name FROM posts LEFT JOIN users ON posts.editor_id = users.id")
@@ -285,13 +275,11 @@ struct DocumentationExamplesTests {
     func existsSubquery() {
         let users = usersTable
         let posts = postsTable
-        let popularPosts = SQL
-            .SELECT(\.id)
+        let popularPosts = SELECT(\.id)
             .FROM(posts)
             .WHERE(posts.author_id == users.id)
             .AND(\.likes > 1000)
-        let query = SQL
-            .SELECT(\.name)
+        let query = SELECT(\.name)
             .FROM(users)
             .WHERE(\.age >= 18)
             .AND(EXISTS(popularPosts))
@@ -304,13 +292,12 @@ struct DocumentationExamplesTests {
     func selectSubquery() {
         let users = usersTable
         let posts = postsTable
-        let latestTitle = SQL
-            .SELECT(\.title)
+        let latestTitle = SELECT(\.title)
             .FROM(posts)
             .WHERE(posts.author_id == users.id)
             .ORDER_BY(\.published_at, .DESC)
             .LIMIT(1)
-        let query = SQL.SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
+        let query = SELECT(users.name, SUBQUERY(latestTitle)).FROM(users)
         #expect(query.query == "SELECT users.name, (SELECT title FROM posts WHERE posts.author_id = users.id ORDER BY published_at DESC LIMIT $1) FROM users")
         #expect(query.parameters.count == 1)
     }
@@ -319,10 +306,9 @@ struct DocumentationExamplesTests {
     func notExistsSubquery() {
         let users = usersTable
         let posts = postsTable
-        let query = SQL
-            .SELECT(\.name)
+        let query = SELECT(\.name)
             .FROM(users)
-            .WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
+            .WHERE(NOT_EXISTS(SELECT(1).FROM(posts).WHERE(posts.author_id == users.id)))
         #expect(query.query == "SELECT name FROM users WHERE NOT EXISTS (SELECT 1 FROM posts WHERE posts.author_id = users.id)")
     }
 
@@ -330,12 +316,10 @@ struct DocumentationExamplesTests {
     func whereInSubquery() {
         let users = usersTable
         let posts = postsTable
-        let popularAuthors = SQL
-            .SELECT(\.author_id)
+        let popularAuthors = SELECT(\.author_id)
             .FROM(posts)
             .WHERE(\.likes > 1000)
-        let query = SQL
-            .SELECT(\.name)
+        let query = SELECT(\.name)
             .FROM(users)
             .WHERE(\.age >= 18)
             .AND(\.id, IN: popularAuthors)
@@ -349,8 +333,7 @@ struct DocumentationExamplesTests {
     func updateSetSubquery() {
         let users = usersTable
         let posts = postsTable
-        let query = SQL
-            .UPDATE(posts, SET: (\.author_id, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1)))
+        let query = UPDATE(posts, SET: (\.author_id, SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1)))
             .WHERE(\.id == postId)
         #expect(query.query == "UPDATE posts SET author_id = (SELECT id FROM users WHERE email = $1 LIMIT $2) WHERE id = $3")
     }
@@ -360,8 +343,7 @@ struct DocumentationExamplesTests {
     @Test
     func insert() {
         let users = usersTable
-        let query = SQL
-            .INSERT(INTO: users,
+        let query = INSERT(INTO: users,
                     columns: \.id, \.email, \.name, \.age,
                     VALUES: userId, "ada@example.com", "Ada", 36)
             .RETURNING(\.id)
@@ -371,8 +353,7 @@ struct DocumentationExamplesTests {
     @Test
     func insertMultipleRows() {
         let users = usersTable
-        let query = SQL
-            .INSERT(INTO: users, columns: \.name, \.age)
+        let query = INSERT(INTO: users, columns: \.name, \.age)
             .VALUES("Ada", 36)
             .VALUES("Grace", 45)
         #expect(query.query == "INSERT INTO users (name, age) VALUES ($1, $2), ($3, $4)")
@@ -383,10 +364,10 @@ struct DocumentationExamplesTests {
         struct NewUser { let name: String; let age: Int }
         let newUsers = [NewUser(name: "Ada", age: 36), NewUser(name: "Grace", age: 45)]
         let users = usersTable
-        let query = SQL.INSERT(INTO: users,
-                               columns: \.name, \.age,
-                               addValuesFrom: newUsers,
-                               mapValues: { ($0.name, $0.age) })
+        let query = INSERT(INTO: users,
+                           columns: \.name, \.age,
+                           addValuesFrom: newUsers,
+                           mapValues: { ($0.name, $0.age) })
         #expect(query.query == "INSERT INTO users (name, age) VALUES ($1, $2), ($3, $4)")
     }
 
@@ -395,7 +376,7 @@ struct DocumentationExamplesTests {
         struct NewUser { let name: String; let age: Int }
         let newUsers = [NewUser(name: "Ada", age: 36), NewUser(name: "Grace", age: 45)]
         let users = usersTable
-        var insert = SQL.INSERT(INTO: users, columns: \.name, \.age)
+        var insert = INSERT(INTO: users, columns: \.name, \.age)
         for user in newUsers {
             insert.ADDVALUES(user.name, user.age)
         }
@@ -406,9 +387,9 @@ struct DocumentationExamplesTests {
     func insertValueFromSubquery() {
         let users = usersTable
         let posts = postsTable
-        let query = SQL.INSERT(INTO: posts,
-                               columns: \.id, \.author_id, \.title,
-                               VALUES: postId, SQL.SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1), "Hello")
+        let query = INSERT(INTO: posts,
+                           columns: \.id, \.author_id, \.title,
+                           VALUES: postId, SELECT(\.id).FROM(users).WHERE(\.email == "ada@example.com").LIMIT(1), "Hello")
         #expect(query.query == "INSERT INTO posts (id, author_id, title) VALUES ($1, (SELECT id FROM users WHERE email = $2 LIMIT $3), $4)")
         #expect(query.parameters.count == 4)
     }
@@ -417,13 +398,11 @@ struct DocumentationExamplesTests {
     func joinedColumnInSubquery() {
         let users = usersTable
         let posts = postsTable
-        let prolificAuthors = SQL
-            .SELECT(\.author_id)
+        let prolificAuthors = SELECT(\.author_id)
             .FROM(posts)
             .GROUP_BY(\.author_id)
             .HAVING(COUNT(*) >= 5)
-        let query = SQL
-            .SELECT(posts.title, users.name)
+        let query = SELECT(posts.title, users.name)
             .FROM(posts)
             .JOIN(users, ON: posts.author_id == users.id)
             .WHERE(users.id, IN: prolificAuthors)
@@ -434,31 +413,29 @@ struct DocumentationExamplesTests {
     @Test
     func deleteVariants() {
         let posts = postsTable
-        #expect(SQL.DELETE_FROM(posts).WHERE(\.id == postId).query == "DELETE FROM posts WHERE id = $1")
+        #expect(DELETE_FROM(posts).WHERE(\.id == postId).query == "DELETE FROM posts WHERE id = $1")
     }
 
     @Test
     func groupedConditionsWithSQLExpr() {
         let users = usersTable
-        let query = SQL
-            .SELECT(\.id)
+        let query = SELECT(\.id)
             .FROM(users)
             .WHERE(\.age >= 18)
             .AND(SQLExpr("(name != ? OR bio IS NULL)", "admin"))
         #expect(query.query == "SELECT id FROM users WHERE age >= $1 AND (name != $2 OR bio IS NULL)")
         #expect(query.parameters.count == 2)
         #expect(query.parameters[1] as? String == "admin")
-        let whereOnly = SQL.SELECT(\.id).FROM(users).WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))
+        let whereOnly = SELECT(\.id).FROM(users).WHERE(SQLExpr("(age >= ? OR bio IS NULL)", 18))
         #expect(whereOnly.query == "SELECT id FROM users WHERE (age >= $1 OR bio IS NULL)")
-        let orGroup = SQL.SELECT(\.id).FROM(users).WHERE(\.name == "admin").OR(SQLExpr("(age >= ? AND bio IS NOT NULL)", 18))
+        let orGroup = SELECT(\.id).FROM(users).WHERE(\.name == "admin").OR(SQLExpr("(age >= ? AND bio IS NOT NULL)", 18))
         #expect(orGroup.query == "SELECT id FROM users WHERE name = $1 OR (age >= $2 AND bio IS NOT NULL)")
     }
 
     @Test
     func insertOnConflict() {
         let users = usersTable
-        let query = SQL
-            .INSERT(INTO: users, columns: \.id, \.email, VALUES: userId, "ada@example.com")
+        let query = INSERT(INTO: users, columns: \.id, \.email, VALUES: userId, "ada@example.com")
             .ON_CONFLICT(\.email, DO: .NOTHING)
             .RETURNING(\.id)
         #expect(query.query == "INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (email) DO NOTHING RETURNING id")
@@ -467,7 +444,7 @@ struct DocumentationExamplesTests {
     @Test
     func onConflictTargets() {
         let users = usersTable
-        let insert = SQL.INSERT(INTO: users, columns: \.id, \.email, VALUES: userId, "ada@example.com")
+        let insert = INSERT(INTO: users, columns: \.id, \.email, VALUES: userId, "ada@example.com")
         #expect(insert.ON_CONFLICT(DO: .NOTHING).query == "INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT DO NOTHING")
         #expect(insert.ON_CONFLICT(ON_CONSTRAINT: "users_email_key", DO: .NOTHING).query == "INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT ON CONSTRAINT users_email_key DO NOTHING")
         #expect(insert.ON_CONFLICT(\.email, WHERE: RawSQL("email IS NOT NULL"), DO: .NOTHING).query == "INSERT INTO users (id, email) VALUES ($1, $2) ON CONFLICT (email) WHERE email IS NOT NULL DO NOTHING")
@@ -476,19 +453,19 @@ struct DocumentationExamplesTests {
     @Test
     func insertReturningVariants() {
         let users = usersTable
-        let insert = SQL.INSERT(INTO: users, columns: \.id, \.email, VALUES: userId, "ada@example.com")
+        let insert = INSERT(INTO: users, columns: \.id, \.email, VALUES: userId, "ada@example.com")
         #expect(insert.RETURNING(\.id, \.email).query.hasSuffix(" RETURNING id, email"))
         #expect(insert.RETURNING(users.id, RawSQL("upper(name)")).query.hasSuffix(" RETURNING users.id, upper(name)"))
-        let returningAll = SQL.UPDATE(users, SET: (\.name, "Ada")).WHERE(\.id == userId).RETURNING(*)
+        let returningAll = UPDATE(users, SET: (\.name, "Ada")).WHERE(\.id == userId).RETURNING(*)
         #expect(returningAll.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING *")
     }
 
     @Test
     func insertWithExpressions() {
         let posts = postsTable
-        let query = SQL.INSERT(INTO: posts,
-                               columns: \.id, \.title, \.published_at,
-                               VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", "  Hello  "), NOW())
+        let query = INSERT(INTO: posts,
+                           columns: \.id, \.title, \.published_at,
+                           VALUES: SQLExpr("gen_random_uuid()"), SQLExpr("trim(?)", "  Hello  "), NOW())
         #expect(query.query == "INSERT INTO posts (id, title, published_at) VALUES (gen_random_uuid(), trim($1), now())")
         #expect(query.parameters.count == 1)
     }
@@ -498,8 +475,7 @@ struct DocumentationExamplesTests {
     @Test
     func update() {
         let users = usersTable
-        let query = SQL
-            .UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
+        let query = UPDATE(users, SET: (\.name, "Ada Lovelace"), (\.age, 37))
             .WHERE(\.id == userId)
             .RETURNING(\.id, \.name)
         #expect(query.query == "UPDATE users SET name = $1, age = $2 WHERE id = $3 RETURNING id, name")
@@ -508,8 +484,7 @@ struct DocumentationExamplesTests {
     @Test
     func updateWithExpressions() {
         let posts = postsTable
-        let query = SQL
-            .UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.published_at, NOW()))
+        let query = UPDATE(posts, SET: (\.likes, SQLExpr("likes + ?", 1)), (\.published_at, NOW()))
             .WHERE(\.id == postId)
         #expect(query.query == "UPDATE posts SET likes = likes + $1, published_at = now() WHERE id = $2")
     }
@@ -519,8 +494,7 @@ struct DocumentationExamplesTests {
         let users = usersTable
         let newName: String? = nil
         let newBio: String? = "Hello"
-        let query = SQL
-            .UPDATE(users, SET:
+        let query = UPDATE(users, SET:
                 (\.name, COALESCE(newName, users.name)),
                 (\.bio, COALESCE(newBio, users.bio)))
             .WHERE(\.id == userId)
@@ -537,8 +511,7 @@ struct DocumentationExamplesTests {
     @Test
     func delete() {
         let posts = postsTable
-        let query = SQL
-            .DELETE(FROM: posts)
+        let query = DELETE(FROM: posts)
             .WHERE(\.likes < 1)
             .RETURNING(\.id)
         #expect(query.query == "DELETE FROM posts WHERE likes < $1 RETURNING id")
@@ -550,7 +523,7 @@ struct DocumentationExamplesTests {
     func injectionAttemptIsBound() {
         let users = usersTable
         let name = "Robert'); DROP TABLE users;--"
-        let query = SQL.SELECT(\.id).FROM(users).WHERE(\.name == name)
+        let query = SELECT(\.id).FROM(users).WHERE(\.name == name)
         #expect(query.query == "SELECT id FROM users WHERE name = $1")
         #expect(query.parameters.count == 1)
         #expect(query.parameters[0] as? String == name)
@@ -561,15 +534,14 @@ struct DocumentationExamplesTests {
     @Test
     func rawSQLInSelect() {
         let users = usersTable
-        let query = SQL.SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
+        let query = SELECT(users.id, RawSQL("upper(name) AS shout")).FROM(users)
         #expect(query.query == "SELECT users.id, upper(name) AS shout FROM users")
     }
 
     @Test
     func returningExpressions() {
         let users = usersTable
-        let query = SQL
-            .UPDATE(users, SET: (\.name, "Ada"))
+        let query = UPDATE(users, SET: (\.name, "Ada"))
             .WHERE(\.id == userId)
             .RETURNING(users.id, RawSQL("length(name)"))
         #expect(query.query == "UPDATE users SET name = $1 WHERE id = $2 RETURNING users.id, length(name)")
@@ -581,18 +553,18 @@ struct DocumentationExamplesTests {
     func insertSelectValuesWhereExists() {
         let teams = TeamTable(), memberships = MembershipTable()
         let teamId = UUID(), userId = UUID(), ownerId = UUID()
-        let query = SQL.INSERT(INTO: memberships, columns: \.team_id, \.user_id,
-                               SELECT: teamId, userId)
-            .WHERE(EXISTS(SQL.SELECT(\.id).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
+        let query = INSERT(INTO: memberships, columns: \.team_id, \.user_id,
+                           SELECT: teamId, userId)
+            .WHERE(EXISTS(SELECT(1).FROM(teams).WHERE(teams.id == teamId).AND(teams.owner_id == ownerId)))
             .ON_CONFLICT(DO: .NOTHING)
-        #expect(query.query == "INSERT INTO memberships (team_id, user_id) SELECT $1, $2 WHERE EXISTS (SELECT id FROM teams WHERE teams.id = $3 AND teams.owner_id = $4) ON CONFLICT DO NOTHING")
+        #expect(query.query == "INSERT INTO memberships (team_id, user_id) SELECT $1, $2 WHERE EXISTS (SELECT 1 FROM teams WHERE teams.id = $3 AND teams.owner_id = $4) ON CONFLICT DO NOTHING")
     }
 
     @Test
     func insertSelectQuery() {
         let posts = postsTable, archivedPosts = ArchivedPostTable()
-        let query = SQL.INSERT(INTO: archivedPosts, columns: \.id, \.title,
-                               SELECT: SQL.SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
+        let query = INSERT(INTO: archivedPosts, columns: \.id, \.title,
+                           SELECT: SELECT(\.id, \.title).FROM(posts).WHERE(\.likes < 10))
         #expect(query.query == "INSERT INTO archived_posts (id, title) SELECT id, title FROM posts WHERE likes < $1")
     }
 
@@ -600,7 +572,7 @@ struct DocumentationExamplesTests {
     func selectValuesWhereNotExists() {
         let memberships = MembershipTable()
         let teamId = UUID(), userId = UUID()
-        let query = SQL.SELECT(teamId, userId).WHERE(NOT_EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+        let query = SELECT(teamId, userId).WHERE(NOT_EXISTS(SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
         #expect(query.query == "SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $3)")
     }
 
@@ -608,7 +580,7 @@ struct DocumentationExamplesTests {
     func existsSelectOne() {
         let memberships = MembershipTable()
         let userId = UUID()
-        let query = SQL.SELECT(\.id).FROM(usersTable).WHERE(EXISTS(SQL.SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
+        let query = SELECT(\.id).FROM(usersTable).WHERE(EXISTS(SELECT(1).FROM(memberships).WHERE(memberships.user_id == userId)))
         #expect(query.query == "SELECT id FROM users WHERE EXISTS (SELECT 1 FROM memberships WHERE memberships.user_id = $1)")
     }
 }
